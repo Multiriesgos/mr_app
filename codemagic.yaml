@@ -4,6 +4,8 @@ workflows:
     name: iOS App Store Release
     max_build_duration: 60
     instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: codemagic
     environment:
       flutter: stable
       xcode: latest
@@ -11,8 +13,6 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.multiriesgos.multimate
-      integrations:
-        app_store_connect: codemagic
     scripts:
       - name: Install pods
         script: cd ios && pod install
