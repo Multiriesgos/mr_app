@@ -11,6 +11,8 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.multiriesgos.multimate
+      integrations:
+        app_store_connect: codemagic
     scripts:
       - name: Install pods
         script: cd ios && pod install
