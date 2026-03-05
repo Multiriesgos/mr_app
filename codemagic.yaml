@@ -14,8 +14,6 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.multiriesgos.multimate
     scripts:
-      - name: Install pods
-        script: cd ios && pod install
       - name: Get Flutter packages
         script: flutter pub get
       - name: Build IPA
