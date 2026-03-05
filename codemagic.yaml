@@ -1,0 +1,52 @@
+workflows:
+
+  ios-release:
+    name: iOS App Store Release
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.multiriesgos.multimate
+      vars:
+        APP_STORE_CONNECT_ISSUER_ID: Encrypted(...)
+        APP_STORE_CONNECT_KEY_IDENTIFIER: Encrypted(...)
+        APP_STORE_CONNECT_PRIVATE_KEY: Encrypted(...)
+    scripts:
+      - name: Install pods
+        script: cd ios && pod install
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Build IPA
+        script: |
+          flutter build ipa --release \
+            --export-options-plist=$CM_BUILD_DIR/ios/ExportOptions.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+
+  android-release:
+    name: Android Play Store Release
+    max_build_duration: 60
+    instance_type: linux_x2
+    environment:
+      flutter: stable
+      android_signing:
+        - multiriesgos_keystore
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Build AAB
+        script: flutter build aab --release
+    artifacts:
+      - build/app/outputs/bundle/release/*.aab
+    publishing:
+      google_play:
+        credentials: Encrypted(...)
+        track: internal

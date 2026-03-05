@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Mr App</string>
+	<string>Multiriesgos</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -34,16 +34,8 @@
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
-		<true/>
+		<false/>
 	</dict>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Always and when in use!</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Can i have location always?</string>
-	<key>NSLocationUsageDescription</key>
-	<string>Older devices need location</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Need locaiton when in use</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
