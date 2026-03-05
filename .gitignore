@@ -1,0 +1,68 @@
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+pubspec.lock
+
+# Build directories
+build/
+.gradle/
+
+# Android
+android/.gradle/
+android/local.properties
+android/gradle.properties
+android/app/debug/
+android/app/profile/
+android/app/release/
+
+# iOS
+ios/Flutter/Flutter.framework/
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/Pods/
+
+# Web
+web/plugins/
+
+# Windows
+windows/flutter/ephemeral/
+windows/flutter/generated_plugins.cmake
+
+# macOS
+macos/Flutter/Flutter-Debug.xcconfig
+macos/Flutter/Flutter-Release.xcconfig
+macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Linux
+linux/flutter/ephemeral/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+*.iml
+
+# Environment
+.env
+key.properties
+
+# Build artifacts
+*.apk
+*.aab
+*.ipa
+*.app
+*.exe
+*.dmg
+
+# Logs
+*.log
+build.log
+
+# Local development
+local.properties
+.claude/settings.local.json
