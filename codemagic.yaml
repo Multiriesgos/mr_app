@@ -11,19 +11,13 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.multiriesgos.multimate
-      vars:
-        APP_STORE_CONNECT_ISSUER_ID: Encrypted(...)
-        APP_STORE_CONNECT_KEY_IDENTIFIER: Encrypted(...)
-        APP_STORE_CONNECT_PRIVATE_KEY: Encrypted(...)
     scripts:
       - name: Install pods
         script: cd ios && pod install
       - name: Get Flutter packages
         script: flutter pub get
       - name: Build IPA
-        script: |
-          flutter build ipa --release \
-            --export-options-plist=$CM_BUILD_DIR/ios/ExportOptions.plist
+        script: flutter build ipa --release
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
