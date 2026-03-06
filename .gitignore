@@ -67,3 +67,4 @@ build.log
 local.properties
 .claude/settings.local.json
 multiriesgos.jks
+multiriesgos-*.json
