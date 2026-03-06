@@ -14,13 +14,17 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.multiriesgos.multimate
     scripts:
+      - name: Clean build cache
+        script: |
+          rm -rf ~/Library/Developer/Xcode/DerivedData/*
+          rm -rf ios/Pods
+          rm -rf ios/Podfile.lock
       - name: Get Flutter packages
         script: flutter pub get
       - name: Build IPA
         script: |
           flutter build ipa --release \
-            --no-pub \
-            --dart-define=FLUTTER_BUILD_MODE=release
+            --no-pub
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
