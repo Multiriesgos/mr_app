@@ -6,7 +6,7 @@ target 'Runner' do
   use_modular_headers!
 
   flutter_root = File.expand_path(File.join(__dir__, '..', '..'))
-  load File.join(flutter_root, '.ios', 'Flutter', 'podhelper.rb')
+  load File.join(flutter_root, 'ios', 'Flutter', 'podhelper.rb')
 
   flutter_ios_podfile_setup
 
