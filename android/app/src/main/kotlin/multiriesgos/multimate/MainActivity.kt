@@ -1,4 +1,4 @@
-package com.multiriesgos.app
+package multiriesgos.multimate
 
 import io.flutter.embedding.android.FlutterActivity
 
