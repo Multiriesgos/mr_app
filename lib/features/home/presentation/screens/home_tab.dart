@@ -26,6 +26,7 @@ class HomeTab extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: cs.surface,
         elevation: 0,
+        toolbarHeight: 72,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -37,6 +38,7 @@ class HomeTab extends ConsumerWidget {
             ),
             Text(
               name.toUpperCase(),
+              maxLines: 2,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:mr_app/core/error/app_exception.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
 import 'package:mr_app/core/widgets/skeleton_product_list.dart';
 import 'package:mr_app/features/products/domain/entities/product.dart';
@@ -23,7 +24,9 @@ class ProductsScreen extends ConsumerWidget {
               child: state.when(
                 loading: () => const SkeletonProductList(),
                 error: (e, _) => _ErrorView(
-                  message: e.toString(),
+                  message: e is AppException
+                      ? e.message
+                      : 'Error inesperado. Por favor reintente.',
                   onRetry: () => ref.read(productsProvider.notifier).reload(),
                 ),
                 data: (products) => products.isEmpty

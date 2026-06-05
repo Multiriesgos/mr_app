@@ -58,7 +58,7 @@ class ProductsRemoteDataSourceImpl implements ProductsRemoteDataSource {
   Future<ProductModel> getProductDetail(int idRen) async {
     final uri = Uri.https(_kHost, '/api/ren/$idRen');
     final response = await _client
-        .post(uri, headers: _kHeaders)
+        .post(uri, headers: _kHeaders, body: '{}')
         .timeout(_kTimeout)
         .onError((_, __) => throw const NetworkException());
 
