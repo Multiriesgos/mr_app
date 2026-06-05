@@ -93,13 +93,13 @@ class _CarnetButton extends StatelessWidget {
   static const double _kAspect = 331 / 219;
 
   // Posiciones medidas en píxeles sobre la imagen 331 × 219
-  // Banda "Nombre:": y = 50..64,  valor empieza en x = 60
-  static const double _kNombreLeft   = 60 / 331;
+  // Banda "Nombre:": y = 50..64,  valor empieza en x = 62 (+2px margen)
+  static const double _kNombreLeft   = 62 / 331;
   static const double _kNombreTop    = 50 / 219;
   static const double _kNombreHeight = 14 / 219;
 
-  // Banda "DUI:":    y = 69..84,  valor empieza en x = 39
-  static const double _kDuiLeft   = 39 / 331;
+  // Banda "DUI:":    y = 69..84,  valor empieza en x = 41 (+2px margen)
+  static const double _kDuiLeft   = 41 / 331;
   static const double _kDuiTop    = 69 / 219;
   static const double _kDuiHeight = 15 / 219;
 
@@ -151,7 +151,7 @@ class _CarnetButton extends StatelessWidget {
                         child: Text(
                           name,
                           style: TextStyle(
-                            color: const Color(0xFF0D1B5E),
+                            color: Colors.white,
                             fontSize: fontSize,
                             fontWeight: FontWeight.w700,
                             height: 1.0,
@@ -172,7 +172,7 @@ class _CarnetButton extends StatelessWidget {
                         child: Text(
                           doc,
                           style: TextStyle(
-                            color: const Color(0xFF0D1B5E),
+                            color: Colors.white,
                             fontSize: fontSize,
                             fontWeight: FontWeight.w700,
                             height: 1.0,
