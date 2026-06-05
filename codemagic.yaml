@@ -32,10 +32,11 @@ workflows:
       vars:
         MR_API_KEY: Encrypted(...)
     scripts:
-      - name: Verificar archivos Firebase
+      - name: Restaurar archivos Firebase
         script: |
+          echo "$FIREBASE_OPTIONS_DART" | base64 --decode > lib/firebase_options.dart
           test -f lib/firebase_options.dart \
-            || { echo "ERROR: FIREBASE_OPTIONS_DART no configurado en Codemagic Environment Files"; exit 1; }
+            || { echo "ERROR: FIREBASE_OPTIONS_DART no configurado en Codemagic"; exit 1; }
       - name: Get Flutter packages
         script: flutter pub get
       - name: Analyze
@@ -82,12 +83,14 @@ workflows:
         script: flutter analyze --fatal-warnings
       - name: Test
         script: flutter test
-      - name: Verificar archivos Firebase iOS
+      - name: Restaurar archivos Firebase iOS
         script: |
+          echo "$FIREBASE_OPTIONS_DART" | base64 --decode > lib/firebase_options.dart
+          echo "$GOOGLE_SERVICE_INFO_PLIST" | base64 --decode > ios/Runner/GoogleService-Info.plist
           test -f lib/firebase_options.dart \
-            || { echo "ERROR: FIREBASE_OPTIONS_DART no configurado en Codemagic Environment Files"; exit 1; }
+            || { echo "ERROR: FIREBASE_OPTIONS_DART no configurado en Codemagic"; exit 1; }
           test -f ios/Runner/GoogleService-Info.plist \
-            || { echo "ERROR: GOOGLE_SERVICE_INFO_PLIST no configurado en Codemagic Environment Files"; exit 1; }
+            || { echo "ERROR: GOOGLE_SERVICE_INFO_PLIST no configurado en Codemagic"; exit 1; }
       - name: Build IPA
         script: |
           flutter build ipa --release \
@@ -122,12 +125,14 @@ workflows:
         script: flutter analyze --fatal-warnings
       - name: Test
         script: flutter test
-      - name: Verificar archivos Firebase Android
+      - name: Restaurar archivos Firebase Android
         script: |
+          echo "$FIREBASE_OPTIONS_DART" | base64 --decode > lib/firebase_options.dart
+          echo "$GOOGLE_SERVICES_JSON" | base64 --decode > android/app/google-services.json
           test -f lib/firebase_options.dart \
-            || { echo "ERROR: FIREBASE_OPTIONS_DART no configurado en Codemagic Environment Files"; exit 1; }
+            || { echo "ERROR: FIREBASE_OPTIONS_DART no configurado en Codemagic"; exit 1; }
           test -f android/app/google-services.json \
-            || { echo "ERROR: GOOGLE_SERVICES_JSON no configurado en Codemagic Environment Files"; exit 1; }
+            || { echo "ERROR: GOOGLE_SERVICES_JSON no configurado en Codemagic"; exit 1; }
       - name: Build AAB
         script: |
           flutter build aab --release \

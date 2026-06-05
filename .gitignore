@@ -77,3 +77,6 @@ lib/firebase_options.dart
 
 # Test coverage (generado por flutter test --coverage)
 coverage/
+
+# Base64 temporales de Firebase (no subir al repo)
+firebase_b64/
