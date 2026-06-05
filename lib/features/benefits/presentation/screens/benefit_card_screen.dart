@@ -89,6 +89,20 @@ class _CarnetButton extends StatelessWidget {
   const _CarnetButton({required this.user});
   final User? user;
 
+  // Aspect ratio real de la imagen: 331 × 219 px
+  static const double _kAspect = 331 / 219;
+
+  // Posiciones medidas en píxeles sobre la imagen 331 × 219
+  // Banda "Nombre:": y = 50..64,  valor empieza en x = 60
+  static const double _kNombreLeft   = 60 / 331;
+  static const double _kNombreTop    = 50 / 219;
+  static const double _kNombreHeight = 14 / 219;
+
+  // Banda "DUI:":    y = 69..84,  valor empieza en x = 39
+  static const double _kDuiLeft   = 39 / 331;
+  static const double _kDuiTop    = 69 / 219;
+  static const double _kDuiHeight = 15 / 219;
+
   Future<void> _launch(BuildContext context) async {
     final docSearch = user?.docSearch ?? '';
     final uri = Uri.parse(ExternalLinks.carnetDigital(docSearch));
@@ -100,7 +114,7 @@ class _CarnetButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final name = user?.name ?? '';
-    final doc = user?.documentNumber ?? '';
+    final doc  = user?.documentNumber ?? '';
 
     return Semantics(
       label: 'Ver carnet digital en el navegador',
@@ -108,96 +122,100 @@ class _CarnetButton extends StatelessWidget {
       child: GestureDetector(
         onTap: () => _launch(context),
         child: AspectRatio(
-          aspectRatio: 1.586,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.asset(
-                  'assets/images/Card-bg-1.png',
-                  fit: BoxFit.cover,
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withValues(alpha: 0),
-                        Colors.black.withValues(alpha: 0.55),
-                      ],
+          aspectRatio: _kAspect,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final w = constraints.maxWidth;
+              final h = constraints.maxHeight;
+              final bandH = h * _kNombreHeight;
+              final fontSize = (bandH * 0.62).clamp(8.0, 13.0);
+
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/Card-bg-1.png',
+                      width: w,
+                      height: h,
+                      fit: BoxFit.fill,
                     ),
-                  ),
-                ),
-                Positioned(
-                  left: 20,
-                  right: 20,
-                  bottom: 20,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        name.toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                          shadows: [
-                            Shadow(blurRadius: 4, color: Colors.black54),
-                          ],
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        doc,
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 13,
-                          letterSpacing: 1.2,
-                          shadows: [
-                            Shadow(blurRadius: 4, color: Colors.black54),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  right: 16,
-                  top: 16,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.open_in_new, color: Colors.white, size: 14),
-                        SizedBox(width: 4),
-                        Text(
-                          'Ver carnet',
+                    // Nombre sobre la banda naranja
+                    Positioned(
+                      left: w * _kNombreLeft,
+                      top: h * _kNombreTop,
+                      right: w * 0.04,
+                      height: h * _kNombreHeight,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          name,
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF0D1B5E),
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.w700,
+                            height: 1.0,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                    // DUI sobre la banda naranja
+                    Positioned(
+                      left: w * _kDuiLeft,
+                      top: h * _kDuiTop,
+                      right: w * 0.04,
+                      height: h * _kDuiHeight,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          doc,
+                          style: TextStyle(
+                            color: const Color(0xFF0D1B5E),
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.w700,
+                            height: 1.0,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    // Botón "Ver carnet"
+                    Positioned(
+                      right: 8,
+                      bottom: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.35),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.open_in_new, color: Colors.white, size: 12),
+                            SizedBox(width: 3),
+                            Text(
+                              'Ver carnet',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),
