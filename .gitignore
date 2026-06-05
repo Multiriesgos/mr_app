@@ -67,3 +67,13 @@ local.properties
 .claude/settings.local.json
 multiriesgos.jks
 multiriesgos-*.json
+Multiriesgos_AppStore.mobileprovision
+lib/generated_plugin_registrant.dart
+
+# Firebase config — nunca en el repo; usar Codemagic Environment Files
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
+
+# Test coverage (generado por flutter test --coverage)
+coverage/

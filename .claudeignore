@@ -1,0 +1,92 @@
+# ============================================
+# .claudeignore — Flutter (Android + iOS)
+# Optimizado para Claude Code
+# ============================================
+
+# ── BUILDS Y ARTEFACTOS GENERADOS ──────────
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# ── DEPENDENCIAS ───────────────────────────
+# (Claude no necesita leer miles de archivos de paquetes)
+.pub-cache/
+.pub/
+
+# ── ANDROID ────────────────────────────────
+android/.gradle/
+android/build/
+android/local.properties        # rutas locales de la máquina
+android/key.properties          # 🔒 credenciales de firma
+android/app/build/
+android/captures/
+android/.idea/
+
+# ── iOS ────────────────────────────────────
+ios/Pods/                       # dependencias CocoaPods (puede ser enorme)
+ios/.symlinks/
+ios/Flutter/Flutter.framework/
+ios/Flutter/Flutter.podspec
+ios/build/
+ios/DerivedData/
+
+# ── ARCHIVOS SENSIBLES / SECRETOS ──────────
+*.jks                           # 🔒 keystore Android
+*.keystore                      # 🔒 keystore Android
+*.p8                            # 🔒 Apple Auth Key
+*.p12                           # 🔒 certificado iOS
+*.mobileprovision               # 🔒 provisioning profile
+**/google-services.json         # 🔒 Firebase Android (si tiene datos privados)
+**/GoogleService-Info.plist     # 🔒 Firebase iOS
+.env
+.env.*
+secrets/
+**/*.secret
+
+# ── ARCHIVOS GENERADOS POR CÓDIGO ──────────
+# (Claude debe leer los fuentes, no los generados)
+**/*.g.dart
+**/*.freezed.dart
+**/*.gr.dart                    # auto_route
+**/*.config.dart
+**/*.mocks.dart                 # mockito
+
+# ── COBERTURA Y TESTS DE RENDIMIENTO ───────
+coverage/
+test/golden/failures/
+
+# ── IDEs Y EDITORES ─────────────────────────
+.idea/
+*.iml
+.vscode/settings.json
+.vscode/launch.json
+
+# ── LOGS Y TEMPORALES ──────────────────────
+*.log
+*.hprof                         # heap dumps
+crash-reports/
+
+# ── ASSETS BINARIOS GRANDES ────────────────
+# (Claude no puede leer binarios, solo ocupa contexto)
+assets/fonts/**
+assets/videos/**
+assets/audio/**
+# Conservar: assets/images/ si contienen rutas referenciadas en el código
+# Descomentar si los assets son muy pesados:
+# assets/images/**
+
+# ── DOCUMENTACIÓN EXTERNA ──────────────────
+# (útil excluirla si es muy extensa)
+# docs/
+# *.pdf
+
+# ── FASTLANE / CI ──────────────────────────
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# ── FIREBASE / CRASHLYTICS ─────────────────
+.firebase/
+firebase-debug.log

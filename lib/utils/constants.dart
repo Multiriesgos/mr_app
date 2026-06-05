@@ -1,13 +1,5 @@
-class Constants {
-  static const String headlineNewsUrl =
-      'https://secure.multiriesgos.com/api/ren';
-
-  static const String headlineCabUrl =
-      'https://secure.multiriesgos.com/api/cab';
-
-  static const String newsPlaceholderImageAssetUrl =
-      'assets/images/7_fit.png';
-
-  static const String kMrApiKey =
-      'MultimateBSaWxylfSeUygBjm4fSb80UDnwkSkVdGHpa1ZW1ogldMfE6fNFpPwWqBTUVZy3ngB5oUckGVOIRBmmps2NAd2BGKamsDW6bLP6aNEfxKxlAGK1rZWUBFwF6';
+abstract final class Constants {
+  // Injected at build time via --dart-define=MR_API_KEY=<value>
+  // Never hardcode this value. See docs/SETUP.md for local dev setup.
+  static const String kMrApiKey = String.fromEnvironment('MR_API_KEY');
 }

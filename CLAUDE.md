@@ -4,68 +4,124 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**mr_app** (Multimate) — Cliente Multiriesgos, a fintech/banking Flutter application for insurance services. Package: `com.multiriesgos.multimate`. Supports Android, iOS, Web, Windows, macOS, and Linux.
+**mr_app** (Multimate) — Cliente Multiriesgos, fintech/insurance Flutter app.
+- Package Android: `multiriesgos.multimate.app`
+- Package iOS: `com.multiriesgos.multimate`
+- Active platforms: **Android + iOS only**. Windows/macOS/Linux/web are default scaffolds, not deployed.
+- Version: `2.1.0+5` (current)
 
 ## Common Commands
 
 ```bash
-flutter pub get          # Install dependencies
-flutter run              # Run in debug mode
-flutter run --release    # Run in release mode
-flutter build apk        # Build Android APK
-flutter build aab        # Build Android App Bundle
-flutter analyze          # Run linter/static analysis
-flutter test             # Run tests
-flutter test test/widget_test.dart  # Run single test file
+flutter pub get                                        # Install dependencies
+flutter run                                            # Debug mode
+flutter run --release --dart-define=MR_API_KEY=xxx     # Release mode with API key
+flutter build aab --dart-define=MR_API_KEY=xxx         # Android App Bundle (Play Store)
+flutter build apk --split-per-abi --dart-define=...    # APKs split by ABI (testing)
+flutter build ipa --dart-define=MR_API_KEY=xxx         # iOS (requires Mac + signing)
+flutter analyze                                        # Linter (very_good_analysis)
+flutter test                                           # Unit tests
+flutter test integration_test/                         # Integration tests (needs device)
+bash scripts/install-hooks.sh                          # Install pre-commit hook (once per clone)
 ```
 
-Android signing requires a `key.properties` file (not in repo) referenced by `android/app/build.gradle`.
+Android signing: `key.properties` in `~/.mr-secrets/` (not in repo).
+API key injected via `--dart-define MR_API_KEY=...` — never hardcoded.
 
-## Architecture
+## Architecture (Clean Architecture — implemented)
 
-### Navigation
-- **GoRouter** (`go_router` v14.2.7) configured in `lib/theme/nav/nav.dart`
-- Named routes with `FFRoute` extensions; initial location: `/`
-- Note: `get` package is also a dependency but GoRouter is the primary router
+```
+lib/
+├── core/
+│   ├── auth/            (BiometricsService — local_auth wrapper)
+│   ├── config/          (ExternalLinks)
+│   ├── di/              (settingsProviders: themeModeProvider, biometricsEnabledProvider)
+│   ├── error/           (AppException: NetworkException, ServerException, AuthException)
+│   ├── logging/         (appLogger — Talker singleton, no PII)
+│   ├── network/         (MrHttpClient — IOClient factory, certificate pinning structure)
+│   ├── router/          (app_router.dart — GoRouter with auth redirect guard)
+│   ├── storage/         (secureStorageProvider — FlutterSecureStorage, AES-GCM + RSA-OAEP)
+│   ├── theme/           (app_colors.dart — single source of truth; app_theme.dart light+dark)
+│   └── widgets/         (ShimmerBox, SkeletonProductList, SkeletonProductDetail)
+├── features/
+│   ├── auth/            (Splash → Login — data/domain/presentation, Riverpod AsyncNotifier)
+│   ├── home/            (HomeScreen with BottomNav: HomeTab, BenefitCard, Products, Profile)
+│   ├── products/        (Mis Productos + Detalle — GoRouter /home/products/:id)
+│   ├── benefits/        (Carnet digital + Medic + Club Ahorro)
+│   └── notifications/   (Scaffold — stub, pendiente Firebase)
+└── main.dart            (~75 lines: HttpOverrides + ProviderScope + MyApp)
+```
 
-### State Management
-- Manual `setState()` with `StatefulWidget` — no framework (Provider, Bloc, etc.)
-- `flutter_secure_storage` for encrypted credential persistence
-- `get_storage` / `shared_preferences` for general key-value storage
+Each feature: `data/{datasources,models,repositories}` · `domain/{entities,repositories,usecases}` · `presentation/{providers,screens,widgets}`.
 
-### API Layer
-- `lib/services/webservice.dart` — HTTP client with generic `Resource<T>` pattern
-- Methods: `load<T>()`, `find<T>()`, `loadCab<T>()`
-- Base URL: `https://secure.multiriesgos.com`
-- JSON parsed with `jsonDecode` (no code-gen serialization)
+## State Management
 
-### Theme System
-- `lib/theme/fintech_theme.dart` — `FinTechTheme` abstract base with `LightModeTheme`
-- `lib/app_theme.dart` — additional theme config
-- `GoogleFonts` integration; custom color schemes in `lib/models/color_schemes.g.dart`
+- **Riverpod 2.x** (`flutter_riverpod ^2.6.1`, `riverpod_annotation`)
+- `AsyncNotifier<T>` for async state; `StateProvider` avoided
+- No `setState` except `HomeScreen._currentIndex` (BottomNav) and `SplashScreen` animation
+- Key providers: `authProvider`, `productsProvider`, `productDetailProvider`, `themeModeProvider`, `biometricsEnabledProvider`
 
-### Responsive Design
-- `lib/ui/` — `ScreenTypeLayout` (mobile/tablet), `OrientationLayout` (portrait/landscape), `ResponsiveBuilder`
-- `flutter_screenutil` for responsive sizing
+## Navigation
 
-### Localization
-- `lib/theme/internationalization.dart` — `FFLocalizations` custom implementation
-- Currently English only; translation map structure ready for expansion
+- **GoRouter 14.2.7** — `lib/core/router/app_router.dart`
+- Auth guard: `redirect:` switch on `AuthState` (Loading → `/`, Authenticated → `/home`, Unauthenticated → `/login`)
+- Routes: `/` (Splash) · `/login` · `/home` · `/home/products` · `/home/products/:id` · `/home/benefits`
 
-## Code Organization
+## HTTP & Security
 
-- **Feature-per-folder**: each feature (e.g., `sign_in/`, `home/`, `my_cards/`) has its own directory with `*_widget.dart` files
-- `lib/components/` — reusable dialog/modal widgets
-- `lib/models/` — data models (`storage_item.dart`, `cab_item.dart`, `ren_item.dart`)
-- `lib/services/` — business logic (storage, HTTP)
-- `lib/utils/` — constants, helpers, UI utilities
-- `lib/views/` — responsive view variants (small/large/tablet)
-- `lib/widgets/` — shared reusable widgets
+- `MrHttpClient.create()` → `IOClient` via `httpClientProvider` (Riverpod)
+- Certificate pinning: structure in place, SHA-256 pins pending. See `lib/core/network/mr_http_client.dart` for instructions.
+- Android: `network_security_config.xml` (pin-set commented, activate when pins obtained)
+- iOS: `NSPinnedDomains` in `Info.plist` (commented, same reason)
+- `_StrictHttpOverrides` active in release builds — rejects all bad certs
+- R8 + minify + shrinkResources enabled in Android release
 
-## Key Patterns
+## Theme System
 
-- Authentication: document number + birth date (DD/MM/YYYY), OTP verification, secure storage
-- Widget naming: `*_widget.dart` for page widgets, `*_model.dart` for models
-- Entry point: `lib/main.dart` — splash screen → login → home dashboard
-- Custom fonts in `assets/fonts/` (WorkSans, Roboto)
-- Animations via `flutter_animate`, `animations`, Lottie, and Rive files
+- `lib/core/theme/app_colors.dart` — **single source of truth** (static constants + ColorScheme factories)
+- `lib/core/theme/app_theme.dart` — `AppTheme.light` and `AppTheme.dark` (Material 3)
+- `themeModeProvider` (AsyncNotifier) — persisted in `flutter_secure_storage`
+- All active screens use `Theme.of(context)` / `AppColors`. `FinTechTheme` is a legacy compatibility shim; do not use it in new code.
+
+## Localization
+
+- `flutter gen-l10n` — `lib/l10n/app_es.arb` (primary) + `app_en.arb`
+- UI language: Spanish (es)
+
+## Biometrics (Fase 5)
+
+- `local_auth ^2.3.0` — `BiometricsService` in `lib/core/auth/biometrics_service.dart`
+- Re-auth on app resume when enabled: `HomeScreen` uses `WidgetsBindingObserver`
+- Toggle persisted in SecureStorage via `biometricsEnabledProvider`
+- Android: `USE_BIOMETRIC` + `USE_FINGERPRINT` permissions
+- iOS: `NSFaceIDUsageDescription` in Info.plist
+
+## Push Notifications (Fase 5 — scaffold pendiente Firebase)
+
+- Interface: `lib/features/notifications/domain/notification_service.dart`
+- Current: `NotificationServiceStub` (noop)
+- To activate: see 7-step instructions in the interface docstring
+- Steps: create Firebase project → add `firebase_core ^3.x` + `firebase_messaging ^15.x` → replace stub
+
+## CI/CD (Codemagic)
+
+Three workflows in `codemagic.yaml`:
+- `pr-validation`: Linux · `flutter analyze --fatal-warnings` + `flutter test --coverage` on every PR to `main`
+- `ios-release`: mac_mini_m2 → TestFlight (App Store Connect API)
+- `android-release`: linux_x2 → AAB to Google Play `internal` + APK split per ABI as artifact
+
+## Accessibility (Fase 6)
+
+- All interactive `InkWell` + icon-only buttons wrapped in `Semantics(label:..., button: true)`
+- `RepaintBoundary` around `ListView.builder` in ProductsScreen
+- Note: `AppColors.textMuted` (#718096) has ~3.9:1 contrast ratio — compliant for large text only (≥18px or ≥14px bold). Use `Theme.of(context).colorScheme.onSurfaceVariant` for secondary text in tight contexts.
+
+## Assets
+
+Custom fonts: `WorkSans` (Regular/Medium/SemiBold/Bold), `Roboto` (Regular/Medium/Bold) — in `assets/fonts/`.
+Images in `assets/images/` (PNG/JPG). For future network images use `cached_network_image`.
+
+## Legacy Files (do not modify, scheduled for eventual deletion)
+
+- `lib/theme/fintech_theme.dart` — compatibility shim only; all new code uses `AppColors`/`Theme.of`
+- `lib/theme/fintech_util.dart`, `lib/theme/fintech_widgets.dart` — no active usages

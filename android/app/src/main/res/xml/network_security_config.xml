@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Certificate pinning — secure.multiriesgos.com
+  Emisor  : Let's Encrypt R12
+  Expira  : 2026-07-28  →  RENOVAR ANTES DE 2026-06-28
+  Fuente  : verificado 2026-06-04 vía openssl s_client + SPKI DER SHA-256
+
+  Al renovar:
+  1. openssl x509 -in cert.der -inform der -pubkey -noout \
+       | openssl pkey -pubin -outform der \
+       | openssl dgst -sha256 -binary | openssl enc -base64
+  2. Actualizar el valor del <pin> abajo
+  3. Actualizar _spkiPin en lib/core/network/mr_http_client.dart
+  4. Actualizar NSPinnedDomains en ios/Runner/Info.plist
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="false">secure.multiriesgos.com</domain>
+
+        <pin-set expiration="2026-07-28">
+            <!-- SPKI SHA-256 del certificado activo — renovar antes de 2026-06-28 -->
+            <pin digest="SHA-256">cp1SngqIwTORG7J1sUU+0l300zt7Y5kIoMU09OHEQAU=</pin>
+        </pin-set>
+
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

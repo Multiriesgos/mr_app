@@ -1,0 +1,69 @@
+{
+  "@@locale": "es",
+
+  "appName": "Multimate",
+  "@appName": { "description": "Nombre de la aplicación" },
+
+  "loginTitle": "INGRESE AQUÍ",
+  "@loginTitle": { "description": "Título de la pantalla de login" },
+
+  "loginDocumentLabel": "No. Documento",
+  "@loginDocumentLabel": { "description": "Label campo número de documento" },
+
+  "loginDocumentHint": "Digite número documento",
+  "@loginDocumentHint": { "description": "Hint del campo documento" },
+
+  "loginBirthdateLabel": "Fecha de nacimiento",
+  "@loginBirthdateLabel": { "description": "Label del campo fecha de nacimiento" },
+
+  "loginBirthdateHint": "dd/mm/yyyy",
+  "@loginBirthdateHint": { "description": "Hint del campo fecha" },
+
+  "loginRememberMe": "Recordar cliente",
+  "@loginRememberMe": { "description": "Texto del checkbox recordar" },
+
+  "loginCotizaButton": "COTIZA",
+  "@loginCotizaButton": { "description": "Botón de cotización externa" },
+
+  "loginIngressButton": "INGRESAR",
+  "@loginIngressButton": { "description": "Botón de ingreso/login" },
+
+  "loginValidationDocument": "Ingrese número documento",
+  "@loginValidationDocument": { "description": "Validación campo documento vacío" },
+
+  "loginValidationBirthdate": "Digite fecha de nacimiento",
+  "@loginValidationBirthdate": { "description": "Validación campo fecha vacío" },
+
+  "loginValidationBirthdateFormat": "Digite fecha en formato DD/MM/YYYY",
+  "@loginValidationBirthdateFormat": { "description": "Validación formato fecha" },
+
+  "loginErrorInvalidCredentials": "Credenciales no válidas.",
+  "@loginErrorInvalidCredentials": { "description": "Error de credenciales" },
+
+  "loginErrorIncompleteData": "Error: Datos incompletos del servidor. Intente de nuevo.",
+  "@loginErrorIncompleteData": { "description": "Error datos servidor" },
+
+  "homeWelcome": "Bienvenido(a)",
+  "@homeWelcome": { "description": "Saludo de bienvenida en home" },
+
+  "homeMyProducts": "Mis Productos",
+  "@homeMyProducts": { "description": "Módulo Mis Productos" },
+
+  "homeBenefits": "Beneficios",
+  "@homeBenefits": { "description": "Módulo Beneficios" },
+
+  "homeCallCenter": "Llamar a MULTIRIESGOS",
+  "@homeCallCenter": { "description": "Botón llamar al call center" },
+
+  "homeLogout": "Cerrar sesión",
+  "@homeLogout": { "description": "Opción cerrar sesión en drawer" },
+
+  "errorOops": "Oops Error!",
+  "@errorOops": { "description": "Título de snackbar de error" },
+
+  "generalRetry": "Reintentar",
+  "@generalRetry": { "description": "Botón reintentar" },
+
+  "generalClose": "Cerrar",
+  "@generalClose": { "description": "Botón cerrar" }
+}

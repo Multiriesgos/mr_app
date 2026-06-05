@@ -1,0 +1,26 @@
+{
+  "@@locale": "en",
+
+  "appName": "Multimate",
+  "loginTitle": "SIGN IN",
+  "loginDocumentLabel": "Document No.",
+  "loginDocumentHint": "Enter document number",
+  "loginBirthdateLabel": "Date of birth",
+  "loginBirthdateHint": "dd/mm/yyyy",
+  "loginRememberMe": "Remember me",
+  "loginCotizaButton": "QUOTE",
+  "loginIngressButton": "SIGN IN",
+  "loginValidationDocument": "Enter document number",
+  "loginValidationBirthdate": "Enter date of birth",
+  "loginValidationBirthdateFormat": "Enter date in DD/MM/YYYY format",
+  "loginErrorInvalidCredentials": "Invalid credentials.",
+  "loginErrorIncompleteData": "Error: Incomplete server data. Please try again.",
+  "homeWelcome": "Welcome",
+  "homeMyProducts": "My Products",
+  "homeBenefits": "Benefits",
+  "homeCallCenter": "Call MULTIRIESGOS",
+  "homeLogout": "Sign out",
+  "errorOops": "Oops! Error",
+  "generalRetry": "Retry",
+  "generalClose": "Close"
+}
