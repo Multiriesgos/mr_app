@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mr_app/core/error/app_exception.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
 import 'package:mr_app/core/widgets/skeleton_product_list.dart';
 import 'package:mr_app/features/products/domain/entities/product.dart';
@@ -24,7 +25,13 @@ class ProductDetailScreen extends ConsumerWidget {
       body: SafeArea(
         child: state.when(
           loading: () => const SkeletonProductDetail(),
-          error: (e, _) => Center(child: Text(e.toString())),
+          error: (e, _) => Center(
+            child: Text(
+              e is AppException
+                  ? e.message
+                  : 'Error inesperado. Por favor reintente.',
+            ),
+          ),
           data: (data) {
             final (detail, contact) = data;
             return _DetailBody(product: detail, contact: contact);
@@ -68,7 +75,7 @@ class _DetailBody extends StatelessWidget {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(20, 10, 20, 0),
+        padding: const EdgeInsetsDirectional.fromSTEB(20, 10, 20, 24),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
