@@ -98,7 +98,6 @@ class _UserHeader extends StatelessWidget {
                         .textTheme
                         .titleMedium
                         ?.copyWith(fontWeight: FontWeight.w600),
-                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
                   Text(

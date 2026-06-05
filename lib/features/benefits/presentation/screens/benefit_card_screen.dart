@@ -99,38 +99,105 @@ class _CarnetButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final name = user?.name ?? '';
+    final doc = user?.documentNumber ?? '';
 
     return Semantics(
       label: 'Ver carnet digital en el navegador',
       button: true,
-      child: InkWell(
+      child: GestureDetector(
         onTap: () => _launch(context),
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          width: double.infinity,
-          height: MediaQuery.orientationOf(context) == Orientation.portrait
-              ? MediaQuery.sizeOf(context).height * 0.25
-              : MediaQuery.sizeOf(context).height * 0.35,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: cs.primary.withValues(alpha: 0.08),
-            border: Border.all(color: cs.primary.withValues(alpha: 0.3)),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.credit_card_outlined, size: 60, color: cs.primary),
-              const SizedBox(height: 8),
-              Text(
-                'Ver carnet digital',
-                style: TextStyle(
-                  color: cs.primary,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
+        child: AspectRatio(
+          aspectRatio: 1.586,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  'assets/images/Card-bg-1.png',
+                  fit: BoxFit.cover,
                 ),
-              ),
-            ],
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0),
+                        Colors.black.withValues(alpha: 0.55),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 20,
+                  right: 20,
+                  bottom: 20,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        name.toUpperCase(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                          shadows: [
+                            Shadow(blurRadius: 4, color: Colors.black54),
+                          ],
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        doc,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 13,
+                          letterSpacing: 1.2,
+                          shadows: [
+                            Shadow(blurRadius: 4, color: Colors.black54),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  right: 16,
+                  top: 16,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.open_in_new, color: Colors.white, size: 14),
+                        SizedBox(width: 4),
+                        Text(
+                          'Ver carnet',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

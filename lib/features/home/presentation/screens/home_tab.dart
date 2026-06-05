@@ -73,6 +73,53 @@ class HomeTab extends ConsumerWidget {
   }
 }
 
+class _CallButton extends StatelessWidget {
+  const _CallButton({required this.cs});
+  final ColorScheme cs;
+
+  Future<void> _call() async {
+    final uri = Uri.parse(ExternalLinks.callCenter);
+    if (await canLaunchUrl(uri)) await launchUrl(uri);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'Llamar al centro de atención',
+      button: true,
+      child: GestureDetector(
+        onTap: _call,
+        child: Column(
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: cs.primary.withValues(alpha: 0.1),
+              ),
+              child: Icon(
+                Icons.support_agent_outlined,
+                size: 64,
+                color: cs.primary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Llamar al centro de atención',
+              style: TextStyle(
+                color: cs.primary,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _HomeContent extends StatelessWidget {
   const _HomeContent();
 
@@ -86,8 +133,8 @@ class _HomeContent extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 20),
-            Image.asset('assets/images/7_fit.png', height: 180),
+            const SizedBox(height: 40),
+            _CallButton(cs: cs),
             const SizedBox(height: 32),
             Text(
               'Bienvenido a Multimate',
