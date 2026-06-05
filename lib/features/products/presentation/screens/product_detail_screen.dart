@@ -196,7 +196,7 @@ class _InfoRow extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Container(
-            height: 40,
+            constraints: const BoxConstraints(minHeight: 40),
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
@@ -205,6 +205,7 @@ class _InfoRow extends StatelessWidget {
               ),
             ),
             alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
               value.isEmpty ? 'no disponible' : value,
               style: Theme.of(context).textTheme.bodyLarge,
