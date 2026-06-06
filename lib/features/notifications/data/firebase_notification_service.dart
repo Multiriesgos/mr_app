@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:mr_app/core/logging/app_logger.dart';
 import 'package:mr_app/features/notifications/domain/models/notification_payload.dart';
 import 'package:mr_app/features/notifications/domain/notification_service.dart';

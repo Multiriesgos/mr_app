@@ -83,10 +83,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
     appLogger.info('auth: login exitoso');
     return UserModel(
-      documentNumber: userappUser!,
-      name: userappNombre!,
+      documentNumber: userappUser,
+      name: userappNombre,
       email: userappEmail,
-      docSearch: userappDocSearch!,
+      docSearch: userappDocSearch,
     );
   }
 }

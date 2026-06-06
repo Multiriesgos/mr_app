@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/core/error/app_exception.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
@@ -159,8 +158,8 @@ class _DetailBody extends StatelessWidget {
                         semanticsLabel:
                             'Contactar por WhatsApp a ${product.aseguradora}',
                         color: AppColors.success,
-                        icon: const FaIcon(
-                          FontAwesomeIcons.whatsapp,
+                        icon: const Icon(
+                          Icons.chat_bubble_outline,
                           size: 50,
                           color: AppColors.success,
                         ),

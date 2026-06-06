@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mr_app/core/theme/app_theme.dart';
-import 'package:mr_app/features/auth/domain/entities/user.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:mr_app/features/auth/presentation/screens/login_screen.dart';
 
