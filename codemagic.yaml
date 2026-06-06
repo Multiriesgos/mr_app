@@ -29,6 +29,8 @@ workflows:
       cancel_previous_builds: true
     environment:
       flutter: stable
+      groups:
+        - secure
     scripts:
       - name: Restaurar archivos Firebase
         script: |
@@ -64,6 +66,8 @@ workflows:
       flutter: stable
       xcode: latest
       cocoapods: default
+      groups:
+        - secure
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.multiriesgos.multimate
@@ -109,6 +113,8 @@ workflows:
     instance_type: mac_mini_m1
     environment:
       flutter: stable
+      groups:
+        - secure
       android_signing:
         - multiriesgos_keystore
     scripts:
