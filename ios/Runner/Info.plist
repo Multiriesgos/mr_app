@@ -38,15 +38,13 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<false/>
 		<!-- Certificate pinning — secure.multiriesgos.com
-		     Emisor  : Let's Encrypt R12
-		     Expira  : 2026-07-28  → RENOVAR ANTES DE 2026-06-28
-		     SPKI    : aD9iZEc/GT9hP1Q/Zy8/P1o6P0g/Pz8/C3YuKD8/Pw0=  (verificado 2026-06-04)
-		     Cert    : s7F+oUuSAuFiKXrSj5cQlHJTNVvIKrYAsQc/wX7QO4A=
+		     Estrategia : Intermedio Let's Encrypt R12 (NSPinnedCAIdentities)
+		     SPKI R12   : kZwN96eHtZftBWrOZUsd6cA4es80n3NzSk/XtYz2EqQ=
+		     R12 expira : 2027-03-12  → RENOVAR ANTES DE 2027-02-28
+		     Verificado : 2026-06-06 vía openssl s_client + SPKI DER SHA-256
 
-		     NOTA: NSPinnedDomains requiere iOS 14+ y DEBE verificarse en device real
-		     antes de activar en producción — si el pin es incorrecto la app pierde
-		     toda conectividad. Validar con "! curl -v https://secure.multiriesgos.com"
-		     en el device antes del release.
+		     NOTA: NSPinnedDomains requiere iOS 14+. Usar NSPinnedCAIdentities para
+		     intermedios (CA), NSPinnedLeafIdentities para cert hoja.
 		-->
 		<key>NSPinnedDomains</key>
 		<dict>
@@ -54,11 +52,11 @@
 			<dict>
 				<key>NSIncludesSubdomains</key>
 				<false/>
-				<key>NSPinnedLeafIdentities</key>
+				<key>NSPinnedCAIdentities</key>
 				<array>
 					<dict>
 						<key>SPKI-SHA256-BASE64</key>
-						<string>aD9iZEc/GT9hP1Q/Zy8/P1o6P0g/Pz8/C3YuKD8/Pw0=</string>
+						<string>kZwN96eHtZftBWrOZUsd6cA4es80n3NzSk/XtYz2EqQ=</string>
 					</dict>
 				</array>
 			</dict>

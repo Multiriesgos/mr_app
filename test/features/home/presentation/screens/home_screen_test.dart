@@ -68,7 +68,11 @@ void main() {
       await tester.pumpWidget(_buildHomeTab());
       await tester.pump();
 
-      expect(find.byIcon(Icons.support_agent_outlined), findsOneWidget);
+      final inAppBar = find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byIcon(Icons.support_agent_outlined),
+      );
+      expect(inAppBar, findsOneWidget);
       expect(find.byIcon(Icons.logout_outlined), findsOneWidget);
     });
 

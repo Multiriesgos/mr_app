@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Certificate pinning — secure.multiriesgos.com
-  Emisor  : Let's Encrypt R12
-  Expira  : 2026-07-28  →  RENOVAR ANTES DE 2026-06-28
-  Fuente  : verificado 2026-06-04 vía openssl s_client + SPKI DER SHA-256
+  Estrategia : Intermedio Let's Encrypt R12 (estable ~90 días sin rotación)
+  SPKI R12   : kZwN96eHtZftBWrOZUsd6cA4es80n3NzSk/XtYz2EqQ=
+  R12 expira : 2027-03-12  →  RENOVAR ANTES DE 2027-02-28
+  Verificado : 2026-06-06 vía openssl s_client + SPKI DER SHA-256
 
-  Al renovar:
-  1. openssl x509 -in cert.der -inform der -pubkey -noout \
+  Al renovar (solo si Let's Encrypt cambia su intermedio):
+  1. openssl s_client -connect secure.multiriesgos.com:443 -showcerts 2>/dev/null \
+       | awk '/-----BEGIN CERTIFICATE-----/{c++} c==2{print}' \
+       | openssl x509 -pubkey -noout \
        | openssl pkey -pubin -outform der \
        | openssl dgst -sha256 -binary | openssl enc -base64
   2. Actualizar el valor del <pin> abajo
@@ -17,9 +20,9 @@
     <domain-config cleartextTrafficPermitted="false">
         <domain includeSubdomains="false">secure.multiriesgos.com</domain>
 
-        <pin-set expiration="2026-07-28">
-            <!-- SPKI SHA-256 del certificado activo — renovar antes de 2026-06-28 -->
-            <pin digest="SHA-256">cp1SngqIwTORG7J1sUU+0l300zt7Y5kIoMU09OHEQAU=</pin>
+        <pin-set expiration="2027-02-28">
+            <!-- SPKI SHA-256 del intermedio Let's Encrypt R12 — renovar antes de 2027-02-28 -->
+            <pin digest="SHA-256">kZwN96eHtZftBWrOZUsd6cA4es80n3NzSk/XtYz2EqQ=</pin>
         </pin-set>
 
         <trust-anchors>
