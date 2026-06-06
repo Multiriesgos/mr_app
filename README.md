@@ -1,9 +1,7 @@
 # Multimate — Cliente Multiriesgos
 
-[![Codemagic build status](https://api.codemagic.io/apps/YOUR_APP_ID/android-release/status_badge.svg)](https://codemagic.io/apps/YOUR_APP_ID/android-release/latest_build)
-[![iOS build](https://api.codemagic.io/apps/YOUR_APP_ID/ios-release/status_badge.svg)](https://codemagic.io/apps/YOUR_APP_ID/ios-release/latest_build)
-
-> Reemplaza `YOUR_APP_ID` con el ID de tu app en Codemagic (Settings → App ID).
+[![Codemagic build status](https://api.codemagic.io/apps/69aa2074f76d35ab6ae977bf/android-release/status_badge.svg)](https://codemagic.io/apps/69aa2074f76d35ab6ae977bf/android-release/latest_build)
+[![iOS build](https://api.codemagic.io/apps/69aa2074f76d35ab6ae977bf/ios-release/status_badge.svg)](https://codemagic.io/apps/69aa2074f76d35ab6ae977bf/ios-release/latest_build)
 
 App Flutter de seguros para clientes Multiriesgos. Plataformas activas: **Android + iOS**.
 
