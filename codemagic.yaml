@@ -4,16 +4,16 @@ workflows:
   # PR Validation — corre en cada PR hacia main
   # ─────────────────────────────────────────────
   #
-  # Environment Files requeridos en Codemagic UI
-  # (Team Settings > Global variables and secrets > Files):
+  # Variables requeridas en Codemagic UI
+  # (App Settings > Environment variables):
   #
-  #   Identifier              Destination path
-  #   ──────────────────────  ─────────────────────────────────────
-  #   FIREBASE_OPTIONS_DART   lib/firebase_options.dart
-  #   GOOGLE_SERVICES_JSON    android/app/google-services.json  (solo android-release)
-  #   GOOGLE_SERVICE_INFO_PLIST  ios/Runner/GoogleService-Info.plist  (solo ios-release)
-  #
-  # Codemagic copia el archivo a la destination path antes de que corran los scripts.
+  #   Nombre                  Tipo       Descripción
+  #   ──────────────────────  ─────────  ─────────────────────────────────────
+  #   MR_API_KEY              Secret     API key del backend Multiriesgos
+  #   FIREBASE_OPTIONS_DART   Secret     base64 de lib/firebase_options.dart
+  #   GOOGLE_SERVICES_JSON    Secret     base64 de android/app/google-services.json
+  #   GOOGLE_SERVICE_INFO_PLIST Secret   base64 de ios/Runner/GoogleService-Info.plist
+  #   GPLAY_SERVICE_ACCOUNT   Secret     JSON del service account de Google Play
   # ─────────────────────────────────────────────
   pr-validation:
     name: PR Validation
@@ -29,14 +29,12 @@ workflows:
       cancel_previous_builds: true
     environment:
       flutter: stable
-      vars:
-        MR_API_KEY: Encrypted(...)
     scripts:
       - name: Restaurar archivos Firebase
         script: |
           echo "$FIREBASE_OPTIONS_DART" | base64 --decode > lib/firebase_options.dart
-          test -f lib/firebase_options.dart \
-            || { echo "ERROR: FIREBASE_OPTIONS_DART no configurado en Codemagic"; exit 1; }
+          test -s lib/firebase_options.dart \
+            || { echo "ERROR: FIREBASE_OPTIONS_DART vacío o no configurado en Codemagic"; exit 1; }
       - name: Get Flutter packages
         script: flutter pub get
       - name: Analyze
@@ -69,8 +67,6 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.multiriesgos.multimate
-      vars:
-        MR_API_KEY: Encrypted(...)
     scripts:
       - name: Clean build cache
         script: |
@@ -96,7 +92,6 @@ workflows:
           flutter build ipa --release \
             --no-pub \
             --dart-define=MR_API_KEY=$MR_API_KEY
-      # dSYMs se suben automáticamente por el plugin firebase-crashlytics-gradle
     artifacts:
       - build/ios/ipa/*.ipa
       - '*.snap'
@@ -116,8 +111,6 @@ workflows:
       flutter: stable
       android_signing:
         - multiriesgos_keystore
-      vars:
-        MR_API_KEY: Encrypted(...)
     scripts:
       - name: Get Flutter packages
         script: flutter pub get
@@ -137,24 +130,15 @@ workflows:
         script: |
           flutter build aab --release \
             --dart-define=MR_API_KEY=$MR_API_KEY
-      # Mapping + dSYMs se suben automáticamente por el plugin firebase-crashlytics-gradle
       - name: Build APK (split per ABI — para pruebas internas)
         script: |
           flutter build apk --release --split-per-abi \
             --dart-define=MR_API_KEY=$MR_API_KEY
-      # T4.1c — Symbols upload (activar cuando se configure T4.2 crash reporting)
-      # - name: Upload mapping.txt to crash reporter
-      #   script: |
-      #     # Sentry:
-      #     # sentry-cli upload-dif --org YOUR_ORG --project mr-app \
-      #     #   build/app/outputs/mapping/release/mapping.txt
-      #     echo "Symbols upload: configure T4.2 first"
     artifacts:
       - build/app/outputs/bundle/release/*.aab
       - build/app/outputs/apk/release/*.apk
-      # ProGuard mapping para deobfuscar stack traces (T4.2)
       - build/app/outputs/mapping/release/mapping.txt
     publishing:
       google_play:
-        credentials: Encrypted(...)
+        credentials: $GPLAY_SERVICE_ACCOUNT
         track: internal
