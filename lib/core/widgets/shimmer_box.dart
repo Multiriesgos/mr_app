@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 /// Usa un gradiente lineal que recorre el widget horizontalmente.
 class ShimmerBox extends StatefulWidget {
   const ShimmerBox({
-    super.key,
-    required this.width,
-    required this.height,
+    required this.width, required this.height, super.key,
     this.borderRadius = 4,
   });
 

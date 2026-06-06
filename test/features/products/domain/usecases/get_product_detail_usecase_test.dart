@@ -69,7 +69,6 @@ void main() {
       final sut = GetProductDetailUseCase(
         _FakeProductsRepository(
           detailResult: tProduct,
-          contactResult: null,
         ),
       );
 
@@ -89,7 +88,6 @@ void main() {
       final sut = GetProductDetailUseCase(
         _FakeProductsRepository(
           detailResult: const NetworkException(),
-          contactResult: null,
         ),
       );
 
@@ -111,7 +109,7 @@ void main() {
     });
 
     test('ContactInfo.hasPhone es true cuando phone tiene valor', () {
-      const info = ContactInfo(phone: '22001234', whatsapp: null);
+      const info = ContactInfo(phone: '22001234');
       expect(info.hasPhone, isTrue);
       expect(info.hasWhatsApp, isFalse);
     });

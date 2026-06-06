@@ -59,7 +59,7 @@ abstract final class AppColors {
   static const Color darkBorder       = Color(0xFF2D3748);
 
   // ── ColorScheme light ──────────────────────────────────────────────
-  static ColorScheme get lightColorScheme => ColorScheme(
+  static ColorScheme get lightColorScheme => const ColorScheme(
     brightness:              Brightness.light,
     primary:                 primary,
     onPrimary:               surface,
@@ -87,7 +87,7 @@ abstract final class AppColors {
   );
 
   // ── ColorScheme dark ───────────────────────────────────────────────
-  static ColorScheme get darkColorScheme => ColorScheme(
+  static ColorScheme get darkColorScheme => const ColorScheme(
     brightness:              Brightness.dark,
     primary:                 accent,
     onPrimary:               darkBackground,
@@ -117,17 +117,26 @@ abstract final class AppColors {
   // ── BoxShadow helpers ──────────────────────────────────────────────
   static List<BoxShadow> get shadowSm => [
     BoxShadow(
-        color: shadowBase.withOpacity(0.08), blurRadius: 8, offset: const Offset(0, 2)),
+      color: shadowBase.withValues(alpha: 0.08),
+      blurRadius: 8,
+      offset: const Offset(0, 2),
+    ),
   ];
 
   static List<BoxShadow> get shadowMd => [
     BoxShadow(
-        color: shadowBase.withOpacity(0.14), blurRadius: 20, offset: const Offset(0, 4)),
+      color: shadowBase.withValues(alpha: 0.14),
+      blurRadius: 20,
+      offset: const Offset(0, 4),
+    ),
   ];
 
   static List<BoxShadow> get shadowLg => [
     BoxShadow(
-        color: shadowBase.withOpacity(0.20), blurRadius: 32, offset: const Offset(0, 8)),
+      color: shadowBase.withValues(alpha: 0.20),
+      blurRadius: 32,
+      offset: const Offset(0, 8),
+    ),
   ];
 
   // ── Login gradient ─────────────────────────────────────────────────

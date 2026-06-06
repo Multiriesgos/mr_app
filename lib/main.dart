@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode, PlatformDispatcher;
+import 'package:flutter/foundation.dart' show PlatformDispatcher, kDebugMode, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -17,7 +17,7 @@ import 'package:mr_app/core/router/app_router.dart';
 import 'package:mr_app/core/theme/app_theme.dart';
 import 'package:mr_app/firebase_options.dart';
 
-import 'l10n/app_localizations.dart';
+import 'package:mr_app/l10n/app_localizations.dart';
 
 void main() async {
   if (kDebugMode) {
@@ -82,7 +82,7 @@ class MyApp extends ConsumerWidget {
       systemNavigationBarColor: Colors.white,
       systemNavigationBarDividerColor: Colors.transparent,
       systemNavigationBarIconBrightness: Brightness.dark,
-    ));
+    ),);
 
     return ScreenUtilInit(
       designSize: const Size(390, 844),

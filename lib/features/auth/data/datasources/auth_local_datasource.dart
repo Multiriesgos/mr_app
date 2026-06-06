@@ -1,6 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import '../models/user_model.dart';
+import 'package:mr_app/features/auth/data/models/user_model.dart';
 
 abstract interface class AuthLocalDataSource {
   Future<void> saveUser(UserModel user, {required bool rememberMe});

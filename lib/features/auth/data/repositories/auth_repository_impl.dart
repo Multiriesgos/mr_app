@@ -1,8 +1,7 @@
+import 'package:mr_app/features/auth/data/datasources/auth_local_datasource.dart';
+import 'package:mr_app/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:mr_app/features/auth/domain/entities/user.dart';
 import 'package:mr_app/features/auth/domain/repositories/auth_repository.dart';
-
-import '../datasources/auth_local_datasource.dart';
-import '../datasources/auth_remote_datasource.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   const AuthRepositoryImpl({

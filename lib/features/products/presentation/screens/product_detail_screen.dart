@@ -11,7 +11,7 @@ import 'package:mr_app/features/products/presentation/providers/products_notifie
 import 'package:url_launcher/url_launcher.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
-  const ProductDetailScreen({super.key, required this.idRen, this.product});
+  const ProductDetailScreen({required this.idRen, super.key, this.product});
 
   final int idRen;
   final Product? product;

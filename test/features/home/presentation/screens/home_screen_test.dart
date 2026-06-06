@@ -28,7 +28,7 @@ Widget _buildHomeTab({bool dark = false}) {
   return ProviderScope(
     overrides: [
       authProvider.overrideWith(
-        () => _FakeAuthNotifier(AuthAuthenticated(_tUser)),
+        () => _FakeAuthNotifier(const AuthAuthenticated(_tUser)),
       ),
     ],
     child: MaterialApp(

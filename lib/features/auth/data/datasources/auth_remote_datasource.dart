@@ -3,9 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mr_app/core/error/app_exception.dart';
 import 'package:mr_app/core/logging/app_logger.dart';
+import 'package:mr_app/features/auth/data/models/user_model.dart';
 import 'package:mr_app/utils/constants.dart';
-
-import '../models/user_model.dart';
 
 abstract interface class AuthRemoteDataSource {
   Future<UserModel> login({

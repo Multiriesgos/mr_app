@@ -47,7 +47,7 @@ class _SkeletonTile extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          const ShimmerBox(width: 20, height: 20, borderRadius: 4),
+          const ShimmerBox(width: 20, height: 20),
         ],
       ),
     );

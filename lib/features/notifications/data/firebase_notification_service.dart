@@ -30,9 +30,7 @@ class FirebaseNotificationService implements NotificationService {
   @override
   Future<bool> requestPermission() async {
     final settings = await FirebaseMessaging.instance.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
+      
     );
     final granted =
         settings.authorizationStatus == AuthorizationStatus.authorized ||

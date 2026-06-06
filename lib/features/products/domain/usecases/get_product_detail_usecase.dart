@@ -1,5 +1,5 @@
-import '../entities/product.dart';
-import '../repositories/products_repository.dart';
+import 'package:mr_app/features/products/domain/entities/product.dart';
+import 'package:mr_app/features/products/domain/repositories/products_repository.dart';
 
 class GetProductDetailUseCase {
   const GetProductDetailUseCase(this._repository);
@@ -20,6 +20,6 @@ class GetProductDetailUseCase {
         tipoSeguro: tipoSeguro,
       ),
     ]);
-    return (results[0] as Product, results[1] as ContactInfo?);
+    return (results[0]! as Product, results[1] as ContactInfo?);
   }
 }

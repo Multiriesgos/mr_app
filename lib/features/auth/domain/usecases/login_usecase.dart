@@ -1,5 +1,5 @@
-import '../entities/user.dart';
-import '../repositories/auth_repository.dart';
+import 'package:mr_app/features/auth/domain/entities/user.dart';
+import 'package:mr_app/features/auth/domain/repositories/auth_repository.dart';
 
 class LoginUseCase {
   const LoginUseCase(this._repository);

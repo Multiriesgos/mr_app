@@ -5,6 +5,7 @@ import 'package:mr_app/core/auth/biometrics_service.dart';
 import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/di/settings_providers.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
+import 'package:mr_app/features/auth/domain/entities/user.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -29,13 +30,13 @@ class ProfileScreen extends ConsumerWidget {
           _UserHeader(user: user),
           const SizedBox(height: 8),
           const Divider(indent: 16, endIndent: 16),
-          _SectionTitle('Apariencia'),
+          const _SectionTitle('Apariencia'),
           _ThemeTile(),
           const Divider(indent: 16, endIndent: 16),
-          _SectionTitle('Seguridad'),
+          const _SectionTitle('Seguridad'),
           _BiometricsTile(),
           const Divider(indent: 16, endIndent: 16),
-          _SectionTitle('Información'),
+          const _SectionTitle('Información'),
           _AppVersionTile(),
           _PrivacyPolicyTile(),
           const Divider(indent: 16, endIndent: 16),
@@ -73,7 +74,7 @@ class _SectionTitle extends StatelessWidget {
 class _UserHeader extends StatelessWidget {
   const _UserHeader({required this.user});
 
-  final dynamic user;
+  final User? user;
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +94,7 @@ class _UserHeader extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    user!.name as String,
+                    user!.name,
                     style: Theme.of(context)
                         .textTheme
                         .titleMedium
@@ -101,12 +102,12 @@ class _UserHeader extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    user!.documentNumber as String,
+                    user!.documentNumber,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   if (user!.email != null)
                   Text(
-                    user!.email as String,
+                    user!.email!,
                     style: Theme.of(context).textTheme.bodySmall,
                     overflow: TextOverflow.ellipsis,
                   ),

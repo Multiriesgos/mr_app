@@ -3,9 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:mr_app/core/error/app_exception.dart';
+import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../providers/auth_notifier.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -65,7 +64,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         elevation: 0,
         margin:
             const EdgeInsets.only(top: 60, left: 16, right: 16, bottom: 20),
-        duration: const Duration(seconds: 4),
         content: _ErrorSnackContent(message: message),
       ),
     );
@@ -102,7 +100,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               if (isLoading)
                 Container(
@@ -174,7 +171,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 4),
+                                    horizontal: 4,),
                                 child: ElevatedButton.icon(
                                   icon: isLoading
                                       ? const SizedBox(
@@ -182,12 +179,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                           height: 18,
                                           child: CircularProgressIndicator(
                                               color: Colors.white,
-                                              strokeWidth: 2),
+                                              strokeWidth: 2,),
                                         )
                                       : const Icon(Icons.shopping_cart),
                                   onPressed: isLoading ? null : _openCotizador,
                                   label: const Text('COTIZA',
-                                      style: TextStyle(fontSize: 14)),
+                                      style: TextStyle(fontSize: 14),),
                                   style: ElevatedButton.styleFrom(
                                     minimumSize:
                                         const Size(double.infinity, 56),
@@ -199,7 +196,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 4),
+                                    horizontal: 4,),
                                 child: ElevatedButton.icon(
                                   icon: isLoading
                                       ? const SizedBox(
@@ -207,12 +204,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                           height: 18,
                                           child: CircularProgressIndicator(
                                               color: Colors.white,
-                                              strokeWidth: 2),
+                                              strokeWidth: 2,),
                                         )
                                       : const Icon(Icons.key),
                                   onPressed: isLoading ? null : _submit,
                                   label: const Text('INGRESAR',
-                                      style: TextStyle(fontSize: 14)),
+                                      style: TextStyle(fontSize: 14),),
                                   style: ElevatedButton.styleFrom(
                                     minimumSize:
                                         const Size(double.infinity, 56),
@@ -273,7 +270,7 @@ class _BorderedField extends StatelessWidget {
         labelText: labelText,
         hintText: hintText,
         prefixIcon: Icon(prefixIcon,
-            color: const Color.fromRGBO(84, 87, 90, 0.5)),
+            color: const Color.fromRGBO(84, 87, 90, 0.5),),
         border: const OutlineInputBorder(borderSide: _borderSide),
         enabledBorder: const OutlineInputBorder(borderSide: _borderSide),
         focusedBorder: const OutlineInputBorder(borderSide: _borderSide),
@@ -348,7 +345,7 @@ class _ErrorSnackContent extends StatelessWidget {
               borderRadius: BorderRadius.all(Radius.circular(18)),
             ),
             child: const Icon(Icons.clear_outlined,
-                color: Colors.white, size: 22),
+                color: Colors.white, size: 22,),
           ),
         ),
       ],

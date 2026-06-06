@@ -116,7 +116,7 @@ class _ProductTile extends StatelessWidget {
           padding: const EdgeInsets.only(right: 2),
           decoration: const BoxDecoration(
             border: Border(
-              right: BorderSide(width: 1, color: Colors.white24),
+              right: BorderSide(color: Colors.white24),
             ),
           ),
           child: const Icon(

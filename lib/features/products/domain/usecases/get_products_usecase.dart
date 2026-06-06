@@ -1,5 +1,5 @@
-import '../entities/product.dart';
-import '../repositories/products_repository.dart';
+import 'package:mr_app/features/products/domain/entities/product.dart';
+import 'package:mr_app/features/products/domain/repositories/products_repository.dart';
 
 class GetProductsUseCase {
   const GetProductsUseCase(this._repository);

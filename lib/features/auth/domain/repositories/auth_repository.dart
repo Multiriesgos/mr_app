@@ -1,4 +1,4 @@
-import '../entities/user.dart';
+import 'package:mr_app/features/auth/domain/entities/user.dart';
 
 abstract interface class AuthRepository {
   Future<User> login({

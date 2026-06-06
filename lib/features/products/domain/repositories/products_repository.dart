@@ -1,4 +1,4 @@
-import '../entities/product.dart';
+import 'package:mr_app/features/products/domain/entities/product.dart';
 
 abstract interface class ProductsRepository {
   Future<List<Product>> getProducts(String docSearch);

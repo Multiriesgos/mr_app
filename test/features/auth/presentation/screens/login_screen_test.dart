@@ -40,7 +40,7 @@ Widget _buildScreen({
     overrides: [
       authProvider.overrideWith(
         loading
-            ? () => _LoadingAuthNotifier()
+            ? _LoadingAuthNotifier.new
             : () => _FakeAuthNotifier(state),
       ),
     ],

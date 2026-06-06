@@ -1,7 +1,6 @@
+import 'package:mr_app/features/products/data/datasources/products_remote_datasource.dart';
 import 'package:mr_app/features/products/domain/entities/product.dart';
 import 'package:mr_app/features/products/domain/repositories/products_repository.dart';
-
-import '../datasources/products_remote_datasource.dart';
 
 class ProductsRepositoryImpl implements ProductsRepository {
   const ProductsRepositoryImpl(this._remote);

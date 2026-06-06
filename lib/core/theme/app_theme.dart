@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'app_colors.dart';
+import 'package:mr_app/core/theme/app_colors.dart';
 
 abstract final class AppTheme {
   static ThemeData get light => _base(AppColors.lightColorScheme);
@@ -67,17 +67,17 @@ abstract final class AppTheme {
         borderSide: BorderSide(color: scheme.error, width: 1.5),
         borderRadius: BorderRadius.circular(8),
       ),
-      labelStyle:   TextStyle(color: scheme.onSurface.withOpacity(0.6)),
-      hintStyle:    TextStyle(color: scheme.onSurface.withOpacity(0.4)),
-      prefixIconColor: scheme.onSurface.withOpacity(0.5),
+      labelStyle:   TextStyle(color: scheme.onSurface.withValues(alpha: 0.6)),
+      hintStyle:    TextStyle(color: scheme.onSurface.withValues(alpha: 0.4)),
+      prefixIconColor: scheme.onSurface.withValues(alpha: 0.5),
     ),
     checkboxTheme: CheckboxThemeData(
       fillColor: WidgetStateProperty.resolveWith((states) =>
-          states.contains(WidgetState.selected) ? scheme.primary : null),
+          states.contains(WidgetState.selected) ? scheme.primary : null,),
     ),
     chipTheme: ChipThemeData(
       backgroundColor: scheme.surfaceContainerHighest,
-      selectedColor:   scheme.primary.withOpacity(0.15),
+      selectedColor:   scheme.primary.withValues(alpha: 0.15),
       labelStyle:      TextStyle(color: scheme.onSurface),
     ),
     badgeTheme: BadgeThemeData(
@@ -87,7 +87,7 @@ abstract final class AppTheme {
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor:      scheme.surface,
       selectedItemColor:    scheme.primary,
-      unselectedItemColor:  scheme.onSurface.withOpacity(0.54),
+      unselectedItemColor:  scheme.onSurface.withValues(alpha: 0.54),
       showSelectedLabels:   false,
       showUnselectedLabels: false,
       type:                 BottomNavigationBarType.fixed,
@@ -100,12 +100,12 @@ abstract final class AppTheme {
       headlineSmall:  GoogleFonts.workSans(color: scheme.onSurface, fontWeight: FontWeight.w600, fontSize: 18),
       titleLarge:   GoogleFonts.workSans(color: scheme.onSurface, fontWeight: FontWeight.w600, fontSize: 16),
       titleMedium:  GoogleFonts.workSans(color: scheme.onSurface, fontWeight: FontWeight.w500, fontSize: 15),
-      titleSmall:   GoogleFonts.workSans(color: scheme.onSurface.withOpacity(0.8), fontWeight: FontWeight.w500, fontSize: 14),
+      titleSmall:   GoogleFonts.workSans(color: scheme.onSurface.withValues(alpha: 0.8), fontWeight: FontWeight.w500, fontSize: 14),
       bodyLarge:    GoogleFonts.workSans(color: scheme.onSurface, fontSize: 15),
       bodyMedium:   GoogleFonts.workSans(color: scheme.onSurface, fontSize: 14),
-      bodySmall:    GoogleFonts.workSans(color: scheme.onSurface.withOpacity(0.7), fontSize: 12),
+      bodySmall:    GoogleFonts.workSans(color: scheme.onSurface.withValues(alpha: 0.7), fontSize: 12),
       labelLarge:   GoogleFonts.workSans(color: scheme.onSurface, fontWeight: FontWeight.w600, fontSize: 14),
-      labelMedium:  GoogleFonts.workSans(color: scheme.onSurface.withOpacity(0.7), fontSize: 12),
+      labelMedium:  GoogleFonts.workSans(color: scheme.onSurface.withValues(alpha: 0.7), fontSize: 12),
     ),
   );
 }

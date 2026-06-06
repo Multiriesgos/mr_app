@@ -13,8 +13,7 @@ import 'package:talker_flutter/talker_flutter.dart';
 /// NUNCA pasar PII: documentNumber, birthDate, email.
 final Talker appLogger = Talker(
   settings: TalkerSettings(
-    enabled: true,
-    useConsoleLogs: kDebugMode,
+    
   ),
   observer: _CrashlyticsObserver(),
 );

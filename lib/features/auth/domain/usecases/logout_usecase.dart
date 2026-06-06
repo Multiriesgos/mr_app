@@ -1,4 +1,4 @@
-import '../repositories/auth_repository.dart';
+import 'package:mr_app/features/auth/domain/repositories/auth_repository.dart';
 
 class LogoutUseCase {
   const LogoutUseCase(this._repository);
