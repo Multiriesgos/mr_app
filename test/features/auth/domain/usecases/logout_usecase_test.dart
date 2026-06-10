@@ -47,7 +47,7 @@ void main() {
         ..throwOnLogout = Exception('storage error');
       final sut = LogoutUseCase(repo);
 
-      await expectLater(sut, throwsException);
+      await expectLater(sut(), throwsException);
     });
   });
 }
