@@ -87,6 +87,14 @@ workflows:
             || { echo "ERROR: FIREBASE_OPTIONS_DART vacío o no configurado en Codemagic"; exit 1; }
           test -s ios/Runner/GoogleService-Info.plist \
             || { echo "ERROR: GOOGLE_SERVICE_INFO_PLIST vacío o no configurado en Codemagic"; exit 1; }
+      - name: Set up iOS signing
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files com.multiriesgos.multimate \
+            --type IOS_APP_STORE \
+            --create
+          keychain add-certificates
+          xcode-project use-profiles
       - name: Analyze
         script: flutter analyze --fatal-warnings
       - name: Test
