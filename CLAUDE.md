@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Package Android: `multiriesgos.multimate.app`
 - Package iOS: `com.multiriesgos.multimate`
 - Active platforms: **Android + iOS only**. Windows/macOS/Linux/web are default scaffolds, not deployed.
-- Version: `2.1.0+5` (current)
+- Version: `2.1.0+6` (current)
 
 ## Common Commands
 
