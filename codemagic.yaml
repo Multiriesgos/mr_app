@@ -152,7 +152,7 @@ workflows:
       - build/app/outputs/bundle/release/*.aab
       - build/app/outputs/apk/release/*.apk
       - build/app/outputs/mapping/release/mapping.txt
-    publishing:
-      google_play:
-        credentials: $GPLAY_SERVICE_ACCOUNT
-        track: internal
+    # publishing:           # Desactivado hasta configurar vínculo Google Cloud → Play Console
+    #   google_play:
+    #     credentials: $GPLAY_SERVICE_ACCOUNT
+    #     track: internal
