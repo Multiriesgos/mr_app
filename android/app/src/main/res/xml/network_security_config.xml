@@ -8,7 +8,7 @@
 
   Al renovar (solo si Let's Encrypt cambia su intermedio):
   1. openssl s_client -connect secure.multiriesgos.com:443 -showcerts 2>/dev/null \
-       | awk '/-----BEGIN CERTIFICATE-----/{c++} c==2{print}' \
+       | awk '/BEGIN CERTIFICATE/{c++} c==2{print}' \
        | openssl x509 -pubkey -noout \
        | openssl pkey -pubin -outform der \
        | openssl dgst -sha256 -binary | openssl enc -base64
