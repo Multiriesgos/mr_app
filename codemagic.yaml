@@ -128,6 +128,14 @@ workflows:
             || { echo "ERROR: FIREBASE_OPTIONS_DART vacío o no configurado en Codemagic"; exit 1; }
           test -s android/app/google-services.json \
             || { echo "ERROR: GOOGLE_SERVICES_JSON vacío o no configurado en Codemagic"; exit 1; }
+      - name: Set up Android signing
+        script: |
+          cat > android/key.properties <<EOF
+          storePassword=$CM_KEYSTORE_PASSWORD
+          keyPassword=$CM_KEY_PASSWORD
+          keyAlias=$CM_KEY_ALIAS
+          storeFile=$CM_KEYSTORE_PATH
+          EOF
       - name: Analyze
         script: flutter analyze --fatal-warnings
       - name: Test
