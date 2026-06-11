@@ -50,8 +50,13 @@ linux/flutter/ephemeral/
 .env
 key.properties
 
-# Apple Auth Keys (App Store Connect API) — nunca al repo
+# Apple certificates & keys — nunca al repo
 *.p8
+*.p12
+*.cer
+*.csr
+*.key
+*.mobileprovision
 
 # Build artifacts
 *.apk
