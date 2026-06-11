@@ -89,6 +89,7 @@ workflows:
           PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PROFILES_DIR"
           keychain initialize
+          keychain add-certificates
 
           echo "=== [1] Descargando archivos de firma ==="
           app-store-connect fetch-signing-files com.multiriesgos.multimate \
@@ -117,7 +118,6 @@ workflows:
           done
           [ "$FOUND" -eq 0 ] && { echo "ERROR: No se encontró ningún .mobileprovision — fetch-signing-files falló"; exit 1; }
 
-          keychain add-certificates
           xcode-project use-profiles
 
           echo "=== [4] Certificados en keychain ==="
