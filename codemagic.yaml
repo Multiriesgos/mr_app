@@ -130,7 +130,9 @@ workflows:
         script: flutter test
       - name: Build IPA
         script: |
-          PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          PROFILES_DIR="$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
+          SYSTEM_PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$SYSTEM_PROFILES_DIR"
 
           # 1. Compilar sin firma — Flutter ejecuta sus migraciones de Xcode
           flutter build ios --release \
@@ -188,8 +190,8 @@ workflows:
           echo "=== ExportOptions.plist ==="
           cat /tmp/export_options.plist
 
-          # 5. Copiar perfil con nombre UUID (formato que Xcode espera internamente)
-          cp "$PROFILE_FILE" "$PROFILES_DIR/${PROFILE_UUID}.mobileprovision"
+          # 5. Instalar perfil en ubicación estándar de Xcode (requerido por xcodebuild)
+          cp "$PROFILE_FILE" "$SYSTEM_PROFILES_DIR/${PROFILE_UUID}.mobileprovision"
 
           # 6. Archivar con signing manual explícito
           xcodebuild -workspace ios/Runner.xcworkspace \
