@@ -123,7 +123,7 @@ workflows:
           # y Xcode 26 lo propaga a SPM packages (Firebase, nanopb, etc.) que no soportan perfiles.
           # Release.xcconfig solo aplica al target Runner, nunca a targets SPM.
           {
-            printf '\n# Code signing — inyectado por Codemagic CI\n'
+            printf '\n// Code signing — inyectado por Codemagic CI\n'
             printf 'CODE_SIGN_STYLE = Manual\n'
             printf 'CODE_SIGN_IDENTITY = Apple Distribution\n'
             printf 'PROVISIONING_PROFILE_SPECIFIER = %s\n' "$PROFILE_NAME"
