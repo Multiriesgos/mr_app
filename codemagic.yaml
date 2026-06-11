@@ -87,24 +87,49 @@ workflows:
       - name: Set up iOS signing
         script: |
           keychain initialize
+          echo "=== fetch-signing-files ==="
           app-store-connect fetch-signing-files com.multiriesgos.multimate \
             --type IOS_APP_STORE \
-            --create
+            --create \
+            --verbose
+          echo "=== Perfiles descargados ==="
+          ls ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null \
+            || echo "ADVERTENCIA: No hay perfiles instalados"
           keychain add-certificates
           xcode-project use-profiles \
             --export-options-plist /tmp/export_options.plist
+          echo "=== export_options.plist ==="
+          cat /tmp/export_options.plist 2>/dev/null \
+            || echo "ADVERTENCIA: /tmp/export_options.plist no fue generado"
       - name: Analyze
         script: flutter analyze --fatal-warnings
       - name: Test
         script: flutter test
       - name: Build IPA
         script: |
-          flutter build ipa --release \
-            --no-pub \
-            --dart-define=MR_API_KEY=$MR_API_KEY \
-            --export-options-plist=/tmp/export_options.plist
+          # 1. Compilar sin firma — Flutter corre sus migraciones de Xcode
+          flutter build ios --release \
+            --no-codesign \
+            --dart-define=MR_API_KEY=$MR_API_KEY
+          # 2. Aplicar perfiles DESPUÉS de las migraciones
+          xcode-project use-profiles \
+            --export-options-plist /tmp/export_options.plist
+          # 3. Archivar con CODE_SIGN_STYLE=Manual explícito (override del proyecto)
+          xcodebuild -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            CODE_SIGN_STYLE=Manual \
+            archive
+          # 4. Exportar IPA
+          xcodebuild -exportArchive \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -exportOptionsPlist /tmp/export_options.plist \
+            -exportPath build/ios/ipa
     artifacts:
       - build/ios/ipa/*.ipa
+      - build/ios/archive/Runner.xcarchive/Products/Applications/*.app
       - '*.snap'
     publishing:
       app_store_connect:
