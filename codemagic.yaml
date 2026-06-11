@@ -86,10 +86,7 @@ workflows:
             || { echo "ERROR: GOOGLE_SERVICE_INFO_PLIST vacío o no configurado en Codemagic"; exit 1; }
       - name: Set up iOS signing
         script: |
-          PROFILES_DIR="$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
-          mkdir -p "$PROFILES_DIR"
           keychain initialize
-          keychain add-certificates
 
           echo "=== [1] Descargando archivos de firma ==="
           app-store-connect fetch-signing-files com.multiriesgos.multimate \
@@ -98,30 +95,71 @@ workflows:
             --certificate-key @env:CERT_PRIVATE_KEY \
             --verbose || exit 1
 
-          echo "=== [2] Perfiles en $PROFILES_DIR ==="
-          ls -la "$PROFILES_DIR/" 2>/dev/null || echo "VACÍO — no se descargaron perfiles"
+          keychain add-certificates
 
-          echo "=== [3] Inspeccionando capabilities del perfil ==="
-          FOUND=0
-          for f in "$PROFILES_DIR"/*.mobileprovision; do
-            [ -f "$f" ] || continue
-            FOUND=1
-            PDATA=$(security cms -D -i "$f" 2>/dev/null)
-            PNAME=$(echo "$PDATA" | /usr/libexec/PlistBuddy -c "Print Name" /dev/stdin 2>/dev/null || echo "?")
-            echo "Perfil: $PNAME  ($f)"
-            if echo "$PDATA" | /usr/libexec/PlistBuddy -c "Print Entitlements:aps-environment" /dev/stdin 2>/dev/null | grep -q .; then
-              echo "  aps-environment: ✓  (Push Notifications incluido)"
-            else
-              echo "  aps-environment: ✗  (Push Notifications AUSENTE)"
-              echo "  SOLUCIÓN: Eliminar este perfil en developer.apple.com → Profiles"
-              echo "  y re-ejecutar el build (--create generará uno nuevo con la capability)."
-            fi
-          done
-          [ "$FOUND" -eq 0 ] && { echo "ERROR: No se encontró ningún .mobileprovision — fetch-signing-files falló"; exit 1; }
+          echo "=== [2] Localizando provisioning profile ==="
+          FETCH_DIR="$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
+          PROFILE_FILE=$(find "$FETCH_DIR" -name "*.mobileprovision" 2>/dev/null | head -1)
+          if [ -z "$PROFILE_FILE" ]; then
+            echo "ERROR: No hay .mobileprovision en $FETCH_DIR"
+            exit 1
+          fi
+          security cms -D -i "$PROFILE_FILE" > /tmp/profile.plist
+          PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print Name" /tmp/profile.plist 2>/dev/null)
+          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /tmp/profile.plist 2>/dev/null)
+          TEAM_ID=$(/usr/libexec/PlistBuddy -c "Print TeamIdentifier:0" /tmp/profile.plist 2>/dev/null)
+          echo "Perfil: $PROFILE_NAME  UUID: $PROFILE_UUID  Team: $TEAM_ID"
 
-          xcode-project use-profiles
+          echo "=== [3] Verificando aps-environment ==="
+          if ! /usr/libexec/PlistBuddy -c "Print Entitlements:aps-environment" /tmp/profile.plist 2>/dev/null | grep -q .; then
+            echo "ERROR: aps-environment AUSENTE en perfil '$PROFILE_NAME'"
+            echo "Solución: Eliminar perfil en developer.apple.com → Profiles y relanzar."
+            exit 1
+          fi
+          echo "aps-environment: ✓"
 
-          echo "=== [4] Certificados en keychain ==="
+          echo "=== [4] Inyectando firma en Release.xcconfig (solo Runner target) ==="
+          # NO usamos xcode-project use-profiles porque modifica el proyecto a nivel global
+          # y Xcode 26 lo propaga a SPM packages (Firebase, nanopb, etc.) que no soportan perfiles.
+          # Release.xcconfig solo aplica al target Runner, nunca a targets SPM.
+          {
+            printf '\n# Code signing — inyectado por Codemagic CI\n'
+            printf 'CODE_SIGN_STYLE = Manual\n'
+            printf 'CODE_SIGN_IDENTITY = Apple Distribution\n'
+            printf 'PROVISIONING_PROFILE_SPECIFIER = %s\n' "$PROFILE_NAME"
+            printf 'DEVELOPMENT_TEAM = %s\n' "$TEAM_ID"
+          } >> ios/Flutter/Release.xcconfig
+          echo "Release.xcconfig final:"
+          cat ios/Flutter/Release.xcconfig
+
+          echo "=== [5] Generando ExportOptions.plist ==="
+          cat > /tmp/ExportOptions.plist << PLISTEOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store-connect</string>
+              <key>teamID</key>
+              <string>$TEAM_ID</string>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>com.multiriesgos.multimate</key>
+                  <string>$PROFILE_NAME</string>
+              </dict>
+              <key>uploadBitcode</key>
+              <false/>
+              <key>uploadSymbols</key>
+              <true/>
+          </dict>
+          </plist>
+          PLISTEOF
+          echo "ExportOptions.plist:"
+          cat /tmp/ExportOptions.plist
+
+          echo "=== [6] Certificados en keychain ==="
           security find-identity -v -p codesigning 2>/dev/null | head -5 \
             || echo "Sin certificados de firma"
       - name: Analyze
@@ -130,27 +168,9 @@ workflows:
         script: flutter test
       - name: Build IPA
         script: |
-          PROFILES_DIR="$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
-
-          # 1. Verificar que el perfil existe y tiene aps-environment
-          PROFILE_FILE=$(find "$PROFILES_DIR" -name "*.mobileprovision" | head -1)
-          if [ -z "$PROFILE_FILE" ]; then
-            echo "ERROR: No hay provisioning profiles en $PROFILES_DIR"
-            exit 1
-          fi
-          security cms -D -i "$PROFILE_FILE" > /tmp/profile.plist
-          PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print Name" /tmp/profile.plist 2>/dev/null || echo "?")
-          if ! /usr/libexec/PlistBuddy -c "Print Entitlements:aps-environment" /tmp/profile.plist 2>/dev/null | grep -q .; then
-            echo "ERROR: El perfil '$PROFILE_NAME' no tiene aps-environment."
-            echo "Elimina el perfil en developer.apple.com → Profiles y re-ejecuta el build."
-            exit 1
-          fi
-          echo "aps-environment: ✓  Perfil: $PROFILE_NAME"
-
-          # 2. Build IPA — flutter maneja migraciones de Xcode y firma via xcode-project use-profiles
           flutter build ipa --release \
             --dart-define=MR_API_KEY=$MR_API_KEY \
-            --export-options-plist=$CM_EXPORT_OPTIONS_PLIST
+            --export-options-plist=/tmp/ExportOptions.plist
     artifacts:
       - build/ios/ipa/*.ipa
       - '*.snap'
