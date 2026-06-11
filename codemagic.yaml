@@ -95,6 +95,7 @@ workflows:
           app-store-connect fetch-signing-files com.multiriesgos.multimate \
             --type IOS_APP_STORE \
             --create \
+            --certificate-key @env:CERT_PRIVATE_KEY \
             --verbose || exit 1
 
           echo "=== [2] Perfiles en $PROFILES_DIR ==="
