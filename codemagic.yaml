@@ -86,7 +86,7 @@ workflows:
             || { echo "ERROR: GOOGLE_SERVICE_INFO_PLIST vacío o no configurado en Codemagic"; exit 1; }
       - name: Set up iOS signing
         script: |
-          PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          PROFILES_DIR="$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
           mkdir -p "$PROFILES_DIR"
           keychain initialize
           keychain add-certificates
