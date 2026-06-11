@@ -91,7 +91,8 @@ workflows:
             --type IOS_APP_STORE \
             --create
           keychain add-certificates
-          xcode-project use-profiles
+          xcode-project use-profiles \
+            --export-options-plist /tmp/export_options.plist
       - name: Analyze
         script: flutter analyze --fatal-warnings
       - name: Test
@@ -100,7 +101,8 @@ workflows:
         script: |
           flutter build ipa --release \
             --no-pub \
-            --dart-define=MR_API_KEY=$MR_API_KEY
+            --dart-define=MR_API_KEY=$MR_API_KEY \
+            --export-options-plist=/tmp/export_options.plist
     artifacts:
       - build/ios/ipa/*.ipa
       - '*.snap'
