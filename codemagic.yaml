@@ -86,43 +86,121 @@ workflows:
             || { echo "ERROR: GOOGLE_SERVICE_INFO_PLIST vacío o no configurado en Codemagic"; exit 1; }
       - name: Set up iOS signing
         script: |
+          PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILES_DIR"
           keychain initialize
-          echo "=== fetch-signing-files ==="
+
+          echo "=== [1] Descargando archivos de firma ==="
           app-store-connect fetch-signing-files com.multiriesgos.multimate \
             --type IOS_APP_STORE \
             --create \
             --verbose
-          echo "=== Perfiles descargados ==="
-          ls ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null \
-            || echo "ADVERTENCIA: No hay perfiles instalados"
+
+          echo "=== [2] Perfiles en $PROFILES_DIR ==="
+          ls -la "$PROFILES_DIR/" 2>/dev/null || echo "VACÍO — no se descargaron perfiles"
+
+          echo "=== [3] Inspeccionando capabilities del perfil ==="
+          FOUND=0
+          for f in "$PROFILES_DIR"/*.mobileprovision; do
+            [ -f "$f" ] || continue
+            FOUND=1
+            PDATA=$(security cms -D -i "$f" 2>/dev/null)
+            PNAME=$(echo "$PDATA" | /usr/libexec/PlistBuddy -c "Print Name" /dev/stdin 2>/dev/null || echo "?")
+            echo "Perfil: $PNAME  ($f)"
+            if echo "$PDATA" | /usr/libexec/PlistBuddy -c "Print Entitlements:aps-environment" /dev/stdin 2>/dev/null | grep -q .; then
+              echo "  aps-environment: ✓  (Push Notifications incluido)"
+            else
+              echo "  aps-environment: ✗  (Push Notifications AUSENTE)"
+              echo "  SOLUCIÓN: Eliminar este perfil en developer.apple.com → Profiles"
+              echo "  y re-ejecutar el build (--create generará uno nuevo con la capability)."
+            fi
+          done
+          [ "$FOUND" -eq 0 ] && echo "⚠ No se encontró ningún .mobileprovision — fetch-signing-files falló"
+
           keychain add-certificates
-          xcode-project use-profiles \
-            --export-options-plist /tmp/export_options.plist
-          echo "=== export_options.plist ==="
-          cat /tmp/export_options.plist 2>/dev/null \
-            || echo "ADVERTENCIA: /tmp/export_options.plist no fue generado"
+
+          echo "=== [4] Certificados en keychain ==="
+          security find-identity -v -p codesigning 2>/dev/null | head -5 \
+            || echo "Sin certificados de firma"
       - name: Analyze
         script: flutter analyze --fatal-warnings
       - name: Test
         script: flutter test
       - name: Build IPA
         script: |
-          # 1. Compilar sin firma — Flutter corre sus migraciones de Xcode
+          PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+
+          # 1. Compilar sin firma — Flutter ejecuta sus migraciones de Xcode
           flutter build ios --release \
             --no-codesign \
             --dart-define=MR_API_KEY=$MR_API_KEY
-          # 2. Aplicar perfiles DESPUÉS de las migraciones
-          xcode-project use-profiles \
-            --export-options-plist /tmp/export_options.plist
-          # 3. Archivar con CODE_SIGN_STYLE=Manual explícito (override del proyecto)
+
+          # 2. Buscar el perfil descargado
+          PROFILE_FILE=$(find "$PROFILES_DIR" -name "*.mobileprovision" | head -1)
+          if [ -z "$PROFILE_FILE" ]; then
+            echo "ERROR: No hay provisioning profiles en $PROFILES_DIR"
+            echo "Revisa el paso 'Set up iOS signing' para diagnosticar fetch-signing-files."
+            exit 1
+          fi
+
+          PROFILE_PLIST=$(security cms -D -i "$PROFILE_FILE" 2>/dev/null)
+          PROFILE_NAME=$(echo "$PROFILE_PLIST" | /usr/libexec/PlistBuddy -c "Print Name" /dev/stdin)
+          PROFILE_UUID=$(echo "$PROFILE_PLIST" | /usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin)
+          TEAM_ID=$(echo "$PROFILE_PLIST" | /usr/libexec/PlistBuddy -c "Print TeamIdentifier:0" /dev/stdin 2>/dev/null || echo "A2H3V99998")
+          echo "Perfil: $PROFILE_NAME  UUID: $PROFILE_UUID  Team: $TEAM_ID"
+
+          # 3. Verificar aps-environment antes de archivar
+          if ! echo "$PROFILE_PLIST" | /usr/libexec/PlistBuddy -c "Print Entitlements:aps-environment" /dev/stdin 2>/dev/null | grep -q .; then
+            echo "ERROR: El perfil '$PROFILE_NAME' no tiene aps-environment."
+            echo "Elimina el perfil en developer.apple.com → Profiles y re-ejecuta el build."
+            exit 1
+          fi
+          echo "aps-environment: ✓"
+
+          # 4. Generar ExportOptions.plist con formato dict correcto (no array)
+          cat > /tmp/export_options.plist << PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store</string>
+              <key>teamID</key>
+              <string>$TEAM_ID</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>com.multiriesgos.multimate</key>
+                  <string>$PROFILE_NAME</string>
+              </dict>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>stripSwiftSymbols</key>
+              <true/>
+              <key>uploadSymbols</key>
+              <true/>
+              <key>compileBitcode</key>
+              <false/>
+          </dict>
+          </plist>
+          PLIST
+          echo "=== ExportOptions.plist ==="
+          cat /tmp/export_options.plist
+
+          # 5. Copiar perfil con nombre UUID (formato que Xcode espera internamente)
+          cp "$PROFILE_FILE" "$PROFILES_DIR/${PROFILE_UUID}.mobileprovision"
+
+          # 6. Archivar con signing manual explícito
           xcodebuild -workspace ios/Runner.xcworkspace \
             -scheme Runner \
             -configuration Release \
             -sdk iphoneos \
             -archivePath build/ios/archive/Runner.xcarchive \
             CODE_SIGN_STYLE=Manual \
+            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
             archive
-          # 4. Exportar IPA
+
+          # 7. Exportar IPA
           xcodebuild -exportArchive \
             -archivePath build/ios/archive/Runner.xcarchive \
             -exportOptionsPlist /tmp/export_options.plist \
