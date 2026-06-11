@@ -94,7 +94,7 @@ workflows:
           app-store-connect fetch-signing-files com.multiriesgos.multimate \
             --type IOS_APP_STORE \
             --create \
-            --verbose
+            --verbose || exit 1
 
           echo "=== [2] Perfiles en $PROFILES_DIR ==="
           ls -la "$PROFILES_DIR/" 2>/dev/null || echo "VACÍO — no se descargaron perfiles"
@@ -115,9 +115,10 @@ workflows:
               echo "  y re-ejecutar el build (--create generará uno nuevo con la capability)."
             fi
           done
-          [ "$FOUND" -eq 0 ] && echo "⚠ No se encontró ningún .mobileprovision — fetch-signing-files falló"
+          [ "$FOUND" -eq 0 ] && { echo "ERROR: No se encontró ningún .mobileprovision — fetch-signing-files falló"; exit 1; }
 
           keychain add-certificates
+          xcode-project use-profiles
 
           echo "=== [4] Certificados en keychain ==="
           security find-identity -v -p codesigning 2>/dev/null | head -5 \
