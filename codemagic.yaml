@@ -131,88 +131,28 @@ workflows:
       - name: Build IPA
         script: |
           PROFILES_DIR="$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
-          SYSTEM_PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
-          mkdir -p "$SYSTEM_PROFILES_DIR"
 
-          # 1. Compilar sin firma — Flutter ejecuta sus migraciones de Xcode
-          flutter build ios --release \
-            --no-codesign \
-            --dart-define=MR_API_KEY=$MR_API_KEY
-
-          # 2. Buscar el perfil descargado
+          # 1. Verificar que el perfil existe y tiene aps-environment
           PROFILE_FILE=$(find "$PROFILES_DIR" -name "*.mobileprovision" | head -1)
           if [ -z "$PROFILE_FILE" ]; then
             echo "ERROR: No hay provisioning profiles en $PROFILES_DIR"
-            echo "Revisa el paso 'Set up iOS signing' para diagnosticar fetch-signing-files."
             exit 1
           fi
-
-          PROFILE_PLIST=$(security cms -D -i "$PROFILE_FILE" 2>/dev/null)
-          PROFILE_NAME=$(echo "$PROFILE_PLIST" | /usr/libexec/PlistBuddy -c "Print Name" /dev/stdin)
-          PROFILE_UUID=$(echo "$PROFILE_PLIST" | /usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin)
-          TEAM_ID=$(echo "$PROFILE_PLIST" | /usr/libexec/PlistBuddy -c "Print TeamIdentifier:0" /dev/stdin 2>/dev/null || echo "A2H3V99998")
-          echo "Perfil: $PROFILE_NAME  UUID: $PROFILE_UUID  Team: $TEAM_ID"
-
-          # 3. Verificar aps-environment antes de archivar
-          if ! echo "$PROFILE_PLIST" | /usr/libexec/PlistBuddy -c "Print Entitlements:aps-environment" /dev/stdin 2>/dev/null | grep -q .; then
+          security cms -D -i "$PROFILE_FILE" > /tmp/profile.plist
+          PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print Name" /tmp/profile.plist 2>/dev/null || echo "?")
+          if ! /usr/libexec/PlistBuddy -c "Print Entitlements:aps-environment" /tmp/profile.plist 2>/dev/null | grep -q .; then
             echo "ERROR: El perfil '$PROFILE_NAME' no tiene aps-environment."
             echo "Elimina el perfil en developer.apple.com → Profiles y re-ejecuta el build."
             exit 1
           fi
-          echo "aps-environment: ✓"
+          echo "aps-environment: ✓  Perfil: $PROFILE_NAME"
 
-          # 4. Generar ExportOptions.plist con formato dict correcto (no array)
-          cat > /tmp/export_options.plist << PLIST
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>method</key>
-              <string>app-store</string>
-              <key>teamID</key>
-              <string>$TEAM_ID</string>
-              <key>provisioningProfiles</key>
-              <dict>
-                  <key>com.multiriesgos.multimate</key>
-                  <string>$PROFILE_NAME</string>
-              </dict>
-              <key>signingStyle</key>
-              <string>manual</string>
-              <key>stripSwiftSymbols</key>
-              <true/>
-              <key>uploadSymbols</key>
-              <true/>
-              <key>compileBitcode</key>
-              <false/>
-          </dict>
-          </plist>
-          PLIST
-          echo "=== ExportOptions.plist ==="
-          cat /tmp/export_options.plist
-
-          # 5. Instalar perfil en ubicación estándar de Xcode (requerido por xcodebuild)
-          cp "$PROFILE_FILE" "$SYSTEM_PROFILES_DIR/${PROFILE_UUID}.mobileprovision"
-
-          # 6. Archivar con signing manual explícito
-          xcodebuild -workspace ios/Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Release \
-            -sdk iphoneos \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
-            DEVELOPMENT_TEAM="$TEAM_ID" \
-            archive
-
-          # 7. Exportar IPA
-          xcodebuild -exportArchive \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            -exportOptionsPlist /tmp/export_options.plist \
-            -exportPath build/ios/ipa
+          # 2. Build IPA — flutter maneja migraciones de Xcode y firma via xcode-project use-profiles
+          flutter build ipa --release \
+            --dart-define=MR_API_KEY=$MR_API_KEY \
+            --export-options-plist=$CM_EXPORT_OPTIONS_PLIST
     artifacts:
       - build/ios/ipa/*.ipa
-      - build/ios/archive/Runner.xcarchive/Products/Applications/*.app
       - '*.snap'
     publishing:
       app_store_connect:
