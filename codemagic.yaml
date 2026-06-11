@@ -68,9 +68,6 @@ workflows:
       cocoapods: default
       groups:
         - secure
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.multiriesgos.multimate
     scripts:
       - name: Clean build cache
         script: |
