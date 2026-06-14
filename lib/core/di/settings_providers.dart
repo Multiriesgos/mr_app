@@ -13,7 +13,7 @@ class _ThemeModeNotifier extends AsyncNotifier<ThemeMode> {
     return switch (val) {
       'light' => ThemeMode.light,
       'dark' => ThemeMode.dark,
-      _ => ThemeMode.system,
+      _ => ThemeMode.light,
     };
   }
 
