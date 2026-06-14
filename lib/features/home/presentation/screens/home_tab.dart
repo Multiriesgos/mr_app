@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/core/config/external_links.dart';
+import 'package:mr_app/core/theme/app_colors.dart';
 import 'package:mr_app/features/auth/domain/entities/user.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -10,11 +11,6 @@ class HomeTab extends ConsumerWidget {
   const HomeTab({super.key, this.user});
 
   final User? user;
-
-  Future<void> _call() async {
-    final uri = Uri.parse(ExternalLinks.callCenter);
-    if (await canLaunchUrl(uri)) await launchUrl(uri);
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -46,16 +42,11 @@ class HomeTab extends ConsumerWidget {
             ),
           ],
         ),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(height: 1, color: AppColors.borderLight),
+        ),
         actions: [
-          Semantics(
-            label: 'Llamar al centro de atención',
-            button: true,
-            child: IconButton(
-              icon: Icon(Icons.support_agent_outlined, color: cs.primary),
-              tooltip: 'Llamar al centro de atención',
-              onPressed: _call,
-            ),
-          ),
           Semantics(
             label: 'Cerrar sesión',
             button: true,
@@ -75,9 +66,8 @@ class HomeTab extends ConsumerWidget {
   }
 }
 
-class _CallButton extends StatelessWidget {
-  const _CallButton({required this.cs});
-  final ColorScheme cs;
+class _HomeContent extends StatelessWidget {
+  const _HomeContent();
 
   Future<void> _call() async {
     final uri = Uri.parse(ExternalLinks.callCenter);
@@ -86,76 +76,60 @@ class _CallButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      label: 'Llamar al centro de atención',
-      button: true,
-      child: GestureDetector(
-        onTap: _call,
-        child: Column(
-          children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: cs.primary.withValues(alpha: 0.1),
-              ),
-              child: Icon(
-                Icons.support_agent_outlined,
-                size: 64,
-                color: cs.primary,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Llamar al centro de atención',
-              style: TextStyle(
-                color: cs.primary,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _HomeContent extends StatelessWidget {
-  const _HomeContent();
-
-  @override
-  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return RepaintBoundary(
+    return Center(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 40),
-            _CallButton(cs: cs),
-            const SizedBox(height: 32),
-            Text(
-              'Bienvenido a Multimate',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: cs.primary,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tu app de seguros y beneficios',
-              textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: cs.onSurfaceVariant),
-            ),
-          ],
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: cs.surface,
+            border: Border.all(color: AppColors.borderLight),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: AppColors.shadowSm,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 88,
+                height: 88,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: cs.primary.withValues(alpha: 0.10),
+                ),
+                child: Icon(
+                  Icons.support_agent_outlined,
+                  size: 48,
+                  color: cs.primary,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Centro de atención',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Estamos disponibles para ayudarte',
+                textAlign: TextAlign.center,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: AppColors.textMuted),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: _call,
+                icon: const Icon(Icons.phone_outlined, size: 18),
+                label: const Text('Llamar ahora'),
+              ),
+            ],
+          ),
         ),
       ),
     );

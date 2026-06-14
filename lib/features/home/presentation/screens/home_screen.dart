@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/core/auth/biometrics_service.dart';
 import 'package:mr_app/core/di/settings_providers.dart';
-import 'package:mr_app/core/theme/app_colors.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:mr_app/features/benefits/presentation/screens/benefit_card_screen.dart';
 import 'package:mr_app/features/home/presentation/screens/home_tab.dart';
@@ -76,12 +75,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
-        backgroundColor: Colors.white,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: const Color(0x8A000000),
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
@@ -94,9 +87,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             label: 'Carnet',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.list_alt_outlined),
-            activeIcon: Icon(Icons.list_alt),
-            label: 'Productos',
+            icon: Icon(Icons.description_outlined),
+            activeIcon: Icon(Icons.description),
+            label: 'Pólizas',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),

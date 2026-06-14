@@ -69,7 +69,7 @@ class _Header extends StatelessWidget {
           else
             const SizedBox(width: 32),
           Text(
-            'Productos contratados',
+            'Mis pólizas',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(width: 32),
@@ -111,19 +111,12 @@ class _ProductTile extends StatelessWidget {
           '${dateStr.isNotEmpty ? ", renovación $dateStr" : ""}',
       button: true,
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-        leading: Container(
-          padding: const EdgeInsets.only(right: 2),
-          decoration: const BoxDecoration(
-            border: Border(
-              right: BorderSide(color: Colors.white24),
-            ),
-          ),
-          child: const Icon(
-            Icons.my_library_books_outlined,
-            color: AppColors.accent,
-            size: 40,
-          ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        leading: const Icon(
+          Icons.description_outlined,
+          color: AppColors.accent,
+          size: 24,
         ),
         title: Text(
           product.ramo,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/core/config/external_links.dart';
+import 'package:mr_app/core/theme/app_colors.dart';
 import 'package:mr_app/features/auth/domain/entities/user.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -234,7 +235,7 @@ class _BenefitGrid extends StatelessWidget {
           title: 'Medic',
           subtitle: 'Telemedicina 24/7',
           icon: Icons.medical_services_outlined,
-          color: Colors.teal,
+          color: AppColors.info,
           url: ExternalLinks.medic,
         ),
         SizedBox(height: 8),
@@ -242,7 +243,7 @@ class _BenefitGrid extends StatelessWidget {
           title: 'Club Ahorro',
           subtitle: 'Descuentos y beneficios',
           icon: Icons.savings_outlined,
-          color: Colors.orange,
+          color: AppColors.accent,
           url: ExternalLinks.clubahorro,
         ),
       ],
@@ -278,15 +279,21 @@ class _BenefitTile extends StatelessWidget {
       label: '$title — $subtitle. Abrir en el navegador',
       button: true,
       child: ListTile(
-        tileColor: color.withValues(alpha: 0.08),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        leading: Icon(icon, color: color, size: 36),
+        shape: RoundedRectangleBorder(
+          side: const BorderSide(color: AppColors.borderLight),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        leading: Icon(icon, color: color, size: 28),
         title: Text(
           title,
-          style: TextStyle(fontWeight: FontWeight.bold, color: color),
+          style: TextStyle(fontWeight: FontWeight.w600, color: color),
         ),
         subtitle: Text(subtitle),
-        trailing: Icon(Icons.open_in_new_outlined, color: color),
+        trailing: const Icon(
+          Icons.open_in_new_outlined,
+          color: AppColors.textMuted,
+          size: 18,
+        ),
         onTap: _launch,
       ),
     );

@@ -264,10 +264,10 @@ class _LogoutTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ListTile(
-      leading: const Icon(Icons.logout_outlined, color: Colors.red),
+      leading: const Icon(Icons.logout_outlined, color: AppColors.error),
       title: const Text(
         'Cerrar sesión',
-        style: TextStyle(color: Colors.red),
+        style: TextStyle(color: AppColors.error),
       ),
       onTap: () => _showLogoutDialog(context, ref),
     );
@@ -291,7 +291,7 @@ class _LogoutTile extends ConsumerWidget {
               if (context.mounted) context.go('/login');
             },
             child:
-                const Text('Salir', style: TextStyle(color: Colors.red)),
+                const Text('Salir', style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),

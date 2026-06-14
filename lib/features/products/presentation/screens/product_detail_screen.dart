@@ -97,35 +97,14 @@ class _DetailBody extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Detalle de producto',
+                      'Detalle de póliza',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(width: 36),
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: Text(
-                  'Contacto Cabina',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: cs.primary,
-                      ),
-                ),
-              ),
-              const Center(
-                child: CircleAvatar(
-                  radius: 65,
-                  backgroundColor: Colors.white,
-                  child: CircleAvatar(
-                    backgroundImage: AssetImage('assets/images/7_fit.png'),
-                    radius: 60,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               _InfoRow(label: 'ASEGURADORA', value: product.aseguradora),
               _InfoRow(label: 'RAMO', value: product.ramo),
               _InfoRow(label: 'TIPO SEGURO', value: product.tipoSeguro),
@@ -134,39 +113,48 @@ class _DetailBody extends StatelessWidget {
                 label: 'PÓLIZA',
                 value: product.adjunto ?? 'no disponible',
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               if (contact != null &&
-                  (contact!.hasPhone || contact!.hasWhatsApp))
+                  (contact!.hasPhone || contact!.hasWhatsApp)) ...[
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    'CONTACTO DE CABINA',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: cs.onSurfaceVariant,
+                          letterSpacing: 0.8,
+                        ),
+                  ),
+                ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (contact!.hasPhone)
-                      _ContactButton(
-                        label: 'Cabina',
-                        semanticsLabel: 'Llamar a cabina de ${product.aseguradora}',
-                        color: AppColors.info,
-                        icon: const Icon(
-                          Icons.phone_enabled_outlined,
-                          size: 50,
+                      Expanded(
+                        child: _ContactButton(
+                          label: 'Llamar',
+                          semanticsLabel:
+                              'Llamar a cabina de ${product.aseguradora}',
                           color: AppColors.info,
+                          iconData: Icons.phone_outlined,
+                          onTap: () => _call(context),
                         ),
-                        onTap: () => _call(context),
                       ),
+                    if (contact!.hasPhone && contact!.hasWhatsApp)
+                      const SizedBox(width: 12),
                     if (contact!.hasWhatsApp)
-                      _ContactButton(
-                        label: 'WhatsApp',
-                        semanticsLabel:
-                            'Contactar por WhatsApp a ${product.aseguradora}',
-                        color: AppColors.success,
-                        icon: const Icon(
-                          Icons.chat_bubble_outline,
-                          size: 50,
+                      Expanded(
+                        child: _ContactButton(
+                          label: 'WhatsApp',
+                          semanticsLabel:
+                              'Contactar por WhatsApp a ${product.aseguradora}',
                           color: AppColors.success,
+                          iconData: Icons.chat_bubble_outline,
+                          onTap: () => _whatsApp(context),
                         ),
-                        onTap: () => _whatsApp(context),
                       ),
                   ],
                 ),
+              ],
             ],
           ),
         ),
@@ -221,47 +209,31 @@ class _ContactButton extends StatelessWidget {
     required this.label,
     required this.semanticsLabel,
     required this.color,
-    required this.icon,
+    required this.iconData,
     required this.onTap,
   });
 
   final String label;
   final String semanticsLabel;
   final Color color;
-  final Widget icon;
+  final IconData iconData;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Semantics(
-        label: semanticsLabel,
-        button: true,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Ink(
-              decoration: BoxDecoration(
-                border: Border.all(color: color, width: 2),
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(100),
-                onTap: onTap,
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: icon,
-                ),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-          ],
+    return Semantics(
+      label: semanticsLabel,
+      button: true,
+      child: OutlinedButton.icon(
+        onPressed: onTap,
+        icon: Icon(iconData, size: 20),
+        label: Text(label),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: color,
+          side: BorderSide(color: color),
+          minimumSize: const Size(double.infinity, 48),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
     );
