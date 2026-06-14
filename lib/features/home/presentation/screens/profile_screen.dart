@@ -76,16 +76,34 @@ class _UserHeader extends StatelessWidget {
 
   final User? user;
 
+  static String _initials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty || parts.first.isEmpty) return '?';
+    if (parts.length == 1) return parts.first[0].toUpperCase();
+    return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final name = user?.name ?? '';
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
           CircleAvatar(
             radius: 36,
-            backgroundColor: AppColors.primary.withValues(alpha: 0.12),
-            child: const Icon(Icons.person, size: 40, color: AppColors.primary),
+            backgroundColor: cs.primary.withValues(alpha: 0.12),
+            child: name.isNotEmpty
+                ? Text(
+                    _initials(name),
+                    style: TextStyle(
+                      color: cs.primary,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  )
+                : Icon(Icons.person, size: 40, color: cs.primary),
           ),
           const SizedBox(width: 16),
           if (user != null)
@@ -106,11 +124,11 @@ class _UserHeader extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   if (user!.email != null)
-                  Text(
-                    user!.email!,
-                    style: Theme.of(context).textTheme.bodySmall,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                    Text(
+                      user!.email!,
+                      style: Theme.of(context).textTheme.bodySmall,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                 ],
               ),
             ),

@@ -64,7 +64,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final user = authState is AuthAuthenticated ? authState.user : null;
 
     final tabs = <Widget>[
-      HomeTab(user: user),
+      HomeTab(user: user, onTabChange: (i) => setState(() => _currentIndex = i)),
       const BenefitCardScreen(),
       const ProductsScreen(),
       const ProfileScreen(),

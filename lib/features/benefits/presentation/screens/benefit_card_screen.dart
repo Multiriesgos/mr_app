@@ -275,26 +275,52 @@ class _BenefitTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Semantics(
       label: '$title — $subtitle. Abrir en el navegador',
       button: true,
-      child: ListTile(
-        shape: RoundedRectangleBorder(
-          side: const BorderSide(color: AppColors.borderLight),
-          borderRadius: BorderRadius.circular(10),
+      child: Material(
+        color: color.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: _launch,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: color.withValues(alpha: 0.18)),
+            ),
+            child: ListTile(
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              leading: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: color, size: 24),
+              ),
+              title: Text(
+                title,
+                style: TextStyle(fontWeight: FontWeight.w600, color: color),
+              ),
+              subtitle: Text(
+                subtitle,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: cs.onSurfaceVariant),
+              ),
+              trailing: Icon(
+                Icons.open_in_new_outlined,
+                color: color.withValues(alpha: 0.60),
+                size: 18,
+              ),
+            ),
+          ),
         ),
-        leading: Icon(icon, color: color, size: 28),
-        title: Text(
-          title,
-          style: TextStyle(fontWeight: FontWeight.w600, color: color),
-        ),
-        subtitle: Text(subtitle),
-        trailing: const Icon(
-          Icons.open_in_new_outlined,
-          color: AppColors.textMuted,
-          size: 18,
-        ),
-        onTap: _launch,
       ),
     );
   }

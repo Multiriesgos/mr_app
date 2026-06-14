@@ -47,32 +47,39 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final canPop = context.canPop();
-    return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(20, 10, 20, 0),
+    return Container(
+      height: 56,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        border: Border(bottom: BorderSide(color: cs.outlineVariant)),
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           if (canPop)
             Semantics(
               label: 'Volver',
               button: true,
-              child: InkWell(
-                onTap: onBack,
-                borderRadius: BorderRadius.circular(20),
-                child: const Padding(
-                  padding: EdgeInsets.all(4),
-                  child: Icon(Icons.arrow_back_sharp, size: 24),
-                ),
+              child: IconButton(
+                onPressed: onBack,
+                icon: const Icon(Icons.arrow_back_sharp, size: 24),
+                tooltip: 'Volver',
               ),
             )
           else
-            const SizedBox(width: 32),
-          Text(
-            'Mis pólizas',
-            style: Theme.of(context).textTheme.titleMedium,
+            const SizedBox(width: 48),
+          Expanded(
+            child: Text(
+              'Mis pólizas',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
           ),
-          const SizedBox(width: 32),
+          const SizedBox(width: 48),
         ],
       ),
     );
@@ -87,75 +94,203 @@ class _ProductList extends StatelessWidget {
   Widget build(BuildContext context) {
     return RepaintBoundary(
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         itemCount: products.length,
-        itemBuilder: (context, i) => _ProductTile(product: products[i]),
+        itemBuilder: (context, i) => _PolicyCard(product: products[i]),
       ),
     );
   }
 }
 
-class _ProductTile extends StatelessWidget {
-  const _ProductTile({required this.product});
+class _PolicyCard extends StatelessWidget {
+  const _PolicyCard({required this.product});
   final Product product;
 
   @override
   Widget build(BuildContext context) {
-    final dateStr = product.fechaRenovacion == null
-        ? ''
-        : DateFormat('yyyy-MM-dd').format(product.fechaRenovacion!);
+    final cs = Theme.of(context).colorScheme;
+    final ramoColor = _colorForRamo(product.ramo);
+    final ramoIcon = _iconForRamo(product.ramo);
+    final statusWidget = _buildStatusChip(context, product.fechaRenovacion);
+    final dateStr = product.fechaRenovacion != null
+        ? DateFormat('dd/MM/yyyy').format(product.fechaRenovacion!)
+        : null;
 
     return Semantics(
       label: '${product.ramo}, ${product.tipoSeguro}'
           '${product.placa.isNotEmpty ? ", placa ${product.placa}" : ""}'
-          '${dateStr.isNotEmpty ? ", renovación $dateStr" : ""}',
+          '${dateStr != null ? ", renovación $dateStr" : ""}',
       button: true,
-      child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        leading: const Icon(
-          Icons.description_outlined,
-          color: AppColors.accent,
-          size: 24,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: cs.outlineVariant),
+          boxShadow: AppColors.shadowSm,
         ),
-        title: Text(
-          product.ramo,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Row(
-          children: [
-            Expanded(
-              flex: 4,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 5),
-                child: Text(
-                  product.placa.isNotEmpty
-                      ? '${product.tipoSeguro}\n${product.placa}'
-                      : product.tipoSeguro,
-                  style: const TextStyle(fontSize: 12),
-                ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => context.push(
+              '/home/products/${product.idRen}',
+              extra: product,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: ramoColor.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(ramoIcon, color: ramoColor, size: 22),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                product.ramo,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                            if (statusWidget != null) ...[
+                              const SizedBox(width: 8),
+                              statusWidget,
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          product.tipoSeguro,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: cs.onSurfaceVariant,
+                              ),
+                        ),
+                        if (product.placa.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            product.placa,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: cs.onSurfaceVariant,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                          ),
+                        ],
+                        if (dateStr != null) ...[
+                          const SizedBox(height: 5),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_today_outlined,
+                                size: 11,
+                                color: cs.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Renueva: $dateStr',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: cs.onSurfaceVariant,
+                                      fontSize: 11,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.chevron_right, color: cs.onSurfaceVariant, size: 20),
+                ],
               ),
             ),
-            Expanded(
-              flex: 2,
-              child: Text(
-                dateStr,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontSize: 12,
-                ),
-              ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _colorForRamo(String ramo) {
+    final r = ramo.toLowerCase();
+    if (r.contains('auto') || r.contains('veh')) return AppColors.info;
+    if (r.contains('vida')) return AppColors.success;
+    if (r.contains('salud') || r.contains('medic')) return AppColors.statSuccess;
+    if (r.contains('incendio') || r.contains('hogar')) return AppColors.warning;
+    return AppColors.primary;
+  }
+
+  IconData _iconForRamo(String ramo) {
+    final r = ramo.toLowerCase();
+    if (r.contains('auto') || r.contains('veh')) return Icons.directions_car_outlined;
+    if (r.contains('vida')) return Icons.favorite_border;
+    if (r.contains('salud') || r.contains('medic')) return Icons.medical_services_outlined;
+    if (r.contains('incendio') || r.contains('hogar')) return Icons.home_outlined;
+    return Icons.description_outlined;
+  }
+
+  Widget? _buildStatusChip(BuildContext context, DateTime? date) {
+    if (date == null) return null;
+    final days = date.difference(DateTime.now()).inDays;
+    if (days < 0) {
+      return const _StatusChip(
+        label: 'Vencida',
+        color: AppColors.errorDark,
+        bg: AppColors.errorBg,
+      );
+    }
+    if (days <= 30) {
+      return _StatusChip(
+        label: 'Vence en ${days}d',
+        color: AppColors.warningDark,
+        bg: AppColors.warningBg,
+      );
+    }
+    return const _StatusChip(
+      label: 'Vigente',
+      color: AppColors.successDark,
+      bg: AppColors.successBg,
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({required this.label, required this.color, required this.bg});
+  final String label;
+  final Color color;
+  final Color bg;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w600,
+              fontSize: 11,
             ),
-          ],
-        ),
-        isThreeLine: product.placa.isNotEmpty,
-        trailing: Icon(
-          Icons.arrow_forward_ios_outlined,
-          color: Theme.of(context).colorScheme.primary,
-          size: 22,
-        ),
-        onTap: () =>
-            context.push('/home/products/${product.idRen}', extra: product),
       ),
     );
   }
@@ -166,21 +301,18 @@ class _EmptyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.library_books_outlined,
-            size: 64,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          Icon(Icons.library_books_outlined, size: 56, color: cs.onSurfaceVariant),
           const SizedBox(height: 16),
           Text(
-            'No se encontraron productos.',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+            'No se encontraron pólizas.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
           ),
         ],
       ),
