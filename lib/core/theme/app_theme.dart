@@ -49,7 +49,7 @@ abstract final class AppTheme {
     inputDecorationTheme: InputDecorationTheme(
       filled:      true,
       fillColor:   scheme.brightness == Brightness.light
-          ? AppColors.surfaceAlt
+          ? AppColors.background
           : AppColors.darkSurfaceAlt,
       focusedBorder: OutlineInputBorder(
         borderSide: BorderSide(color: scheme.primary, width: 1.5),
@@ -67,9 +67,10 @@ abstract final class AppTheme {
         borderSide: BorderSide(color: scheme.error, width: 1.5),
         borderRadius: BorderRadius.circular(8),
       ),
-      labelStyle:   TextStyle(color: scheme.onSurface.withValues(alpha: 0.6)),
-      hintStyle:    TextStyle(color: scheme.onSurface.withValues(alpha: 0.4)),
-      prefixIconColor: scheme.onSurface.withValues(alpha: 0.5),
+      labelStyle:         TextStyle(color: scheme.onSurface.withValues(alpha: 0.6)),
+      floatingLabelStyle: TextStyle(color: scheme.primary, fontWeight: FontWeight.w500),
+      hintStyle:          TextStyle(color: scheme.onSurface.withValues(alpha: 0.4)),
+      prefixIconColor:    scheme.onSurface.withValues(alpha: 0.5),
     ),
     checkboxTheme: CheckboxThemeData(
       fillColor: WidgetStateProperty.resolveWith((states) =>
