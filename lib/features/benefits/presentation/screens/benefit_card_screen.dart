@@ -14,33 +14,35 @@ class BenefitCardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider).valueOrNull;
     final user = authState is AuthAuthenticated ? authState.user : null;
-    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: cs.surface,
       body: SafeArea(
         child: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
-          child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(20, 10, 20, 25),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _Header(onBack: () => context.pop()),
-                  const SizedBox(height: 25),
-                  if (MediaQuery.orientationOf(context) == Orientation.portrait)
-                    Text(
-                      'Tu carnet',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  const SizedBox(height: 8),
-                  _CarnetButton(user: user),
-                  const SizedBox(height: 16),
-                  const _BenefitGrid(),
-                ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _Header(onBack: () => context.pop()),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsetsDirectional.fromSTEB(20, 20, 20, 25),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (MediaQuery.orientationOf(context) == Orientation.portrait)
+                        Text(
+                          'Tu carnet',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      const SizedBox(height: 8),
+                      _CarnetButton(user: user),
+                      const SizedBox(height: 16),
+                      const _BenefitGrid(),
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -55,31 +57,39 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final canPop = context.canPop();
-    return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(0, 10, 0, 0),
+    return Container(
+      height: 56,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: const BoxDecoration(
+        color: AppColors.sidebarBg,
+        border: Border(bottom: BorderSide(color: Colors.white12)),
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           if (canPop)
             Semantics(
               label: 'Volver',
               button: true,
-              child: InkWell(
-                onTap: onBack,
-                borderRadius: BorderRadius.circular(20),
-                child: const Padding(
-                  padding: EdgeInsets.all(4),
-                  child: Icon(Icons.arrow_back_rounded, size: 24),
-                ),
+              child: IconButton(
+                onPressed: onBack,
+                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 24),
+                tooltip: 'Volver',
               ),
             )
           else
-            const SizedBox(width: 32),
-          Text(
-            'Mis beneficios',
-            style: Theme.of(context).textTheme.titleMedium,
+            const SizedBox(width: 48),
+          const Expanded(
+            child: Text(
+              'Mis beneficios',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
-          const SizedBox(width: 32),
+          const SizedBox(width: 48),
         ],
       ),
     );

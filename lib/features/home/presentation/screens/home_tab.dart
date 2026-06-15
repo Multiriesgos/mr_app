@@ -15,13 +15,10 @@ class HomeTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
     final name = user?.name ?? '';
 
     return Scaffold(
-      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: cs.surface,
         elevation: 0,
         toolbarHeight: 72,
         title: Column(
@@ -30,7 +27,7 @@ class HomeTab extends ConsumerWidget {
             Text(
               'Bienvenido,',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.onSurfaceVariant,
+                    color: Colors.white70,
                   ),
             ),
             Text(
@@ -38,14 +35,14 @@ class HomeTab extends ConsumerWidget {
               maxLines: 2,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
+                    color: Colors.white,
                   ),
             ),
           ],
         ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Divider(height: 1, color: cs.outlineVariant),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(height: 1, color: Colors.white12),
         ),
         actions: [
           Padding(
@@ -57,11 +54,11 @@ class HomeTab extends ConsumerWidget {
                 onTap: () => onTabChange?.call(3),
                 child: CircleAvatar(
                   radius: 18,
-                  backgroundColor: cs.primary.withValues(alpha: 0.12),
+                  backgroundColor: Colors.white.withValues(alpha: 0.15),
                   child: Text(
                     _initials(name),
-                    style: TextStyle(
-                      color: cs.primary,
+                    style: const TextStyle(
+                      color: Colors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 13,
                     ),
@@ -74,7 +71,7 @@ class HomeTab extends ConsumerWidget {
             label: 'Cerrar sesión',
             button: true,
             child: IconButton(
-              icon: Icon(Icons.logout_outlined, color: cs.primary),
+              icon: const Icon(Icons.logout_outlined, color: Colors.white),
               tooltip: 'Cerrar sesión',
               onPressed: () async {
                 await ref.read(authProvider.notifier).logout();

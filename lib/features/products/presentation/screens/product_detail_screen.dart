@@ -116,9 +116,9 @@ class _DetailBody extends StatelessWidget {
           Container(
             height: 56,
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            decoration: BoxDecoration(
-              color: cs.surface,
-              border: Border(bottom: BorderSide(color: cs.outlineVariant)),
+            decoration: const BoxDecoration(
+              color: AppColors.sidebarBg,
+              border: Border(bottom: BorderSide(color: Colors.white12)),
             ),
             child: Row(
               children: [
@@ -127,17 +127,19 @@ class _DetailBody extends StatelessWidget {
                   button: true,
                   child: IconButton(
                     onPressed: () => context.pop(),
-                    icon: const Icon(Icons.arrow_back_sharp, size: 24),
+                    icon: const Icon(Icons.arrow_back_sharp, color: Colors.white, size: 24),
                     tooltip: 'Volver',
                   ),
                 ),
-                Expanded(
+                const Expanded(
                   child: Text(
                     'Detalle de póliza',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 48),

@@ -47,14 +47,13 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final canPop = context.canPop();
     return Container(
       height: 56,
       padding: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        border: Border(bottom: BorderSide(color: cs.outlineVariant)),
+      decoration: const BoxDecoration(
+        color: AppColors.sidebarBg,
+        border: Border(bottom: BorderSide(color: Colors.white12)),
       ),
       child: Row(
         children: [
@@ -64,19 +63,21 @@ class _Header extends StatelessWidget {
               button: true,
               child: IconButton(
                 onPressed: onBack,
-                icon: const Icon(Icons.arrow_back_sharp, size: 24),
+                icon: const Icon(Icons.arrow_back_sharp, color: Colors.white, size: 24),
                 tooltip: 'Volver',
               ),
             )
           else
             const SizedBox(width: 48),
-          Expanded(
+          const Expanded(
             child: Text(
               'Mis pólizas',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           const SizedBox(width: 48),
