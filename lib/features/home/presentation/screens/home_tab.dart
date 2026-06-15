@@ -153,10 +153,10 @@ class _HomeContent extends StatelessWidget {
                 onTap: () => onTabChange?.call(1),
               ),
               _QuickActionCard(
-                icon: Icons.phone_outlined,
-                label: 'Llamar soporte',
+                icon: Icons.person_outline,
+                label: 'Mi perfil',
                 color: AppColors.success,
-                onTap: _call,
+                onTap: () => onTabChange?.call(3),
               ),
               _QuickActionCard(
                 icon: Icons.calculate_outlined,
