@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -21,21 +22,27 @@ class ProductDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(productDetailProvider(idRen));
 
-    return Scaffold(
-      body: SafeArea(
-        child: state.when(
-          loading: () => const SkeletonProductDetail(),
-          error: (e, _) => Center(
-            child: Text(
-              e is AppException
-                  ? e.message
-                  : 'Error inesperado. Por favor reintente.',
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: AppColors.sidebarBg,
+        statusBarIconBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        body: SafeArea(
+          child: state.when(
+            loading: () => const SkeletonProductDetail(),
+            error: (e, _) => Center(
+              child: Text(
+                e is AppException
+                    ? e.message
+                    : 'Error inesperado. Por favor reintente.',
+              ),
             ),
+            data: (data) {
+              final (detail, contact) = data;
+              return _DetailBody(product: detail, contact: contact);
+            },
           ),
-          data: (data) {
-            final (detail, contact) = data;
-            return _DetailBody(product: detail, contact: contact);
-          },
         ),
       ),
     );

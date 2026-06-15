@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/core/config/external_links.dart';
@@ -15,34 +16,40 @@ class BenefitCardScreen extends ConsumerWidget {
     final authState = ref.watch(authProvider).valueOrNull;
     final user = authState is AuthAuthenticated ? authState.user : null;
 
-    return Scaffold(
-      body: SafeArea(
-        child: GestureDetector(
-          onTap: () => FocusScope.of(context).unfocus(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _Header(onBack: () => context.pop()),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsetsDirectional.fromSTEB(20, 20, 20, 25),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (MediaQuery.orientationOf(context) == Orientation.portrait)
-                        Text(
-                          'Tu carnet',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      const SizedBox(height: 8),
-                      _CarnetButton(user: user),
-                      const SizedBox(height: 16),
-                      const _BenefitGrid(),
-                    ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: AppColors.sidebarBg,
+        statusBarIconBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        body: SafeArea(
+          child: GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _Header(onBack: () => context.pop()),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsetsDirectional.fromSTEB(20, 20, 20, 25),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (MediaQuery.orientationOf(context) == Orientation.portrait)
+                          Text(
+                            'Tu carnet',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        const SizedBox(height: 8),
+                        _CarnetButton(user: user),
+                        const SizedBox(height: 16),
+                        const _BenefitGrid(),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

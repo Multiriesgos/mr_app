@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -15,26 +16,32 @@ class ProductsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(productsProvider);
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            _Header(onBack: () => context.pop()),
-            Expanded(
-              child: state.when(
-                loading: () => const SkeletonProductList(),
-                error: (e, _) => _ErrorView(
-                  message: e is AppException
-                      ? e.message
-                      : 'Error inesperado. Por favor reintente.',
-                  onRetry: () => ref.read(productsProvider.notifier).reload(),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: AppColors.sidebarBg,
+        statusBarIconBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        body: SafeArea(
+          child: Column(
+            children: [
+              _Header(onBack: () => context.pop()),
+              Expanded(
+                child: state.when(
+                  loading: () => const SkeletonProductList(),
+                  error: (e, _) => _ErrorView(
+                    message: e is AppException
+                        ? e.message
+                        : 'Error inesperado. Por favor reintente.',
+                    onRetry: () => ref.read(productsProvider.notifier).reload(),
+                  ),
+                  data: (products) => products.isEmpty
+                      ? const _EmptyView()
+                      : _ProductList(products: products),
                 ),
-                data: (products) => products.isEmpty
-                    ? const _EmptyView()
-                    : _ProductList(products: products),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
