@@ -320,20 +320,7 @@ class _DetailBody extends StatelessWidget {
                     const SizedBox(height: 16),
                     const _SectionLabel('Financiero'),
                     const SizedBox(height: 8),
-                    _InfoCard(rows: [
-                      if (product.suma != null)
-                        _InfoRow('Suma asegurada', _fmtCurrency(product.suma!)),
-                      if (product.primaNeta != null)
-                        _InfoRow('Prima neta', _fmtCurrency(product.primaNeta!)),
-                      if (product.primaTotal != null)
-                        _InfoRow('Prima total', _fmtCurrency(product.primaTotal!)),
-                      if (product.formaPago != null &&
-                          product.formaPago!.isNotEmpty)
-                        _InfoRow('Forma de pago', product.formaPago!),
-                      if (product.periodoPago != null &&
-                          product.periodoPago!.isNotEmpty)
-                        _InfoRow('Período de pago', product.periodoPago!),
-                    ],),
+                    _FinancialCard(product: product),
                   ],
 
                   // ── Asesor ───────────────────────────────────────────
@@ -389,9 +376,7 @@ class _DetailBody extends StatelessWidget {
     );
   }
 
-  String _fmtCurrency(double v) =>
-      NumberFormat.currency(locale: 'en_US', symbol: r'$ ', decimalDigits: 2)
-          .format(v);
+
 
   IconData _iconForRamo(String ramo) {
     final r = ramo.toLowerCase();
@@ -479,6 +464,96 @@ class _InfoCard extends StatelessWidget {
             if (i < rows.length - 1)
               Divider(height: 1, indent: 16, endIndent: 16, color: cs.outlineVariant),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _FinancialCard extends StatelessWidget {
+  const _FinancialCard({required this.product});
+  final Product product;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final rows = <Widget>[];
+
+    void addCurrency(String label, double? amount) {
+      if (amount == null) return;
+      if (rows.isNotEmpty) {
+        rows.add(Divider(height: 1, indent: 16, endIndent: 16, color: cs.outlineVariant));
+      }
+      rows.add(_AnimatedCurrencyRow(label, amount));
+    }
+
+    void addText(String label, String? value) {
+      if (value == null || value.isEmpty) return;
+      if (rows.isNotEmpty) {
+        rows.add(Divider(height: 1, indent: 16, endIndent: 16, color: cs.outlineVariant));
+      }
+      rows.add(_InfoRow(label, value));
+    }
+
+    addCurrency('Suma asegurada', product.suma);
+    addCurrency('Prima neta', product.primaNeta);
+    addCurrency('Prima total', product.primaTotal);
+    addText('Forma de pago', product.formaPago);
+    addText('Período de pago', product.periodoPago);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      child: Column(children: rows),
+    );
+  }
+}
+
+class _AnimatedCurrencyRow extends StatelessWidget {
+  const _AnimatedCurrencyRow(this.label, this.amount);
+  final String label;
+  final double amount;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 140,
+            child: Text(
+              label,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: cs.onSurfaceVariant),
+            ),
+          ),
+          Expanded(
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: amount),
+              duration: const Duration(milliseconds: 900),
+              curve: Curves.easeOut,
+              builder: (_, value, __) => Text(
+                NumberFormat.currency(
+                  locale: 'en_US',
+                  symbol: r'$ ',
+                  decimalDigits: 2,
+                ).format(value),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(fontWeight: FontWeight.w500),
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ),
         ],
       ),
     );
