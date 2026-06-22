@@ -311,17 +311,24 @@ class _QrSection extends StatelessWidget {
                     ),
               ),
               const SizedBox(height: 14),
-              QrImageView(
-                data: qrData,
-                size: _kQrSize,
-                backgroundColor: Colors.white,
-                eyeStyle: const QrEyeStyle(
-                  eyeShape: QrEyeShape.square,
-                  color: AppColors.sidebarBg,
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                dataModuleStyle: const QrDataModuleStyle(
-                  dataModuleShape: QrDataModuleShape.square,
-                  color: AppColors.sidebarBg,
+                padding: const EdgeInsets.all(6),
+                child: QrImageView(
+                  data: qrData,
+                  size: _kQrSize,
+                  backgroundColor: Colors.white,
+                  eyeStyle: const QrEyeStyle(
+                    eyeShape: QrEyeShape.square,
+                    color: AppColors.sidebarBg,
+                  ),
+                  dataModuleStyle: const QrDataModuleStyle(
+                    dataModuleShape: QrDataModuleShape.square,
+                    color: AppColors.sidebarBg,
+                  ),
                 ),
               ),
               const SizedBox(height: 10),

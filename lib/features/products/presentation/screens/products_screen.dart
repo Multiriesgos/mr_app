@@ -269,6 +269,17 @@ class _PolicyCard extends StatelessWidget {
                             ],
                           ),
                         ],
+                        if (product.fechaRenovacion != null &&
+                            product.fechaRenovacion!
+                                    .difference(DateTime.now())
+                                    .inDays <=
+                                30) ...[
+                          const SizedBox(height: 6),
+                          _RenovarChip(
+                            expired: product.fechaRenovacion!
+                                .isBefore(DateTime.now()),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -347,6 +358,52 @@ class _StatusChip extends StatelessWidget {
               fontWeight: FontWeight.w600,
               fontSize: 11,
             ),
+      ),
+    );
+  }
+}
+
+class _RenovarChip extends StatelessWidget {
+  const _RenovarChip({required this.expired});
+  final bool expired;
+
+  Future<void> _launch() async {
+    final uri = Uri.parse(ExternalLinks.cotizador);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = expired ? AppColors.errorDark : AppColors.warningDark;
+    final bg = expired ? AppColors.errorBg : AppColors.warningBg;
+    return Semantics(
+      label: 'Cotizar renovación',
+      button: true,
+      child: GestureDetector(
+        onTap: _launch,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.autorenew_rounded, size: 11, color: color),
+              const SizedBox(width: 3),
+              Text(
+                'Renovar',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
