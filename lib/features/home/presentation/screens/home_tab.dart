@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
+import 'package:mr_app/core/widgets/shimmer_box.dart';
 import 'package:mr_app/features/auth/domain/entities/user.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:mr_app/features/products/domain/entities/product.dart';
@@ -134,7 +135,10 @@ class _HomeContent extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (renewingSoon.isNotEmpty) ...[
+          if (productsAsync.isLoading) ...[
+            _RenewalAlertsSkeleton(),
+            const SizedBox(height: 28),
+          ] else if (renewingSoon.isNotEmpty) ...[
             _RenewalAlertsSection(
               products: renewingSoon,
               onProductTap: (p) => context.go('/home/products/${p.idRen}'),
@@ -204,6 +208,51 @@ class _HomeContent extends ConsumerWidget {
     }).toList()
       ..sort((a, b) => a.fechaRenovacion!.compareTo(b.fechaRenovacion!));
     return filtered;
+  }
+}
+
+// ─── Skeleton renovaciones ────────────────────────────────────────────────────
+
+class _RenewalAlertsSkeleton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const ShimmerBox(width: 180, height: 12),
+        const SizedBox(height: 12),
+        for (int i = 0; i < 2; i++) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+            ),
+            child: const Row(
+              children: [
+                ShimmerBox(width: 40, height: 40, borderRadius: 10),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ShimmerBox(width: double.infinity, height: 13),
+                      SizedBox(height: 6),
+                      ShimmerBox(width: 100, height: 11),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 8),
+                ShimmerBox(width: 60, height: 22, borderRadius: 20),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+      ],
+    );
   }
 }
 
