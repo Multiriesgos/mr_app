@@ -7,10 +7,24 @@ import 'package:mr_app/core/theme/app_colors.dart';
 import 'package:mr_app/features/auth/domain/entities/user.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class BenefitCardScreen extends ConsumerWidget {
   const BenefitCardScreen({super.key});
+
+  static void _shareCarnet(User user) {
+    final url = ExternalLinks.carnetDigital(user.docSearch);
+    SharePlus.instance.share(
+      ShareParams(
+        text: 'Carnet Digital — Multiriesgos\n'
+            'Nombre: ${user.name}\n'
+            'DUI: ${user.documentNumber}\n'
+            '$url',
+        subject: 'Carnet Digital Multiriesgos',
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -29,7 +43,10 @@ class BenefitCardScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _Header(onBack: () => context.pop()),
+                _Header(
+                  onBack: () => context.pop(),
+                  onShare: user == null ? null : () => _shareCarnet(user),
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsetsDirectional.fromSTEB(20, 20, 20, 25),
@@ -61,8 +78,9 @@ class BenefitCardScreen extends ConsumerWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.onBack});
+  const _Header({required this.onBack, this.onShare});
   final VoidCallback onBack;
+  final VoidCallback? onShare;
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +117,18 @@ class _Header extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 48),
+          if (onShare != null)
+            Semantics(
+              label: 'Compartir carnet',
+              button: true,
+              child: IconButton(
+                onPressed: onShare,
+                icon: const Icon(Icons.share_outlined, color: Colors.white, size: 22),
+                tooltip: 'Compartir carnet',
+              ),
+            )
+          else
+            const SizedBox(width: 48),
         ],
       ),
     );
