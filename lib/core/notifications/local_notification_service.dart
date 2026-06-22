@@ -1,5 +1,4 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:mr_app/core/logging/app_logger.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
@@ -16,12 +15,6 @@ class LocalNotificationService {
     if (_initialized) return;
 
     tz_data.initializeTimeZones();
-    try {
-      final tzName = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(tzName));
-    } on Exception {
-      tz.setLocalLocation(tz.UTC);
-    }
 
     const androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -73,7 +66,7 @@ class LocalNotificationService {
       id,
       title,
       body,
-      tz.TZDateTime.from(scheduledDate, tz.local),
+      tz.TZDateTime.from(scheduledDate, tz.UTC),
       details,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
@@ -81,6 +74,24 @@ class LocalNotificationService {
     );
 
     appLogger.info('local_notifications: programado id=$id para $scheduledDate');
+  }
+
+  Future<void> showNow({
+    required int id,
+    required String title,
+    required String body,
+  }) async {
+    const details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        _kChannelId,
+        _kChannelName,
+        channelDescription: _kChannelDesc,
+        importance: Importance.max,
+        priority: Priority.high,
+      ),
+      iOS: DarwinNotificationDetails(),
+    );
+    await _plugin.show(id, title, body, details);
   }
 
   Future<void> cancel(int id) => _plugin.cancel(id);
