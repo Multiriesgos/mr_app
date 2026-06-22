@@ -13,6 +13,9 @@ import 'package:mr_app/features/home/presentation/screens/home_tab.dart';
 import 'package:mr_app/features/home/presentation/screens/profile_screen.dart';
 import 'package:mr_app/features/notifications/di/notification_providers.dart';
 import 'package:mr_app/features/notifications/domain/models/notification_payload.dart';
+import 'package:mr_app/features/products/domain/entities/product.dart';
+import 'package:mr_app/features/products/domain/usecases/schedule_renewal_reminders.dart';
+import 'package:mr_app/features/products/presentation/providers/products_notifier.dart';
 import 'package:mr_app/features/products/presentation/screens/products_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -119,6 +122,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider).valueOrNull;
     final user = authState is AuthAuthenticated ? authState.user : null;
+
+    ref.listen<AsyncValue<List<Product>>>(productsProvider, (_, next) {
+      next.whenData((products) {
+        final svc = ref.read(localNotificationServiceProvider);
+        scheduleRenewalReminders(products, svc);
+      });
+    });
 
     final tabs = <Widget>[
       HomeTab(user: user, onTabChange: (i) => setState(() => _currentIndex = i)),
