@@ -61,9 +61,9 @@ class BenefitCardScreen extends ConsumerWidget {
                         const SizedBox(height: 8),
                         _CarnetButton(user: user),
                         const SizedBox(height: 16),
-                        _QrSection(user: user),
-                        const SizedBox(height: 16),
                         const _BenefitGrid(),
+                        const SizedBox(height: 16),
+                        _QrSection(user: user),
                       ],
                     ),
                   ),
@@ -279,7 +279,7 @@ class _QrSection extends StatelessWidget {
   const _QrSection({required this.user});
   final User? user;
 
-  static const _kQrSize = 180.0;
+  static const _kQrSize = 148.0;
 
   @override
   Widget build(BuildContext context) {
@@ -301,7 +301,7 @@ class _QrSection extends StatelessWidget {
             border: Border.all(color: AppColors.borderLight),
             boxShadow: AppColors.shadowSm,
           ),
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
           child: Column(
             children: [
               Text(
