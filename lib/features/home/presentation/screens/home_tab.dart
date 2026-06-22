@@ -5,6 +5,8 @@ import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
 import 'package:mr_app/features/auth/domain/entities/user.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:mr_app/features/products/domain/entities/product.dart';
+import 'package:mr_app/features/products/presentation/providers/products_notifier.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeTab extends ConsumerWidget {
@@ -95,7 +97,9 @@ class HomeTab extends ConsumerWidget {
   }
 }
 
-class _HomeContent extends StatelessWidget {
+// ─── Contenido principal ──────────────────────────────────────────────────────
+
+class _HomeContent extends ConsumerWidget {
   const _HomeContent({this.onTabChange});
 
   final ValueChanged<int>? onTabChange;
@@ -113,14 +117,24 @@ class _HomeContent extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final productsAsync = ref.watch(productsProvider);
+
+    final renewingSoon = _renewingSoon(productsAsync.valueOrNull);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (renewingSoon.isNotEmpty) ...[
+            _RenewalAlertsSection(
+              products: renewingSoon,
+              onProductTap: (p) => context.go('/home/products/${p.idRen}'),
+            ),
+            const SizedBox(height: 28),
+          ],
           Text(
             'ACCESO RÁPIDO',
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
@@ -169,7 +183,194 @@ class _HomeContent extends StatelessWidget {
       ),
     );
   }
+
+  static List<Product> _renewingSoon(List<Product>? products) {
+    if (products == null) return [];
+    final now = DateTime.now();
+    final filtered = products.where((p) {
+      if (p.fechaRenovacion == null) return false;
+      final diff = p.fechaRenovacion!.difference(now).inDays;
+      return diff >= -7 && diff <= 30;
+    }).toList()
+      ..sort((a, b) => a.fechaRenovacion!.compareTo(b.fechaRenovacion!));
+    return filtered;
+  }
 }
+
+// ─── Alertas de renovación ────────────────────────────────────────────────────
+
+class _RenewalAlertsSection extends StatelessWidget {
+  const _RenewalAlertsSection({
+    required this.products,
+    required this.onProductTap,
+  });
+
+  final List<Product> products;
+  final ValueChanged<Product> onProductTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(
+              Icons.notifications_active_outlined,
+              size: 15,
+              color: AppColors.warning,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              'PRÓXIMAS RENOVACIONES',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: cs.onSurfaceVariant,
+                    letterSpacing: 1,
+                  ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ...products.map(
+          (p) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: _RenewalAlertCard(
+              product: p,
+              onTap: () => onProductTap(p),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RenewalAlertCard extends StatelessWidget {
+  const _RenewalAlertCard({required this.product, required this.onTap});
+
+  final Product product;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final diff = product.fechaRenovacion!.difference(now).inDays;
+    final urgency = _Urgency.of(diff);
+    final color = urgency.color;
+
+    return Semantics(
+      label: '${product.tipoSeguro}, ${urgency.label(diff)}',
+      button: true,
+      child: Material(
+        color: color.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: color.withValues(alpha: 0.25)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.event_outlined, color: color, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        product.tipoSeguro,
+                        style:
+                            Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        product.aseguradora,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textMuted,
+                            ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    urgency.label(diff),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: color,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Icon(Icons.chevron_right, color: AppColors.textMuted, size: 18),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Urgencia ─────────────────────────────────────────────────────────────────
+
+enum _Urgency {
+  expired,
+  critical,
+  warning,
+  upcoming;
+
+  static _Urgency of(int days) {
+    if (days < 0) return _Urgency.expired;
+    if (days <= 7) return _Urgency.critical;
+    if (days <= 15) return _Urgency.warning;
+    return _Urgency.upcoming;
+  }
+
+  Color get color => switch (this) {
+        _Urgency.expired => AppColors.error,
+        _Urgency.critical => AppColors.error,
+        _Urgency.warning => AppColors.warning,
+        _Urgency.upcoming => AppColors.info,
+      };
+
+  String label(int days) => switch (this) {
+        _Urgency.expired =>
+          'Vencida hace ${(-days) == 1 ? "1 día" : "${-days} días"}',
+        _Urgency.critical =>
+          days == 0 ? 'Vence hoy' : 'Vence en ${days == 1 ? "1 día" : "$days días"}',
+        _Urgency.warning => 'Vence en $days días',
+        _Urgency.upcoming => 'Vence en $days días',
+      };
+}
+
+// ─── Quick action card ────────────────────────────────────────────────────────
 
 class _QuickActionCard extends StatelessWidget {
   const _QuickActionCard({
@@ -229,6 +430,8 @@ class _QuickActionCard extends StatelessWidget {
     );
   }
 }
+
+// ─── Support card ─────────────────────────────────────────────────────────────
 
 class _SupportCard extends StatelessWidget {
   const _SupportCard({required this.onCall});
