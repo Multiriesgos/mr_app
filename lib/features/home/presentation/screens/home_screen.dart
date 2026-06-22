@@ -1,12 +1,18 @@
+import 'dart:async';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/core/auth/biometrics_service.dart';
 import 'package:mr_app/core/di/settings_providers.dart';
+import 'package:mr_app/core/theme/app_colors.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:mr_app/features/benefits/presentation/screens/benefit_card_screen.dart';
 import 'package:mr_app/features/home/presentation/screens/home_tab.dart';
 import 'package:mr_app/features/home/presentation/screens/profile_screen.dart';
+import 'package:mr_app/features/notifications/di/notification_providers.dart';
+import 'package:mr_app/features/notifications/domain/models/notification_payload.dart';
 import 'package:mr_app/features/products/presentation/screens/products_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -19,20 +25,71 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen>
     with WidgetsBindingObserver {
   int _currentIndex = 0;
-
-  /// Verdadero cuando el app volvió del background y aún no se verificó.
   bool _needsBiometricCheck = false;
+  StreamSubscription<NotificationPayload>? _notifSubscription;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _initNotifications();
   }
 
   @override
   void dispose() {
+    _notifSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  Future<void> _initNotifications() async {
+    final service = ref.read(notificationServiceProvider);
+    await service.initialize();
+    await service.requestPermission();
+
+    if (!mounted) return;
+
+    // App abierta desde tap en notificación (app terminada)
+    final initial = await FirebaseMessaging.instance.getInitialMessage();
+    if (initial != null && mounted) setState(() => _currentIndex = 0);
+
+    // Tap en notificación con app en background
+    FirebaseMessaging.onMessageOpenedApp.listen((_) {
+      if (mounted) setState(() => _currentIndex = 0);
+    });
+
+    // Mensajes mientras la app está en primer plano
+    _notifSubscription = service.onForegroundMessage.listen(_showNotifBanner);
+  }
+
+  void _showNotifBanner(NotificationPayload payload) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              payload.title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+            Text(
+              payload.body,
+              style: const TextStyle(color: Colors.white70),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.sidebarBg,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        duration: const Duration(seconds: 5),
+      ),
+    );
   }
 
   @override

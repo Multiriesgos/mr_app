@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart' show PlatformDispatcher, kDebugMode, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,6 +16,7 @@ import 'package:mr_app/core/logging/app_logger.dart';
 import 'package:mr_app/core/network/mr_http_client.dart';
 import 'package:mr_app/core/router/app_router.dart';
 import 'package:mr_app/core/theme/app_theme.dart';
+import 'package:mr_app/features/notifications/data/firebase_notification_service.dart';
 import 'package:mr_app/firebase_options.dart';
 
 import 'package:mr_app/l10n/app_localizations.dart';
@@ -34,6 +36,7 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
     // Capturar errores de Flutter → Crashlytics.
+    FirebaseMessaging.onBackgroundMessage(firebaseBackgroundHandler);
     FlutterError.onError =
         FirebaseCrashlytics.instance.recordFlutterFatalError;
     // Capturar errores asincrónicos → Crashlytics.

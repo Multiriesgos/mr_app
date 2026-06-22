@@ -7,16 +7,19 @@ import 'package:mr_app/features/notifications/domain/notification_service.dart';
 
 /// Handler de mensajes en background — debe ser función top-level.
 @pragma('vm:entry-point')
-Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
+Future<void> firebaseBackgroundHandler(RemoteMessage message) async {
   appLogger.info('notifications: mensaje background — ${message.messageId}');
 }
 
 class FirebaseNotificationService implements NotificationService {
   final _controller = StreamController<NotificationPayload>.broadcast();
+  bool _initialized = false;
 
   @override
   Future<void> initialize() async {
-    FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
+    if (_initialized) return;
+    _initialized = true;
+    FirebaseMessaging.onBackgroundMessage(firebaseBackgroundHandler);
 
     FirebaseMessaging.onMessage.listen((message) {
       appLogger.info('notifications: mensaje foreground — ${message.messageId}');
