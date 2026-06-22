@@ -1,4 +1,7 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/core/auth/biometrics_service.dart';
@@ -38,6 +41,7 @@ class ProfileScreen extends ConsumerWidget {
           const Divider(indent: 16, endIndent: 16),
           const _SectionTitle('Información'),
           _AppVersionTile(),
+          if (kDebugMode) _FcmTokenTile(),
           _PrivacyPolicyTile(),
           const Divider(indent: 16, endIndent: 16),
           _LogoutTile(),
@@ -255,6 +259,61 @@ class _AppVersionTile extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+// ─── Token FCM (solo debug) ───────────────────────────────────────────────────
+
+class _FcmTokenTile extends StatefulWidget {
+  @override
+  State<_FcmTokenTile> createState() => _FcmTokenTileState();
+}
+
+class _FcmTokenTileState extends State<_FcmTokenTile> {
+  String? _token;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    FirebaseMessaging.instance.getToken().then((t) {
+      if (mounted) setState(() { _token = t; _loading = false; });
+    });
+  }
+
+  Future<void> _copy() async {
+    if (_token == null) return;
+    await Clipboard.setData(ClipboardData(text: _token!));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Token FCM copiado al portapapeles'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final display = _loading
+        ? 'Cargando…'
+        : _token == null
+            ? 'No disponible'
+            : '${_token!.substring(0, 12)}…${_token!.substring(_token!.length - 8)}';
+
+    return ListTile(
+      leading: const Icon(Icons.key_outlined, color: AppColors.warning),
+      title: const Text('[DEBUG] Token FCM'),
+      subtitle: Text(display, style: Theme.of(context).textTheme.bodySmall),
+      trailing: _token != null
+          ? IconButton(
+              icon: const Icon(Icons.copy_outlined, size: 18),
+              tooltip: 'Copiar token completo',
+              onPressed: _copy,
+            )
+          : null,
+      onTap: _copy,
     );
   }
 }
