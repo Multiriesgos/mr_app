@@ -130,6 +130,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       });
     });
 
+    final products = ref.watch(productsProvider).valueOrNull ?? [];
+    final urgentCount = products.where((p) {
+      if (p.fechaRenovacion == null) return false;
+      return p.fechaRenovacion!.difference(DateTime.now()).inDays <= 30;
+    }).length;
+
     final tabs = <Widget>[
       HomeTab(user: user, onTabChange: (i) => setState(() => _currentIndex = i)),
       const BenefitCardScreen(),
@@ -152,23 +158,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
-        items: const [
-          BottomNavigationBarItem(
+        items: [
+          const BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home),
             label: 'Inicio',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.credit_card_outlined),
             activeIcon: Icon(Icons.credit_card),
             label: 'Carnet',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.description_outlined),
-            activeIcon: Icon(Icons.description),
+            icon: Badge(
+              isLabelVisible: urgentCount > 0 && _currentIndex != 2,
+              label: urgentCount > 9 ? const Text('9+') : Text('$urgentCount'),
+              child: const Icon(Icons.description_outlined),
+            ),
+            activeIcon: const Icon(Icons.description),
             label: 'Pólizas',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             activeIcon: Icon(Icons.person),
             label: 'Perfil',
