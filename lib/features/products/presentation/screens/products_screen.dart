@@ -27,7 +27,10 @@ class ProductsScreen extends ConsumerWidget {
         body: SafeArea(
           child: Column(
             children: [
-              _Header(onBack: () => context.pop()),
+              _Header(
+                onBack: () => context.pop(),
+                count: state.valueOrNull?.length,
+              ),
               _LastUpdatedBar(
                 lastUpdated: ref
                     .watch(productsProvider.notifier)
@@ -62,12 +65,16 @@ class ProductsScreen extends ConsumerWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.onBack});
+  const _Header({required this.onBack, this.count});
   final VoidCallback onBack;
+  final int? count;
 
   @override
   Widget build(BuildContext context) {
     final canPop = context.canPop();
+    final title = count != null && count! > 0
+        ? 'Mis pólizas ($count)'
+        : 'Mis pólizas';
     return Container(
       height: 56,
       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -89,11 +96,11 @@ class _Header extends StatelessWidget {
             )
           else
             const SizedBox(width: 48),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Mis pólizas',
+              title,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
