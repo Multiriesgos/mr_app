@@ -24,6 +24,18 @@ class ProductsScreen extends ConsumerWidget {
         statusBarIconBrightness: Brightness.light,
       ),
       child: Scaffold(
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () async {
+            final uri = Uri.parse(ExternalLinks.cotizador);
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            }
+          },
+          icon: const Icon(Icons.add_circle_outline_rounded),
+          label: const Text('Cotizar'),
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+        ),
         body: SafeArea(
           child: Column(
             children: [
@@ -114,17 +126,31 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _LastUpdatedBar extends StatelessWidget {
+class _LastUpdatedBar extends StatefulWidget {
   const _LastUpdatedBar({required this.lastUpdated});
   final DateTime? lastUpdated;
 
+  @override
+  State<_LastUpdatedBar> createState() => _LastUpdatedBarState();
+}
+
+class _LastUpdatedBarState extends State<_LastUpdatedBar> {
+  late final _timer = Stream<void>.periodic(const Duration(seconds: 30))
+      .listen((_) { if (mounted) setState(() {}); });
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
   String _label() {
-    if (lastUpdated == null) return '';
-    final diff = DateTime.now().difference(lastUpdated!);
+    if (widget.lastUpdated == null) return '';
+    final diff = DateTime.now().difference(widget.lastUpdated!);
     if (diff.inSeconds < 60) return 'Actualizado hace un momento';
     if (diff.inMinutes < 60) {
       final m = diff.inMinutes;
-      return 'Actualizado hace $m ${m == 1 ? "min" : "min"}';
+      return 'Actualizado hace $m min';
     }
     final h = diff.inHours;
     return 'Actualizado hace $h ${h == 1 ? "hora" : "horas"}';
@@ -132,7 +158,7 @@ class _LastUpdatedBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (lastUpdated == null) return const SizedBox.shrink();
+    if (widget.lastUpdated == null) return const SizedBox.shrink();
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
@@ -176,8 +202,55 @@ class _ProductList extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12),
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: sorted.length,
-        itemBuilder: (context, i) => _PolicyCard(product: sorted[i]),
+        itemBuilder: (context, i) =>
+            _AnimatedPolicyCard(product: sorted[i], index: i),
       ),
+    );
+  }
+}
+
+class _AnimatedPolicyCard extends StatefulWidget {
+  const _AnimatedPolicyCard({required this.product, required this.index});
+  final Product product;
+  final int index;
+
+  @override
+  State<_AnimatedPolicyCard> createState() => _AnimatedPolicyCardState();
+}
+
+class _AnimatedPolicyCardState extends State<_AnimatedPolicyCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 350),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(milliseconds: widget.index * 70), () {
+      if (mounted) _ctrl.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _ctrl,
+      builder: (context, child) => Opacity(
+        opacity: _ctrl.value,
+        child: Transform.translate(
+          offset: Offset(0, 16 * (1 - _ctrl.value)),
+          child: child,
+        ),
+      ),
+      child: _PolicyCard(product: widget.product),
     );
   }
 }

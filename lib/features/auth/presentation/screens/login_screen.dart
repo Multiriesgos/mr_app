@@ -79,8 +79,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
     );
 
-    ref.listen(authProvider, (_, next) {
+    ref.listen(authProvider, (prev, next) {
       next.whenOrNull(
+        data: (state) {
+          if (state is AuthAuthenticated) {
+            HapticFeedback.mediumImpact();
+          }
+        },
         error: (err, _) {
           final msg = err is AppException
               ? err.message

@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
@@ -33,20 +33,29 @@ final routerProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: 'products',
-            builder: (_, __) => const ProductsScreen(),
+            pageBuilder: (context, state) => _slidePage(
+              state: state,
+              child: const ProductsScreen(),
+            ),
             routes: [
               GoRoute(
                 path: ':id',
-                builder: (context, state) => ProductDetailScreen(
-                  idRen: int.parse(state.pathParameters['id']!),
-                  product: state.extra as Product?,
+                pageBuilder: (context, state) => _slidePage(
+                  state: state,
+                  child: ProductDetailScreen(
+                    idRen: int.parse(state.pathParameters['id']!),
+                    product: state.extra as Product?,
+                  ),
                 ),
               ),
             ],
           ),
           GoRoute(
             path: 'benefits',
-            builder: (_, __) => const BenefitCardScreen(),
+            pageBuilder: (context, state) => _slidePage(
+              state: state,
+              child: const BenefitCardScreen(),
+            ),
           ),
         ],
       ),
@@ -70,3 +79,22 @@ final routerProvider = Provider<GoRouter>((ref) {
     },
   );
 });
+
+CustomTransitionPage<void> _slidePage({
+  required GoRouterState state,
+  required Widget child,
+}) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 280),
+    reverseTransitionDuration: const Duration(milliseconds: 220),
+    transitionsBuilder: (_, animation, __, child) => SlideTransition(
+      position: Tween(
+        begin: const Offset(1, 0),
+        end: Offset.zero,
+      ).chain(CurveTween(curve: Curves.easeInOut)).animate(animation),
+      child: child,
+    ),
+  );
+}

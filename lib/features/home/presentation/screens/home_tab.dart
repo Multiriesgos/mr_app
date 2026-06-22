@@ -430,7 +430,7 @@ class _RenewalAlertCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        product.aseguradora,
+                        '${product.aseguradora} · ${_fmtDate(product.fechaRenovacion!)}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: AppColors.textMuted,
                             ),
@@ -493,10 +493,18 @@ enum _Urgency {
         _Urgency.expired =>
           'Vencida hace ${(-days) == 1 ? "1 día" : "${-days} días"}',
         _Urgency.critical =>
-          days == 0 ? 'Vence hoy' : 'Vence en ${days == 1 ? "1 día" : "$days días"}',
+          days == 0 ? '¡Vence hoy!' : 'Vence en ${days == 1 ? "1 día" : "$days días"}',
         _Urgency.warning => 'Vence en $days días',
-        _Urgency.upcoming => 'Vence en $days días',
+        _Urgency.upcoming => '$days días',
       };
+}
+
+String _fmtDate(DateTime d) {
+  const months = [
+    'ene', 'feb', 'mar', 'abr', 'may', 'jun',
+    'jul', 'ago', 'sep', 'oct', 'nov', 'dic',
+  ];
+  return '${d.day} ${months[d.month - 1]}';
 }
 
 // ─── Quick action card ────────────────────────────────────────────────────────

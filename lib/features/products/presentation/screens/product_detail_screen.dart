@@ -302,6 +302,7 @@ class _DetailBody extends StatelessWidget {
                       product.adjunto?.isNotEmpty ?? false
                           ? product.adjunto!
                           : 'No disponible',
+                      copyable: product.adjunto?.isNotEmpty ?? false,
                     ),
                   ],),
 
@@ -561,38 +562,64 @@ class _AnimatedCurrencyRow extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow(this.label, this.value);
+  const _InfoRow(this.label, this.value, {this.copyable = false});
   final String label;
   final String value;
+  final bool copyable;
+
+  Future<void> _copy(BuildContext context) async {
+    await Clipboard.setData(ClipboardData(text: value));
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$label copiado'),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 140,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.onSurfaceVariant,
-                  ),
+    final displayValue = value.isEmpty ? 'No disponible' : value;
+    final canCopy = copyable && value.isNotEmpty;
+
+    return InkWell(
+      onTap: canCopy ? () => _copy(context) : null,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 140,
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+              ),
             ),
-          ),
-          Expanded(
-            child: Text(
-              value.isEmpty ? 'No disponible' : value,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(fontWeight: FontWeight.w500),
-              textAlign: TextAlign.right,
+            Expanded(
+              child: Text(
+                displayValue,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(fontWeight: FontWeight.w500),
+                textAlign: TextAlign.right,
+              ),
             ),
-          ),
-        ],
+            if (canCopy) ...[
+              const SizedBox(width: 6),
+              Icon(Icons.copy_outlined, size: 15, color: cs.onSurfaceVariant),
+            ],
+          ],
+        ),
       ),
     );
   }
