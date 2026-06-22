@@ -6,6 +6,7 @@ import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
 import 'package:mr_app/features/auth/domain/entities/user.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class BenefitCardScreen extends ConsumerWidget {
@@ -42,6 +43,8 @@ class BenefitCardScreen extends ConsumerWidget {
                           ),
                         const SizedBox(height: 8),
                         _CarnetButton(user: user),
+                        const SizedBox(height: 16),
+                        _QrSection(user: user),
                         const SizedBox(height: 16),
                         const _BenefitGrid(),
                       ],
@@ -240,6 +243,130 @@ class _CarnetButton extends StatelessWidget {
     );
   }
 }
+
+// ─── QR del carnet ───────────────────────────────────────────────────────────
+
+class _QrSection extends StatelessWidget {
+  const _QrSection({required this.user});
+  final User? user;
+
+  static const _kQrSize = 180.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final docSearch = user?.docSearch ?? '';
+    if (docSearch.isEmpty) return const SizedBox.shrink();
+
+    final qrData = ExternalLinks.carnetDigital(docSearch);
+    final cs = Theme.of(context).colorScheme;
+
+    return Semantics(
+      label: 'Código QR del carnet. Toca para ampliar.',
+      button: true,
+      child: GestureDetector(
+        onTap: () => _showFullScreen(context, qrData),
+        child: Container(
+          decoration: BoxDecoration(
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.borderLight),
+            boxShadow: AppColors.shadowSm,
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          child: Column(
+            children: [
+              Text(
+                'Tu código QR',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              const SizedBox(height: 14),
+              QrImageView(
+                data: qrData,
+                size: _kQrSize,
+                backgroundColor: Colors.white,
+                eyeStyle: const QrEyeStyle(
+                  eyeShape: QrEyeShape.square,
+                  color: AppColors.sidebarBg,
+                ),
+                dataModuleStyle: const QrDataModuleStyle(
+                  dataModuleShape: QrDataModuleShape.square,
+                  color: AppColors.sidebarBg,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.open_in_full_rounded,
+                    size: 13,
+                    color: AppColors.textMuted,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Toca para ampliar',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textMuted,
+                        ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showFullScreen(BuildContext context, String data) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.white,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(28, 28, 28, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              QrImageView(
+                data: data,
+                size: 260,
+                backgroundColor: Colors.white,
+                eyeStyle: const QrEyeStyle(
+                  eyeShape: QrEyeShape.square,
+                  color: AppColors.sidebarBg,
+                ),
+                dataModuleStyle: const QrDataModuleStyle(
+                  dataModuleShape: QrDataModuleShape.square,
+                  color: AppColors.sidebarBg,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Muestra este código para identificarte',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textMuted,
+                    ),
+              ),
+              const SizedBox(height: 4),
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Cerrar'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Grid de beneficios ───────────────────────────────────────────────────────
 
 class _BenefitGrid extends StatelessWidget {
   const _BenefitGrid();
