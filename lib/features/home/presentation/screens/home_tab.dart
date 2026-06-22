@@ -35,8 +35,9 @@ class HomeTab extends ConsumerWidget {
                   ),
             ),
             Text(
-              name.toUpperCase(),
-              maxLines: 2,
+              _shortName(name).toUpperCase(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
@@ -93,6 +94,13 @@ class HomeTab extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  static String _shortName(String name) {
+    final parts = name.trim().split(RegExp(r'\s+'))
+      ..removeWhere((p) => p.isEmpty);
+    if (parts.length <= 2) return name.trim();
+    return '${parts.first} ${parts.last}';
   }
 
   static String _initials(String name) {
