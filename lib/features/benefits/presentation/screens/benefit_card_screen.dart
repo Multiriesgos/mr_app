@@ -6,6 +6,7 @@ import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
 import 'package:mr_app/features/auth/domain/entities/user.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:mr_app/features/products/presentation/providers/products_notifier.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -48,7 +49,11 @@ class BenefitCardScreen extends ConsumerWidget {
                   onShare: user == null ? null : () => _shareCarnet(user),
                 ),
                 Expanded(
-                  child: SingleChildScrollView(
+                  child: RefreshIndicator(
+                    onRefresh: () => ref.read(productsProvider.notifier).reload(),
+                    color: AppColors.primary,
+                    child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsetsDirectional.fromSTEB(20, 20, 20, 25),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -66,6 +71,7 @@ class BenefitCardScreen extends ConsumerWidget {
                         _QrSection(user: user),
                       ],
                     ),
+                  ),
                   ),
                 ),
               ],
