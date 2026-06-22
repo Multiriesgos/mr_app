@@ -92,50 +92,47 @@ class _UserHeader extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final name = user?.name ?? '';
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Row(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      child: Column(
         children: [
           CircleAvatar(
-            radius: 36,
+            radius: 46,
             backgroundColor: cs.primary.withValues(alpha: 0.12),
             child: name.isNotEmpty
                 ? Text(
                     _initials(name),
                     style: TextStyle(
                       color: cs.primary,
-                      fontSize: 22,
+                      fontSize: 30,
                       fontWeight: FontWeight.w700,
                     ),
                   )
-                : Icon(Icons.person, size: 40, color: cs.primary),
+                : Icon(Icons.person, size: 52, color: cs.primary),
           ),
-          const SizedBox(width: 16),
-          if (user != null)
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    user!.name,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    user!.documentNumber,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  if (user!.email != null)
-                    Text(
-                      user!.email!,
-                      style: Theme.of(context).textTheme.bodySmall,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                ],
-              ),
+          if (user != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              user!.name,
+              textAlign: TextAlign.center,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w700),
             ),
+            const SizedBox(height: 2),
+            Text(
+              user!.documentNumber,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            if (user!.email != null)
+              Text(
+                user!.email!,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall,
+                overflow: TextOverflow.ellipsis,
+              ),
+          ],
         ],
       ),
     );

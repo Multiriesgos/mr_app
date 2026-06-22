@@ -19,6 +19,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _docController = TextEditingController();
   final _birthController = TextEditingController();
   bool _rememberMe = true;
+  String? _errorMessage;
 
   final _birthMask = MaskTextInputFormatter(mask: '##/##/####');
 
@@ -26,6 +27,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void initState() {
     super.initState();
     _loadSavedDoc();
+    _docController.addListener(_clearError);
+    _birthController.addListener(_clearError);
   }
 
   Future<void> _loadSavedDoc() async {
@@ -36,6 +39,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  void _clearError() {
+    if (_errorMessage != null) setState(() => _errorMessage = null);
+  }
+
   @override
   void dispose() {
     _docController.dispose();
@@ -44,6 +51,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _submit() async {
+    setState(() => _errorMessage = null);
     if (!_formKey.currentState!.validate()) return;
     await ref.read(authProvider.notifier).login(
           documentNumber: _docController.text.trim(),
@@ -55,38 +63,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _openCotizador() async {
     final uri = Uri.parse('https://multiriesgos.com/cotizador');
     if (await canLaunchUrl(uri)) await launchUrl(uri);
-  }
-
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: AppColors.errorBg,
-        behavior: SnackBarBehavior.floating,
-        elevation: 0,
-        margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        content: Row(
-          children: [
-            const Icon(
-              Icons.error_outline,
-              color: AppColors.errorDark,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(
-                  color: AppColors.errorDark,
-                  fontSize: 13,
-                  height: 1.4,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
@@ -109,7 +85,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           final msg = err is AppException
               ? err.message
               : 'Error de conexión. Intente de nuevo.';
-          _showError(msg);
+          setState(() => _errorMessage = msg);
         },
       );
     });
@@ -125,7 +101,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (isLoading) const LinearProgressIndicator(),
               const SizedBox(height: 48),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -191,17 +166,86 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       contentPadding: EdgeInsets.zero,
                       controlAffinity: ListTileControlAffinity.leading,
                     ),
-                    const SizedBox(height: 16),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      transitionBuilder: (child, animation) => FadeTransition(
+                        opacity: animation,
+                        child: SizeTransition(
+                          sizeFactor: animation,
+                          axisAlignment: -1,
+                          child: child,
+                        ),
+                      ),
+                      child: _errorMessage != null
+                          ? Padding(
+                              key: const ValueKey('error-banner'),
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.errorBg,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: AppColors.error.withValues(alpha: 0.3),
+                                  ),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.only(top: 1),
+                                      child: Icon(
+                                        Icons.error_rounded,
+                                        color: AppColors.errorDark,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        _errorMessage!,
+                                        style: const TextStyle(
+                                          color: AppColors.errorDark,
+                                          fontSize: 13,
+                                          height: 1.4,
+                                        ),
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: _clearError,
+                                      child: const Icon(
+                                        Icons.close_rounded,
+                                        color: AppColors.errorDark,
+                                        size: 18,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(key: ValueKey('no-error')),
+                    ),
                     ElevatedButton(
                       onPressed: isLoading ? null : _submit,
                       child: isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
+                          ? const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Text('Verificando...'),
+                              ],
                             )
                           : const Text('Ingresar'),
                     ),

@@ -29,7 +29,7 @@ class HomeTab extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Bienvenido,',
+              _greeting(),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.white70,
                   ),
@@ -131,6 +131,13 @@ class HomeTab extends ConsumerWidget {
     if (parts.isEmpty || parts.first.isEmpty) return '?';
     if (parts.length == 1) return parts.first[0].toUpperCase();
     return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
+  }
+
+  static String _greeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Buenos días,';
+    if (hour < 19) return 'Buenas tardes,';
+    return 'Buenas noches,';
   }
 }
 
@@ -289,7 +296,7 @@ class _RenewalAlertsSkeleton extends StatelessWidget {
 
 // ─── Alertas de renovación ────────────────────────────────────────────────────
 
-class _RenewalAlertsSection extends StatelessWidget {
+class _RenewalAlertsSection extends StatefulWidget {
   const _RenewalAlertsSection({
     required this.products,
     required this.onProductTap,
@@ -299,8 +306,21 @@ class _RenewalAlertsSection extends StatelessWidget {
   final ValueChanged<Product> onProductTap;
 
   @override
+  State<_RenewalAlertsSection> createState() => _RenewalAlertsSectionState();
+}
+
+class _RenewalAlertsSectionState extends State<_RenewalAlertsSection> {
+  final Set<int> _dismissed = {};
+
+  @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final visible = widget.products
+        .where((p) => !_dismissed.contains(p.idRen))
+        .toList();
+
+    if (visible.isEmpty) return const SizedBox.shrink();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -322,12 +342,31 @@ class _RenewalAlertsSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        ...products.map(
+        ...visible.map(
           (p) => Padding(
             padding: const EdgeInsets.only(bottom: 8),
-            child: _RenewalAlertCard(
-              product: p,
-              onTap: () => onProductTap(p),
+            child: Dismissible(
+              key: ValueKey(p.idRen),
+              direction: DismissDirection.endToStart,
+              background: Container(
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: 20),
+                decoration: BoxDecoration(
+                  color: AppColors.textMuted.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.close_rounded,
+                  color: AppColors.textMuted,
+                ),
+              ),
+              onDismissed: (_) {
+                setState(() => _dismissed.add(p.idRen));
+              },
+              child: _RenewalAlertCard(
+                product: p,
+                onTap: () => widget.onProductTap(p),
+              ),
             ),
           ),
         ),
@@ -565,7 +604,7 @@ class _SupportCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Lunes a viernes · 8:00 – 17:00',
+                  'Lun–Vie · 8:00–17:00',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.textMuted,
                       ),

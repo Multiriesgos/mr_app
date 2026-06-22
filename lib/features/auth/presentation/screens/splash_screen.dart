@@ -16,16 +16,19 @@ class SplashScreen extends ConsumerStatefulWidget {
 class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _animation;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 1),
+      duration: const Duration(milliseconds: 900),
     )..forward();
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _scaleAnimation =
+        CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
 
     Timer(const Duration(seconds: 4), _navigate);
   }
@@ -74,12 +77,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               ),
             ),
             AnimatedBuilder(
-              animation: _animation,
+              animation: _controller,
               builder: (context, _) => Center(
-                child: Image.asset(
-                  'assets/images/7_fit.png',
-                  width: _animation.value * 350,
-                  height: _animation.value * 350,
+                child: Opacity(
+                  opacity: _fadeAnimation.value,
+                  child: Image.asset(
+                    'assets/images/7_fit.png',
+                    width: _scaleAnimation.value * 350,
+                    height: _scaleAnimation.value * 350,
+                  ),
                 ),
               ),
             ),
