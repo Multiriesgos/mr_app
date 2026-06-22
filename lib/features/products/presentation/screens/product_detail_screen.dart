@@ -11,6 +11,7 @@ import 'package:mr_app/core/theme/app_colors.dart';
 import 'package:mr_app/core/widgets/skeleton_product_list.dart';
 import 'package:mr_app/features/products/domain/entities/product.dart';
 import 'package:mr_app/features/products/presentation/providers/products_notifier.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
@@ -75,6 +76,31 @@ class _DetailBody extends StatelessWidget {
 
   final Product product;
   final ContactInfo? contact;
+
+  void _share(Product p) {
+    final dateStr = p.fechaRenovacion != null
+        ? DateFormat('dd/MM/yyyy').format(p.fechaRenovacion!)
+        : 'N/D';
+    final lines = [
+      'Póliza — ${p.ramo}',
+      'Tipo: ${p.tipoSeguro}',
+      'Asegurado: ${p.asegurado}',
+      if (p.placa.isNotEmpty) 'Placa: ${p.placa}',
+      'Renovación: $dateStr',
+      if (p.adjunto != null && p.adjunto!.isNotEmpty) 'N.° póliza: ${p.adjunto}',
+      if (p.suma != null)
+        'Suma asegurada: \$${p.suma!.toStringAsFixed(2)}',
+      'Aseguradora: ${p.aseguradora}',
+      if (p.ejecutivo != null && p.ejecutivo!.isNotEmpty)
+        'Ejecutivo: ${p.ejecutivo}',
+    ];
+    SharePlus.instance.share(
+      ShareParams(
+        text: lines.join('\n'),
+        subject: 'Detalle de póliza — ${p.ramo}',
+      ),
+    );
+  }
 
   Future<void> _call(BuildContext context) async {
     final uri = Uri.parse('tel:+503${contact!.phone}');
@@ -150,7 +176,15 @@ class _DetailBody extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 48),
+                Semantics(
+                  label: 'Compartir póliza',
+                  button: true,
+                  child: IconButton(
+                    onPressed: () => _share(product),
+                    icon: const Icon(Icons.share_outlined, color: Colors.white, size: 22),
+                    tooltip: 'Compartir',
+                  ),
+                ),
               ],
             ),
           ),
