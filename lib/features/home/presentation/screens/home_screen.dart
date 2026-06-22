@@ -52,17 +52,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     if (!mounted) return;
 
-    // App abierta desde tap en notificación (app terminada)
+    // App abierta desde tap en notificación (app terminada).
     final initial = await FirebaseMessaging.instance.getInitialMessage();
-    if (initial != null && mounted) setState(() => _currentIndex = 0);
+    if (initial != null && mounted) _handleNotifNavigation(initial.data);
 
-    // Tap en notificación con app en background
-    FirebaseMessaging.onMessageOpenedApp.listen((_) {
-      if (mounted) setState(() => _currentIndex = 0);
+    // Tap en notificación con app en background.
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      if (mounted) _handleNotifNavigation(message.data);
     });
 
-    // Mensajes mientras la app está en primer plano
+    // Mensajes mientras la app está en primer plano.
     _notifSubscription = service.onForegroundMessage.listen(_showNotifBanner);
+  }
+
+  /// Navega a la ruta indicada en el payload o al tab Inicio por defecto.
+  void _handleNotifNavigation(Map<String, dynamic> data) {
+    final route = data['route'] as String?;
+    if (route != null && mounted) {
+      context.push(route);
+    } else if (mounted) {
+      setState(() => _currentIndex = 0);
+    }
   }
 
   void _showNotifBanner(NotificationPayload payload) {
@@ -86,6 +96,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ),
           ],
         ),
+        action: payload.route != null
+            ? SnackBarAction(
+                label: 'Ver',
+                textColor: Colors.white,
+                onPressed: () => context.push(payload.route!),
+              )
+            : null,
         backgroundColor: AppColors.sidebarBg,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(12),
