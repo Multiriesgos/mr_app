@@ -145,14 +145,31 @@ class _ProductList extends StatelessWidget {
   const _ProductList({required this.products});
   final List<Product> products;
 
+  static int _urgencyScore(Product p) {
+    if (p.fechaRenovacion == null) return 3;
+    final days = p.fechaRenovacion!.difference(DateTime.now()).inDays;
+    if (days < 0) return 0;
+    if (days <= 30) return 1;
+    return 2;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final sorted = [...products]
+      ..sort((a, b) {
+        final cmp = _urgencyScore(a).compareTo(_urgencyScore(b));
+        if (cmp != 0) return cmp;
+        if (a.fechaRenovacion != null && b.fechaRenovacion != null) {
+          return a.fechaRenovacion!.compareTo(b.fechaRenovacion!);
+        }
+        return 0;
+      });
     return RepaintBoundary(
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: 12),
         physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: products.length,
-        itemBuilder: (context, i) => _PolicyCard(product: products[i]),
+        itemCount: sorted.length,
+        itemBuilder: (context, i) => _PolicyCard(product: sorted[i]),
       ),
     );
   }
