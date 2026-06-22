@@ -354,21 +354,22 @@ class _LogoutTile extends ConsumerWidget {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Confirmar salida'),
-        content: const Text('¿Está seguro de que desea cerrar sesión?'),
+        icon: const Icon(Icons.logout_outlined, color: AppColors.error, size: 32),
+        title: const Text('¿Cerrar sesión?'),
+        content: const Text('Tendrás que volver a ingresar tus credenciales.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
             child: const Text('Cancelar'),
           ),
-          TextButton(
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
             onPressed: () async {
               Navigator.of(ctx).pop();
               await ref.read(authProvider.notifier).logout();
               if (context.mounted) context.go('/login');
             },
-            child:
-                const Text('Salir', style: TextStyle(color: AppColors.error)),
+            child: const Text('Cerrar sesión'),
           ),
         ],
       ),

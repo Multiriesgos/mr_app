@@ -78,10 +78,7 @@ class HomeTab extends ConsumerWidget {
             child: IconButton(
               icon: const Icon(Icons.logout_outlined, color: Colors.white),
               tooltip: 'Cerrar sesión',
-              onPressed: () async {
-                await ref.read(authProvider.notifier).logout();
-                if (context.mounted) context.go('/login');
-              },
+              onPressed: () => _showLogoutDialog(context, ref),
             ),
           ),
         ],
@@ -92,6 +89,32 @@ class HomeTab extends ConsumerWidget {
           color: AppColors.primary,
           child: _HomeContent(onTabChange: onTabChange),
         ),
+      ),
+    );
+  }
+
+  static void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.logout_outlined, color: AppColors.error, size: 32),
+        title: const Text('¿Cerrar sesión?'),
+        content: const Text('Tendrás que volver a ingresar tus credenciales.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              await ref.read(authProvider.notifier).logout();
+              if (context.mounted) context.go('/login');
+            },
+            child: const Text('Cerrar sesión'),
+          ),
+        ],
       ),
     );
   }
