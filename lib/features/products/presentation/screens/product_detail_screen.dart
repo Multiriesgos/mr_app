@@ -159,10 +159,17 @@ class _DetailBody extends StatelessWidget {
                 Semantics(
                   label: 'Volver a Pólizas',
                   button: true,
-                  child: IconButton(
+                  child: TextButton.icon(
                     onPressed: () => context.pop(),
-                    icon: const Icon(Icons.arrow_back_sharp, color: Colors.white, size: 24),
-                    tooltip: 'Volver',
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 16),
+                    label: const Text(
+                      'Pólizas',
+                      style: TextStyle(color: Colors.white, fontSize: 15),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      minimumSize: const Size(0, 48),
+                    ),
                   ),
                 ),
                 const Expanded(
