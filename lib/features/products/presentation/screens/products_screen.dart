@@ -3,11 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/error/app_exception.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
 import 'package:mr_app/core/widgets/skeleton_product_list.dart';
 import 'package:mr_app/features/products/domain/entities/product.dart';
 import 'package:mr_app/features/products/presentation/providers/products_notifier.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProductsScreen extends ConsumerWidget {
   const ProductsScreen({super.key});
@@ -27,17 +29,23 @@ class ProductsScreen extends ConsumerWidget {
             children: [
               _Header(onBack: () => context.pop()),
               Expanded(
-                child: state.when(
-                  loading: () => const SkeletonProductList(),
-                  error: (e, _) => _ErrorView(
-                    message: e is AppException
-                        ? e.message
-                        : 'Error inesperado. Por favor reintente.',
-                    onRetry: () => ref.read(productsProvider.notifier).reload(),
+                child: RefreshIndicator(
+                  onRefresh: () => ref.read(productsProvider.notifier).reload(),
+                  color: AppColors.primary,
+                  child: state.when(
+                    skipLoadingOnReload: true,
+                    loading: () => const SkeletonProductList(),
+                    error: (e, _) => _ErrorView(
+                      message: e is AppException
+                          ? e.message
+                          : 'Sin conexión. Revisá tu internet e intentá de nuevo.',
+                      onRetry: () =>
+                          ref.read(productsProvider.notifier).reload(),
+                    ),
+                    data: (products) => products.isEmpty
+                        ? const _EmptyView()
+                        : _ProductList(products: products),
                   ),
-                  data: (products) => products.isEmpty
-                      ? const _EmptyView()
-                      : _ProductList(products: products),
                 ),
               ),
             ],
@@ -103,6 +111,7 @@ class _ProductList extends StatelessWidget {
     return RepaintBoundary(
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: 12),
+        physics: const AlwaysScrollableScrollPhysics(),
         itemCount: products.length,
         itemBuilder: (context, i) => _PolicyCard(product: products[i]),
       ),
@@ -310,19 +319,60 @@ class _EmptyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.library_books_outlined, size: 56, color: cs.onSurfaceVariant),
-          const SizedBox(height: 16),
-          Text(
-            'No se encontraron pólizas.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: SizedBox(
+          height: constraints.maxHeight,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: BoxDecoration(
+                      color: cs.primary.withValues(alpha: 0.07),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.policy_outlined,
+                      size: 44,
+                      color: cs.primary.withValues(alpha: 0.55),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Sin pólizas activas',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'No encontramos pólizas vigentes\nasociadas a tu documento.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                  ),
+                  const SizedBox(height: 28),
+                  FilledButton.icon(
+                    onPressed: () => launchUrl(
+                      Uri.parse(ExternalLinks.cotizador),
+                      mode: LaunchMode.externalApplication,
+                    ),
+                    icon: const Icon(Icons.calculate_outlined, size: 18),
+                    label: const Text('Cotizar en línea'),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -335,21 +385,56 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.error_outline, color: AppColors.error, size: 48),
-            const SizedBox(height: 12),
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            FilledButton.tonal(
-              onPressed: onRetry,
-              child: const Text('Reintentar'),
+    final cs = Theme.of(context).colorScheme;
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: SizedBox(
+          height: constraints.maxHeight,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withValues(alpha: 0.07),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.cloud_off_outlined,
+                      size: 44,
+                      color: AppColors.error,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'No se pudo cargar',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                  ),
+                  const SizedBox(height: 28),
+                  FilledButton.tonal(
+                    onPressed: onRetry,
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
         ),
       ),
     );

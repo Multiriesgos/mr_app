@@ -84,7 +84,11 @@ class HomeTab extends ConsumerWidget {
         ],
       ),
       body: SafeArea(
-        child: _HomeContent(onTabChange: onTabChange),
+        child: RefreshIndicator(
+          onRefresh: () => ref.read(productsProvider.notifier).reload(),
+          color: AppColors.primary,
+          child: _HomeContent(onTabChange: onTabChange),
+        ),
       ),
     );
   }
@@ -124,6 +128,7 @@ class _HomeContent extends ConsumerWidget {
     final renewingSoon = _renewingSoon(productsAsync.valueOrNull);
 
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
