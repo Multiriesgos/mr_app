@@ -182,6 +182,10 @@ class _HomeContent extends ConsumerWidget {
               ),
             ],
           ),
+          if (productsAsync.hasValue && productsAsync.value!.isEmpty) ...[
+            const SizedBox(height: 20),
+            _NoPoliciesBanner(onCotizar: _openCotizador),
+          ],
           const SizedBox(height: 28),
           _SupportCard(onCall: _call),
         ],
@@ -492,6 +496,76 @@ class _SupportCard extends StatelessWidget {
               onPressed: onCall,
               icon: Icon(Icons.phone_outlined, color: cs.primary, size: 22),
               tooltip: 'Llamar',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Banner sin pólizas ───────────────────────────────────────────────────────
+
+class _NoPoliciesBanner extends StatelessWidget {
+  const _NoPoliciesBanner({required this.onCotizar});
+  final VoidCallback onCotizar;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cs.primary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.primary.withValues(alpha: 0.15)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: cs.primary.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(Icons.policy_outlined, color: cs.primary, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Sin pólizas activas',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  'No encontramos pólizas vigentes asociadas a tu documento.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                ),
+                const SizedBox(height: 10),
+                Semantics(
+                  label: 'Cotizar una nueva póliza en línea',
+                  button: true,
+                  child: TextButton.icon(
+                    onPressed: onCotizar,
+                    icon: const Icon(Icons.calculate_outlined, size: 16),
+                    label: const Text('Cotizar en línea'),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
