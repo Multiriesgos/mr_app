@@ -27,14 +27,18 @@ final productsProvider =
 );
 
 class ProductsNotifier extends AsyncNotifier<List<Product>> {
+  DateTime? lastUpdated;
+
   @override
   Future<List<Product>> build() async {
     final authState = ref.watch(authProvider).valueOrNull;
     if (authState is! AuthAuthenticated) return [];
 
-    return GetProductsUseCase(ref.read(productsRepositoryProvider))(
+    final result = await GetProductsUseCase(ref.read(productsRepositoryProvider))(
       authState.user.docSearch,
     );
+    lastUpdated = DateTime.now();
+    return result;
   }
 
   Future<void> reload() async {
@@ -46,6 +50,7 @@ class ProductsNotifier extends AsyncNotifier<List<Product>> {
             .docSearch,
       ),
     );
+    if (state.hasValue) lastUpdated = DateTime.now();
   }
 }
 

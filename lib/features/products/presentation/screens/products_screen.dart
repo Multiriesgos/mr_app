@@ -28,6 +28,11 @@ class ProductsScreen extends ConsumerWidget {
           child: Column(
             children: [
               _Header(onBack: () => context.pop()),
+              _LastUpdatedBar(
+                lastUpdated: ref
+                    .watch(productsProvider.notifier)
+                    .lastUpdated,
+              ),
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: () => ref.read(productsProvider.notifier).reload(),
@@ -97,6 +102,40 @@ class _Header extends StatelessWidget {
           ),
           const SizedBox(width: 48),
         ],
+      ),
+    );
+  }
+}
+
+class _LastUpdatedBar extends StatelessWidget {
+  const _LastUpdatedBar({required this.lastUpdated});
+  final DateTime? lastUpdated;
+
+  String _label() {
+    if (lastUpdated == null) return '';
+    final diff = DateTime.now().difference(lastUpdated!);
+    if (diff.inSeconds < 60) return 'Actualizado hace un momento';
+    if (diff.inMinutes < 60) {
+      final m = diff.inMinutes;
+      return 'Actualizado hace $m ${m == 1 ? "min" : "min"}';
+    }
+    final h = diff.inHours;
+    return 'Actualizado hace $h ${h == 1 ? "hora" : "horas"}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (lastUpdated == null) return const SizedBox.shrink();
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      child: Text(
+        _label(),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+        textAlign: TextAlign.right,
       ),
     );
   }
