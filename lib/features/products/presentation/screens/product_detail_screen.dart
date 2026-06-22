@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/error/app_exception.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
 import 'package:mr_app/core/widgets/skeleton_product_list.dart';
@@ -232,6 +233,17 @@ class _DetailBody extends StatelessWidget {
                       ],
                     ),
                   ),
+
+                  // ── CTA renovación ───────────────────────────────────
+                  if (product.fechaRenovacion != null &&
+                      product.fechaRenovacion!
+                              .difference(DateTime.now())
+                              .inDays <=
+                          30)
+                    _RenovarBanner(
+                      expired: product.fechaRenovacion!
+                          .isBefore(DateTime.now()),
+                    ),
 
                   // ── Información general ──────────────────────────────
                   const SizedBox(height: 20),
@@ -465,6 +477,62 @@ class _InfoRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _RenovarBanner extends StatelessWidget {
+  const _RenovarBanner({required this.expired});
+  final bool expired;
+
+  Future<void> _launch() async {
+    final uri = Uri.parse(ExternalLinks.cotizador);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = expired ? AppColors.error : AppColors.warning;
+    final label = expired ? 'Póliza vencida — cotiza tu renovación' : 'Próxima a vencer — cotiza con tiempo';
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: Semantics(
+        label: 'Cotizar renovación de póliza',
+        button: true,
+        child: Material(
+          color: color.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
+            onTap: _launch,
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: color.withValues(alpha: 0.30)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.autorenew_rounded, color: color, size: 22),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: color,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                  Icon(Icons.open_in_new_outlined, color: color.withValues(alpha: 0.70), size: 16),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
