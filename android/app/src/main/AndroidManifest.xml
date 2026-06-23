@@ -62,5 +62,9 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Canal por defecto para notificaciones FCM (elimina el warning en logcat) -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="renewal_reminders" />
     </application>
 </manifest>
