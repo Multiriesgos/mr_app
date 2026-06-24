@@ -15,7 +15,7 @@ abstract final class AppTheme {
     return ThemeData(
     useMaterial3:            true,
     colorScheme:             scheme,
-    fontFamily:              'WorkSans',
+    fontFamily:              GoogleFonts.ibmPlexSans().fontFamily,
     scaffoldBackgroundColor: scheme.surface == AppColors.surface
         ? AppColors.background
         : AppColors.darkBackground,
@@ -25,7 +25,7 @@ abstract final class AppTheme {
       backgroundColor: AppColors.sidebarBg,
       foregroundColor: AppColors.surface,
       elevation:       0,
-      titleTextStyle:  GoogleFonts.workSans(
+      titleTextStyle:  GoogleFonts.ibmPlexSans(
         color: AppColors.surface,
         fontSize: 18,
         fontWeight: FontWeight.w600,
@@ -37,7 +37,7 @@ abstract final class AppTheme {
         foregroundColor: scheme.onPrimary,
         minimumSize:     const Size(double.infinity, 52),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        textStyle: GoogleFonts.workSans(
+        textStyle: GoogleFonts.ibmPlexSans(
           fontSize: 15,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.5,
@@ -97,24 +97,24 @@ abstract final class AppTheme {
       unselectedItemColor:   scheme.onSurface.withValues(alpha: 0.45),
       showSelectedLabels:    true,
       showUnselectedLabels:  true,
-      selectedLabelStyle:    GoogleFonts.workSans(fontSize: 11, fontWeight: FontWeight.w500),
-      unselectedLabelStyle:  GoogleFonts.workSans(fontSize: 11),
+      selectedLabelStyle:    GoogleFonts.ibmPlexSans(fontSize: 11, fontWeight: FontWeight.w500),
+      unselectedLabelStyle:  GoogleFonts.ibmPlexSans(fontSize: 11),
       type:                  BottomNavigationBarType.fixed,
     ),
-    textTheme: GoogleFonts.workSansTextTheme().copyWith(
-      displayLarge:  GoogleFonts.workSans(color: scheme.onSurface, fontWeight: FontWeight.w700),
-      displayMedium: GoogleFonts.workSans(color: scheme.onSurface, fontWeight: FontWeight.w700),
-      headlineLarge: GoogleFonts.workSans(color: scheme.onSurface, fontWeight: FontWeight.w600, fontSize: 24),
-      headlineMedium: GoogleFonts.workSans(color: scheme.onSurface, fontWeight: FontWeight.w600, fontSize: 20),
-      headlineSmall:  GoogleFonts.workSans(color: scheme.onSurface, fontWeight: FontWeight.w600, fontSize: 18),
-      titleLarge:   GoogleFonts.workSans(color: scheme.onSurface, fontWeight: FontWeight.w600, fontSize: 16),
-      titleMedium:  GoogleFonts.workSans(color: scheme.onSurface, fontWeight: FontWeight.w500, fontSize: 15),
-      titleSmall:   GoogleFonts.workSans(color: scheme.onSurface.withValues(alpha: alphaHigh), fontWeight: FontWeight.w500, fontSize: 14),
-      bodyLarge:    GoogleFonts.workSans(color: scheme.onSurface, fontSize: 15),
-      bodyMedium:   GoogleFonts.workSans(color: scheme.onSurface, fontSize: 14),
-      bodySmall:    GoogleFonts.workSans(color: scheme.onSurface.withValues(alpha: alphaHigh), fontSize: 12),
-      labelLarge:   GoogleFonts.workSans(color: scheme.onSurface, fontWeight: FontWeight.w600, fontSize: 14),
-      labelMedium:  GoogleFonts.workSans(color: scheme.onSurface.withValues(alpha: alphaHigh), fontSize: 12),
+    textTheme: GoogleFonts.ibmPlexSansTextTheme().copyWith(
+      displayLarge:  GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontWeight: FontWeight.w700),
+      displayMedium: GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontWeight: FontWeight.w700),
+      headlineLarge: GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontWeight: FontWeight.w600, fontSize: 24),
+      headlineMedium: GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontWeight: FontWeight.w600, fontSize: 20),
+      headlineSmall:  GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontWeight: FontWeight.w600, fontSize: 18),
+      titleLarge:   GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontWeight: FontWeight.w600, fontSize: 16),
+      titleMedium:  GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontWeight: FontWeight.w500, fontSize: 15),
+      titleSmall:   GoogleFonts.ibmPlexSans(color: scheme.onSurface.withValues(alpha: alphaHigh), fontWeight: FontWeight.w500, fontSize: 14),
+      bodyLarge:    GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontSize: 15),
+      bodyMedium:   GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontSize: 14),
+      bodySmall:    GoogleFonts.ibmPlexSans(color: scheme.onSurface.withValues(alpha: alphaHigh), fontSize: 12),
+      labelLarge:   GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontWeight: FontWeight.w600, fontSize: 14),
+      labelMedium:  GoogleFonts.ibmPlexSans(color: scheme.onSurface.withValues(alpha: alphaHigh), fontSize: 12),
     ),
   );
   }

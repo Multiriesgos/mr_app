@@ -17,7 +17,7 @@ class AppTheme {
   static const Color dismissibleBackground = Color(0xFF364A54);
   static const Color chipBackground = Color(0xFFEEF1F3);
   static const Color spacer = Color(0xFFF2F2F2);
-  static const String fontName = 'WorkSans';
+  static const String fontName = 'IBM Plex Sans';
 
   static final light = ThemeData.light().copyWith(
     buttonTheme: const ButtonThemeData(
