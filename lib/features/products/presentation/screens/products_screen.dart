@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/error/app_exception.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
+import 'package:mr_app/core/widgets/carbon_tag.dart';
 import 'package:mr_app/core/widgets/skeleton_product_list.dart';
 import 'package:mr_app/features/products/domain/entities/product.dart';
 import 'package:mr_app/features/products/presentation/providers/products_notifier.dart';
@@ -372,9 +373,18 @@ class _PolicyCard extends StatelessWidget {
                                     .inDays <=
                                 30) ...[
                           const SizedBox(height: 6),
-                          _RenovarChip(
-                            expired: product.fechaRenovacion!
-                                .isBefore(DateTime.now()),
+                          CarbonTag(
+                            label: 'Renovar',
+                            type: product.fechaRenovacion!.isBefore(DateTime.now())
+                                ? CarbonTagType.error
+                                : CarbonTagType.warning,
+                            icon: Icons.autorenew_rounded,
+                            onTap: () async {
+                              final uri = Uri.parse(ExternalLinks.cotizador);
+                              if (await canLaunchUrl(uri)) {
+                                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                              }
+                            },
                           ),
                         ],
                       ],
@@ -412,99 +422,12 @@ class _PolicyCard extends StatelessWidget {
   Widget? _buildStatusChip(BuildContext context, DateTime? date) {
     if (date == null) return null;
     final days = date.difference(DateTime.now()).inDays;
-    if (days < 0) {
-      return const _StatusChip(
-        label: 'Vencida',
-        color: AppColors.errorDark,
-        bg: AppColors.errorBg,
-      );
-    }
-    if (days <= 30) {
-      return _StatusChip(
-        label: 'Vence en ${days}d',
-        color: AppColors.warningDark,
-        bg: AppColors.warningBg,
-      );
-    }
-    return const _StatusChip(
-      label: 'Vigente',
-      color: AppColors.successDark,
-      bg: AppColors.successBg,
-    );
+    if (days < 0) return const CarbonTag(label: 'Vencida', type: CarbonTagType.error);
+    if (days <= 30) return CarbonTag(label: 'Vence en ${days}d', type: CarbonTagType.warning);
+    return const CarbonTag(label: 'Vigente', type: CarbonTagType.success);
   }
 }
 
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.label, required this.color, required this.bg});
-  final String label;
-  final Color color;
-  final Color bg;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-              fontSize: 11,
-            ),
-      ),
-    );
-  }
-}
-
-class _RenovarChip extends StatelessWidget {
-  const _RenovarChip({required this.expired});
-  final bool expired;
-
-  Future<void> _launch() async {
-    final uri = Uri.parse(ExternalLinks.cotizador);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final color = expired ? AppColors.errorDark : AppColors.warningDark;
-    final bg = expired ? AppColors.errorBg : AppColors.warningBg;
-    return Semantics(
-      label: 'Cotizar renovación',
-      button: true,
-      child: GestureDetector(
-        onTap: _launch,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-          decoration: BoxDecoration(
-            color: bg,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.autorenew_rounded, size: 11, color: color),
-              const SizedBox(width: 3),
-              Text(
-                'Renovar',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: color,
-                      fontWeight: FontWeight.w700,
-                    ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class _EmptyView extends StatelessWidget {
   const _EmptyView();

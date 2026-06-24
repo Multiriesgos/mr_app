@@ -23,14 +23,23 @@ abstract final class AppColors {
   // Gray Carbon — Surfaces
   static const Color _cGray10     = Color(0xFFF4F4F4);
 
+  // Blue Carbon — Info background
+  static const Color _cBlue10     = Color(0xFFEDF5FF); // Carbon blue-10
+
   // Green Carbon — Success
   static const Color _cGreen10    = Color(0xFFDEFBE6);
   static const Color _cGreen50    = Color(0xFF24A148);
   static const Color _cGreen70    = Color(0xFF0E6027);
 
   // Red Carbon — Error / Danger
+  static const Color _cRed10      = Color(0xFFFFF1F1); // Carbon red-10
   static const Color _cRed60      = Color(0xFFDA1E28);
   static const Color _cRed70      = Color(0xFFA2191F);
+
+  // Yellow Carbon — Warning
+  static const Color _cYellow10   = Color(0xFFFCF4D6); // Carbon yellow-10
+  static const Color _cYellow30   = Color(0xFFF1C21B); // Carbon yellow-30 (icono/borde)
+  static const Color _cYellow70   = Color(0xFF8E6A00); // Carbon yellow-70 (texto)
 
   // ── Azules corporativos ──────────────────────────────────────────────
   static const Color primary      = Color(0xFF1530B8);
@@ -64,12 +73,13 @@ abstract final class AppColors {
   static const Color successBg    = _cGreen10;         // Carbon green-10  #DEFBE6
   static const Color successDark  = _cGreen70;         // Carbon green-70  #0E6027
   static const Color error        = _cRed60;           // Carbon red-60    #DA1E28
-  static const Color errorBg      = Color(0xFFFEE2E2); // sin equivalente Carbon exacto
+  static const Color errorBg      = _cRed10;           // Carbon red-10    #FFF1F1
   static const Color errorDark    = _cRed70;           // Carbon red-70    #A2191F
-  static const Color warning      = Color(0xFFCA8A04); // amber corporativo, sin token Carbon
-  static const Color warningBg    = Color(0xFFFEF9C3);
-  static const Color warningDark  = Color(0xFF854D0E);
+  static const Color warning      = _cYellow30;        // Carbon yellow-30 #F1C21B
+  static const Color warningBg    = _cYellow10;        // Carbon yellow-10 #FCF4D6
+  static const Color warningDark  = _cYellow70;        // Carbon yellow-70 #8E6A00
   static const Color info         = _cBlue60;          // Carbon blue-60   #0F62FE
+  static const Color infoBg       = _cBlue10;          // Carbon blue-10   #EDF5FF
 
   // ── Iconos de stat ───────────────────────────────────────────────────
   static const Color statSuccess  = _cGreen50;         // #24A148

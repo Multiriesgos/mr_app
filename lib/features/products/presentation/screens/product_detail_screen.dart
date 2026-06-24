@@ -8,6 +8,8 @@ import 'package:intl/intl.dart';
 import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/error/app_exception.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
+import 'package:mr_app/core/widgets/carbon_inline_notification.dart';
+import 'package:mr_app/core/widgets/carbon_tag.dart';
 import 'package:mr_app/core/widgets/skeleton_product_list.dart';
 import 'package:mr_app/features/products/domain/entities/product.dart';
 import 'package:mr_app/features/products/presentation/providers/products_notifier.dart';
@@ -249,28 +251,7 @@ class _DetailBody extends StatelessWidget {
                             ],
                           ),
                         ),
-                        if (status.label != null)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: status.iconBg,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              status.label!,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: status.iconColor,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 12,
-                                  ),
-                            ),
-                          ),
+                        if (_buildStatusTag(product.fechaRenovacion) case final tag?) tag,
                       ],
                     ),
                   ),
@@ -281,9 +262,23 @@ class _DetailBody extends StatelessWidget {
                               .difference(DateTime.now())
                               .inDays <=
                           30)
-                    _RenovarBanner(
-                      expired: product.fechaRenovacion!
-                          .isBefore(DateTime.now()),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 14),
+                      child: CarbonInlineNotification(
+                        kind: product.fechaRenovacion!.isBefore(DateTime.now())
+                            ? CarbonNotificationKind.error
+                            : CarbonNotificationKind.warning,
+                        title: product.fechaRenovacion!.isBefore(DateTime.now())
+                            ? 'Póliza vencida'
+                            : 'Próxima a vencer',
+                        subtitle: 'Cotiza tu renovación',
+                        onAction: () async {
+                          final uri = Uri.parse(ExternalLinks.cotizador);
+                          if (await canLaunchUrl(uri)) {
+                            await launchUrl(uri, mode: LaunchMode.externalApplication);
+                          }
+                        },
+                      ),
                     ),
 
                   // ── Información general ──────────────────────────────
@@ -379,6 +374,14 @@ class _DetailBody extends StatelessWidget {
 
 
 
+  CarbonTag? _buildStatusTag(DateTime? date) {
+    if (date == null) return null;
+    final days = date.difference(DateTime.now()).inDays;
+    if (days < 0) return const CarbonTag(label: 'Vencida', type: CarbonTagType.error);
+    if (days <= 30) return CarbonTag(label: 'Vence en ${days}d', type: CarbonTagType.warning);
+    return const CarbonTag(label: 'Vigente', type: CarbonTagType.success);
+  }
+
   IconData _iconForRamo(String ramo) {
     final r = ramo.toLowerCase();
     if (r.contains('auto') || r.contains('veh')) return Icons.directions_car_outlined;
@@ -400,11 +403,11 @@ class _DetailBody extends StatelessWidget {
     }
     final days = date.difference(DateTime.now()).inDays;
     if (days < 0) {
-      return const _StatusInfo(
+      return _StatusInfo(
         label: 'Vencida',
         bg: AppColors.errorBg,
-        border: Color(0x33DC2626),
-        iconBg: Color(0x1FDC2626),
+        border: AppColors.error.withValues(alpha: 0.20),
+        iconBg: AppColors.error.withValues(alpha: 0.12),
         iconColor: AppColors.errorDark,
       );
     }
@@ -412,16 +415,16 @@ class _DetailBody extends StatelessWidget {
       return _StatusInfo(
         label: 'Vence en ${days}d',
         bg: AppColors.warningBg,
-        border: const Color(0x40CA8A04),
-        iconBg: const Color(0x1FCA8A04),
+        border: AppColors.warning.withValues(alpha: 0.50),
+        iconBg: AppColors.warning.withValues(alpha: 0.15),
         iconColor: AppColors.warningDark,
       );
     }
-    return const _StatusInfo(
+    return _StatusInfo(
       label: 'Vigente',
       bg: AppColors.successBg,
-      border: Color(0x3316A34A),
-      iconBg: Color(0x1F16A34A),
+      border: AppColors.success.withValues(alpha: 0.20),
+      iconBg: AppColors.success.withValues(alpha: 0.12),
       iconColor: AppColors.successDark,
     );
   }
@@ -625,61 +628,6 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-class _RenovarBanner extends StatelessWidget {
-  const _RenovarBanner({required this.expired});
-  final bool expired;
-
-  Future<void> _launch() async {
-    final uri = Uri.parse(ExternalLinks.cotizador);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final color = expired ? AppColors.error : AppColors.warning;
-    final label = expired ? 'Póliza vencida — cotiza tu renovación' : 'Próxima a vencer — cotiza con tiempo';
-    return Padding(
-      padding: const EdgeInsets.only(top: 14),
-      child: Semantics(
-        label: 'Cotizar renovación de póliza',
-        button: true,
-        child: Material(
-          color: color.withValues(alpha: 0.07),
-          borderRadius: BorderRadius.circular(12),
-          child: InkWell(
-            onTap: _launch,
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: color.withValues(alpha: 0.30)),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.autorenew_rounded, color: color, size: 22),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: color,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                  ),
-                  Icon(Icons.open_in_new_outlined, color: color.withValues(alpha: 0.70), size: 16),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class _ContactButton extends StatelessWidget {
   const _ContactButton({
