@@ -19,7 +19,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _docController = TextEditingController();
   final _birthController = TextEditingController();
+  final _birthFocusNode = FocusNode();
   bool _rememberMe = true;
+  bool _hasSubmitted = false;
   String? _errorMessage;
 
   final _birthMask = MaskTextInputFormatter(mask: '##/##/####');
@@ -48,11 +50,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void dispose() {
     _docController.dispose();
     _birthController.dispose();
+    _birthFocusNode.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
-    setState(() => _errorMessage = null);
+    setState(() { _errorMessage = null; _hasSubmitted = true; });
     if (!_formKey.currentState!.validate()) return;
     await ref.read(authProvider.notifier).login(
           documentNumber: _docController.text.trim(),
@@ -128,12 +131,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const SizedBox(height: AppSpacing.lg),
               Form(
                 key: _formKey,
+                autovalidateMode: _hasSubmitted
+                    ? AutovalidateMode.onUserInteraction
+                    : AutovalidateMode.disabled,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     TextFormField(
                       controller: _docController,
                       keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.next,
+                      onEditingComplete: _birthFocusNode.requestFocus,
                       decoration: const InputDecoration(
                         labelText: 'No. Documento',
                         hintText: 'Digite número de documento',
@@ -146,7 +154,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: AppSpacing.md),
                     TextFormField(
                       controller: _birthController,
+                      focusNode: _birthFocusNode,
                       keyboardType: TextInputType.datetime,
+                      textInputAction: TextInputAction.done,
+                      onEditingComplete: () {
+                        _birthFocusNode.unfocus();
+                        _submit();
+                      },
                       maxLength: 10,
                       inputFormatters: [_birthMask],
                       decoration: const InputDecoration(

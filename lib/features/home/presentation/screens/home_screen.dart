@@ -30,6 +30,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   int _currentIndex = 0;
   bool _needsBiometricCheck = false;
   StreamSubscription<NotificationPayload>? _notifSubscription;
+  final List<ScrollController> _scrollControllers =
+      List.generate(4, (_) => ScrollController());
 
   @override
   void initState() {
@@ -42,7 +44,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void dispose() {
     _notifSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
+    for (final c in _scrollControllers) {
+      c.dispose();
+    }
     super.dispose();
+  }
+
+  void _onTabTap(int i) {
+    if (i == _currentIndex) {
+      final c = _scrollControllers[i];
+      if (c.hasClients) {
+        c.animateTo(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    } else {
+      setState(() => _currentIndex = i);
+    }
   }
 
   Future<void> _initNotifications() async {
@@ -154,10 +174,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }).length;
 
     final tabs = <Widget>[
-      HomeTab(user: user, onTabChange: (i) => setState(() => _currentIndex = i)),
-      const BenefitCardScreen(),
-      const ProductsScreen(),
-      const ProfileScreen(),
+      PrimaryScrollController(
+        controller: _scrollControllers[0],
+        child: HomeTab(
+          user: user,
+          onTabChange: (i) => setState(() => _currentIndex = i),
+        ),
+      ),
+      PrimaryScrollController(
+        controller: _scrollControllers[1],
+        child: const BenefitCardScreen(),
+      ),
+      PrimaryScrollController(
+        controller: _scrollControllers[2],
+        child: const ProductsScreen(),
+      ),
+      PrimaryScrollController(
+        controller: _scrollControllers[3],
+        child: const ProfileScreen(),
+      ),
     ];
 
     return Scaffold(
@@ -174,7 +209,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (i) => setState(() => _currentIndex = i),
+        onTap: _onTabTap,
         items: [
           const BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
