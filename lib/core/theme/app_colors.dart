@@ -1,64 +1,96 @@
 import 'package:flutter/material.dart';
 
 /// Paleta corporativa Multiriesgos Corp
-/// Fuente: wwwroot/css/site.css  —  Única fuente de verdad de color.
+/// Tokens semánticos alineados con IBM Carbon Design System v11.
+/// Referencia: https://carbondesignsystem.com/elements/color/tokens/
 abstract final class AppColors {
-  // ── Azules corporativos ────────────────────────────────────────────
+
+  // ── Carbon color tokens (base) ───────────────────────────────────────
+  // Azules Carbon — Interactive / brand support
+  static const Color _cBlue20     = Color(0xFFD0E2FF);
+  static const Color _cBlue50     = Color(0xFF4589FF);
+  static const Color _cBlue60     = Color(0xFF0F62FE);
+
+  // coolGray Carbon — Text & UI chrome
+  static const Color _cCoolGray10 = Color(0xFFF2F4F8);
+  static const Color _cCoolGray20 = Color(0xFFDDE1E6);
+  static const Color _cCoolGray30 = Color(0xFFC1C7CD);
+  static const Color _cCoolGray40 = Color(0xFFA2A9B0);
+  static const Color _cCoolGray50 = Color(0xFF878D96);
+  static const Color _cCoolGray80 = Color(0xFF343A3F);
+  static const Color _cCoolGray90 = Color(0xFF21272A);
+
+  // Gray Carbon — Surfaces
+  static const Color _cGray10     = Color(0xFFF4F4F4);
+
+  // Green Carbon — Success
+  static const Color _cGreen10    = Color(0xFFDEFBE6);
+  static const Color _cGreen50    = Color(0xFF24A148);
+  static const Color _cGreen70    = Color(0xFF0E6027);
+
+  // Red Carbon — Error / Danger
+  static const Color _cRed60      = Color(0xFFDA1E28);
+  static const Color _cRed70      = Color(0xFFA2191F);
+
+  // ── Azules corporativos ──────────────────────────────────────────────
   static const Color primary      = Color(0xFF1530B8);
   static const Color primaryDark  = Color(0xFF0D1F8A);
   static const Color primaryLight = Color(0xFF2B48D4);
-  static const Color accent       = Color(0xFF4A7AFF);
-  static const Color accentHover  = Color(0xFF3366EE);
-  static const Color sidebarBg   = Color(0xFF060D45);
-  static const Color sidebarText = Color(0xFFBDC8F0);
+  static const Color accent       = _cBlue50;          // Carbon blue-50  #4589FF
+  static const Color accentHover  = _cBlue60;          // Carbon blue-60  #0F62FE
+  static const Color sidebarBg    = Color(0xFF060D45);
+  static const Color sidebarText  = _cBlue20;          // Carbon blue-20  #D0E2FF
 
-  // ── Texto y fondos ─────────────────────────────────────────────────
-  static const Color textPrimary  = Color(0xFF1A202C);
-  static const Color textBody     = Color(0xFF2D3748);
-  static const Color textMuted    = Color(0xFF718096);
-  static const Color textLight    = Color(0xFFA0AEC0);
-  static const Color textFaint    = Color(0xFFCBD5E0);
+  // ── Texto (Carbon coolGray) ──────────────────────────────────────────
+  static const Color textPrimary  = _cCoolGray90;      // #21272A
+  static const Color textBody     = _cCoolGray80;      // #343A3F
+  static const Color textMuted    = _cCoolGray50;      // #878D96
+  static const Color textLight    = _cCoolGray40;      // #A2A9B0
+  static const Color textFaint    = _cCoolGray30;      // #C1C7CD
 
+  // ── Fondos y superficies (Carbon White theme) ────────────────────────
   static const Color surface      = Color(0xFFFFFFFF);
-  static const Color background   = Color(0xFFF0F4F8);
-  static const Color surfaceAlt   = Color(0xFFF7FAFC);
-  static const Color surfaceTable = Color(0xFFF8FAFC);
+  static const Color background   = _cCoolGray10;      // #F2F4F8
+  static const Color surfaceAlt   = _cGray10;          // #F4F4F4
+  static const Color surfaceTable = _cGray10;          // #F4F4F4
 
-  // ── Bordes ─────────────────────────────────────────────────────────
-  static const Color borderLight  = Color(0xFFE8EDF5);
-  static const Color border       = Color(0xFFE2E8F0);
-  static const Color borderInner  = Color(0xFFF0F4F8);
+  // ── Bordes (Carbon coolGray) ─────────────────────────────────────────
+  static const Color borderLight  = Color(0xFFE8EDF5); // puente coolGray10↔20, tinte azul marca
+  static const Color border       = _cCoolGray20;      // #DDE1E6
+  static const Color borderInner  = _cCoolGray10;      // #F2F4F8
 
-  // ── Semánticos ─────────────────────────────────────────────────────
-  static const Color success      = Color(0xFF16A34A);
-  static const Color successBg    = Color(0xFFDCFCE7);
-  static const Color successDark  = Color(0xFF166534);
-  static const Color error        = Color(0xFFDC2626);
-  static const Color errorBg      = Color(0xFFFEE2E2);
-  static const Color errorDark    = Color(0xFF991B1B);
-  static const Color warning      = Color(0xFFCA8A04);
+  // ── Semánticos ───────────────────────────────────────────────────────
+  static const Color success      = _cGreen50;         // Carbon green-50  #24A148
+  static const Color successBg    = _cGreen10;         // Carbon green-10  #DEFBE6
+  static const Color successDark  = _cGreen70;         // Carbon green-70  #0E6027
+  static const Color error        = _cRed60;           // Carbon red-60    #DA1E28
+  static const Color errorBg      = Color(0xFFFEE2E2); // sin equivalente Carbon exacto
+  static const Color errorDark    = _cRed70;           // Carbon red-70    #A2191F
+  static const Color warning      = Color(0xFFCA8A04); // amber corporativo, sin token Carbon
   static const Color warningBg    = Color(0xFFFEF9C3);
   static const Color warningDark  = Color(0xFF854D0E);
-  static const Color info         = Color(0xFF2563EB);
+  static const Color info         = _cBlue60;          // Carbon blue-60   #0F62FE
 
-  // ── Iconos de stat ─────────────────────────────────────────────────
-  static const Color statSuccess  = Color(0xFF16A34A);
+  // ── Iconos de stat ───────────────────────────────────────────────────
+  static const Color statSuccess  = _cGreen50;         // #24A148
   static const Color statWarning  = Color(0xFFCA8A04);
-  static const Color statDanger   = Color(0xFFDC2626);
+  static const Color statDanger   = _cRed60;           // #DA1E28
 
-  // ── Sombras ────────────────────────────────────────────────────────
+  // ── Sombras ──────────────────────────────────────────────────────────
   static const Color shadowBase   = Color(0xFF060D45);
 
-  // ── Dark-mode equivalents ──────────────────────────────────────────
-  static const Color darkSurface      = Color(0xFF1A1F2E);
-  static const Color darkBackground   = Color(0xFF0F1420);
-  static const Color darkSurfaceAlt   = Color(0xFF242B3D);
-  static const Color darkTextPrimary  = Color(0xFFF0F4F8);
-  static const Color darkTextBody     = Color(0xFFCBD5E0);
-  static const Color darkTextMuted    = Color(0xFF718096);
-  static const Color darkBorder       = Color(0xFF2D3748);
+  // ── Dark-mode equivalents ────────────────────────────────────────────
+  // Superficies con tinte navy corporativo (no escala gray pura de Carbon)
+  static const Color darkSurface     = Color(0xFF1A1F2E);
+  static const Color darkBackground  = Color(0xFF0F1420);
+  static const Color darkSurfaceAlt  = Color(0xFF242B3D);
+  // Texto dark → Carbon coolGray (extremo claro)
+  static const Color darkTextPrimary = _cCoolGray10;   // #F2F4F8
+  static const Color darkTextBody    = _cCoolGray30;   // #C1C7CD
+  static const Color darkTextMuted   = _cCoolGray50;   // #878D96
+  static const Color darkBorder      = _cCoolGray80;   // #343A3F
 
-  // ── ColorScheme light ──────────────────────────────────────────────
+  // ── ColorScheme light ────────────────────────────────────────────────
   static ColorScheme get lightColorScheme => const ColorScheme(
     brightness:              Brightness.light,
     primary:                 primary,
@@ -86,7 +118,7 @@ abstract final class AppColors {
     inversePrimary:          accent,
   );
 
-  // ── ColorScheme dark ───────────────────────────────────────────────
+  // ── ColorScheme dark ─────────────────────────────────────────────────
   static ColorScheme get darkColorScheme => const ColorScheme(
     brightness:              Brightness.dark,
     primary:                 accent,
@@ -114,7 +146,7 @@ abstract final class AppColors {
     inversePrimary:          primary,
   );
 
-  // ── BoxShadow helpers ──────────────────────────────────────────────
+  // ── BoxShadow helpers ────────────────────────────────────────────────
   static List<BoxShadow> get shadowSm => [
     BoxShadow(
       color: shadowBase.withValues(alpha: 0.08),
@@ -139,7 +171,7 @@ abstract final class AppColors {
     ),
   ];
 
-  // ── Login gradient ─────────────────────────────────────────────────
+  // ── Login gradient ───────────────────────────────────────────────────
   static const LinearGradient loginGradient = LinearGradient(
     begin: Alignment.topLeft,
     end:   Alignment.bottomRight,
