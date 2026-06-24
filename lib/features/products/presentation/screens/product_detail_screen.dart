@@ -572,6 +572,7 @@ class _InfoRow extends StatelessWidget {
   final bool copyable;
 
   Future<void> _copy(BuildContext context) async {
+    await HapticFeedback.selectionClick();
     await Clipboard.setData(ClipboardData(text: value));
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(

@@ -174,6 +174,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           return 'Digite fecha de nacimiento';
                         }
                         if (v.length != 10) return 'Formato: DD/MM/AAAA';
+                        final parts = v.split('/');
+                        final d = int.tryParse(parts[0]);
+                        final m = int.tryParse(parts[1]);
+                        final y = int.tryParse(parts[2]);
+                        if (d == null || m == null || y == null ||
+                            m < 1 || m > 12 || d < 1 || d > 31 ||
+                            y < 1900 || y > DateTime.now().year) {
+                          return 'Fecha inválida';
+                        }
                         return null;
                       },
                     ),
