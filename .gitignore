@@ -88,3 +88,20 @@ coverage/
 
 # Base64 temporales de Firebase (no subir al repo)
 firebase_b64/
+
+# Artefactos de sesiones de prueba (capturas, logs, dumps UI)
+*.png
+*.jpg
+*.jpeg
+flutter_run_*.txt
+flutter_fcm_token.txt
+log_build*.txt
+log_debug_run.txt
+ui_*.xml
+verify_*.png
+release_*.png
+screen_*.png
+r3_*.png
+r4_*.png
+trigger_notif.py
+cert_key.pem
