@@ -8,6 +8,7 @@ import 'package:mr_app/core/auth/biometrics_service.dart';
 import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/di/settings_providers.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
+import 'package:mr_app/core/theme/app_spacing.dart';
 import 'package:mr_app/features/auth/domain/entities/user.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -28,24 +29,24 @@ class ProfileScreen extends ConsumerWidget {
         elevation: 0,
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
         children: [
           _UserHeader(user: user),
-          const SizedBox(height: 8),
-          const Divider(indent: 16, endIndent: 16),
+          const SizedBox(height: AppSpacing.sm),
+          const Divider(indent: AppSpacing.md, endIndent: AppSpacing.md),
           const _SectionTitle('Apariencia'),
           _ThemeTile(),
-          const Divider(indent: 16, endIndent: 16),
+          const Divider(indent: AppSpacing.md, endIndent: AppSpacing.md),
           const _SectionTitle('Seguridad'),
           _BiometricsTile(),
-          const Divider(indent: 16, endIndent: 16),
+          const Divider(indent: AppSpacing.md, endIndent: AppSpacing.md),
           const _SectionTitle('Información'),
           _AppVersionTile(),
           if (kDebugMode) _FcmTokenTile(),
           _PrivacyPolicyTile(),
-          const Divider(indent: 16, endIndent: 16),
+          const Divider(indent: AppSpacing.md, endIndent: AppSpacing.md),
           _LogoutTile(),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.lg),
         ],
       ),
     );
@@ -61,7 +62,7 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.s04, AppSpacing.md, AppSpacing.xs),
       child: Text(
         title,
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
@@ -92,7 +93,7 @@ class _UserHeader extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final name = user?.name ?? '';
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePaddingH, vertical: AppSpacing.lg),
       child: Column(
         children: [
           CircleAvatar(
@@ -110,7 +111,7 @@ class _UserHeader extends StatelessWidget {
                 : Icon(Icons.person, size: 52, color: cs.primary),
           ),
           if (user != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.s04),
             Text(
               user!.name,
               textAlign: TextAlign.center,
@@ -119,7 +120,7 @@ class _UserHeader extends StatelessWidget {
                   .titleMedium
                   ?.copyWith(fontWeight: FontWeight.w700),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: AppSpacing.s01),
             Text(
               user!.documentNumber,
               textAlign: TextAlign.center,

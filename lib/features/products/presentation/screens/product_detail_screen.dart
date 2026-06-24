@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/error/app_exception.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
+import 'package:mr_app/core/theme/app_spacing.dart';
 import 'package:mr_app/core/widgets/carbon_inline_notification.dart';
 import 'package:mr_app/core/widgets/carbon_tag.dart';
 import 'package:mr_app/core/widgets/skeleton_product_list.dart';
@@ -201,13 +202,13 @@ class _DetailBody extends StatelessWidget {
           // ── Contenido ─────────────────────────────────────────────────
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+              padding: const EdgeInsets.fromLTRB(AppSpacing.pagePaddingH, AppSpacing.pagePaddingH, AppSpacing.pagePaddingH, AppSpacing.sectionGap),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Hero de estado
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
                       color: status.bg,
                       borderRadius: BorderRadius.circular(12),
@@ -228,7 +229,7 @@ class _DetailBody extends StatelessWidget {
                             size: 26,
                           ),
                         ),
-                        const SizedBox(width: 14),
+                        const SizedBox(width: AppSpacing.cardGap),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,7 +241,7 @@ class _DetailBody extends StatelessWidget {
                                     .titleMedium
                                     ?.copyWith(fontWeight: FontWeight.w700),
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: AppSpacing.s01),
                               Text(
                                 product.aseguradora,
                                 style: Theme.of(context)
@@ -263,7 +264,7 @@ class _DetailBody extends StatelessWidget {
                               .inDays <=
                           30)
                     Padding(
-                      padding: const EdgeInsets.only(top: 14),
+                      padding: const EdgeInsets.only(top: AppSpacing.cardGap),
                       child: CarbonInlineNotification(
                         kind: product.fechaRenovacion!.isBefore(DateTime.now())
                             ? CarbonNotificationKind.error
@@ -282,9 +283,9 @@ class _DetailBody extends StatelessWidget {
                     ),
 
                   // ── Información general ──────────────────────────────
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.pagePaddingH),
                   const _SectionLabel('Información general'),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   _InfoCard(rows: [
                     _InfoRow('Tipo de seguro', product.tipoSeguro),
                     _InfoRow('Asegurado', product.asegurado),
@@ -303,9 +304,9 @@ class _DetailBody extends StatelessWidget {
 
                   // ── Cobertura ────────────────────────────────────────
                   if (hasCoverage) ...[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
                     const _SectionLabel('Cobertura'),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     _InfoCard(rows: [
                       _InfoRow('Descripción', product.descripcionSeguro!),
                     ],),
@@ -313,17 +314,17 @@ class _DetailBody extends StatelessWidget {
 
                   // ── Financiero ───────────────────────────────────────
                   if (hasFinancial) ...[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
                     const _SectionLabel('Financiero'),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     _FinancialCard(product: product),
                   ],
 
                   // ── Asesor ───────────────────────────────────────────
                   if (hasEjecutivo) ...[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
                     const _SectionLabel('Asesor'),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     _InfoCard(rows: [
                       _InfoRow('Ejecutivo', product.ejecutivo!),
                     ],),
@@ -331,7 +332,7 @@ class _DetailBody extends StatelessWidget {
 
                   // ── Contacto de cabina ───────────────────────────────
                   if (hasContact) ...[
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.pagePaddingH),
                     const _SectionLabel('Contacto de cabina'),
                     const SizedBox(height: 10),
                     Row(
@@ -348,7 +349,7 @@ class _DetailBody extends StatelessWidget {
                             ),
                           ),
                         if (contact!.hasPhone && contact!.hasWhatsApp)
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppSpacing.s04),
                         if (contact!.hasWhatsApp)
                           Expanded(
                             child: _ContactButton(
@@ -525,7 +526,7 @@ class _AnimatedCurrencyRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.s04),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -578,7 +579,7 @@ class _InfoRow extends StatelessWidget {
         content: Text('$label copiado'),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(12),
+        margin: const EdgeInsets.all(AppSpacing.s04),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
@@ -594,7 +595,7 @@ class _InfoRow extends StatelessWidget {
       onTap: canCopy ? () => _copy(context) : null,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.s04),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -618,7 +619,7 @@ class _InfoRow extends StatelessWidget {
               ),
             ),
             if (canCopy) ...[
-              const SizedBox(width: 6),
+              const SizedBox(width: AppSpacing.iconTileGap),
               Icon(Icons.copy_outlined, size: 15, color: cs.onSurfaceVariant),
             ],
           ],

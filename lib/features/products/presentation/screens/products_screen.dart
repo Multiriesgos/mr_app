@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/error/app_exception.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
+import 'package:mr_app/core/theme/app_spacing.dart';
 import 'package:mr_app/core/widgets/carbon_tag.dart';
 import 'package:mr_app/core/widgets/skeleton_product_list.dart';
 import 'package:mr_app/features/products/domain/entities/product.dart';
@@ -200,7 +201,7 @@ class _ProductList extends StatelessWidget {
       });
     return RepaintBoundary(
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.s04),
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: sorted.length,
         itemBuilder: (context, i) =>
@@ -276,7 +277,7 @@ class _PolicyCard extends StatelessWidget {
           '${dateStr != null ? ", renovación $dateStr" : ""}',
       button: true,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 5),
         decoration: BoxDecoration(
           color: cs.surface,
           borderRadius: BorderRadius.circular(12),
@@ -293,7 +294,7 @@ class _PolicyCard extends StatelessWidget {
               extra: product,
             ),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.md),
               child: Row(
                 children: [
                   Container(
@@ -305,7 +306,7 @@ class _PolicyCard extends StatelessWidget {
                     ),
                     child: Icon(ramoIcon, color: ramoColor, size: 22),
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: AppSpacing.cardGap),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -322,7 +323,7 @@ class _PolicyCard extends StatelessWidget {
                               ),
                             ),
                             if (statusWidget != null) ...[
-                              const SizedBox(width: 8),
+                              const SizedBox(width: AppSpacing.sm),
                               statusWidget,
                             ],
                           ],
@@ -353,7 +354,7 @@ class _PolicyCard extends StatelessWidget {
                                 size: 11,
                                 color: cs.onSurfaceVariant,
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: AppSpacing.xs),
                               Text(
                                 'Renueva: $dateStr',
                                 style: Theme.of(context)
@@ -372,7 +373,7 @@ class _PolicyCard extends StatelessWidget {
                                     .difference(DateTime.now())
                                     .inDays <=
                                 30) ...[
-                          const SizedBox(height: 6),
+                          const SizedBox(height: AppSpacing.iconTileGap),
                           CarbonTag(
                             label: 'Renovar',
                             type: product.fechaRenovacion!.isBefore(DateTime.now())
@@ -390,7 +391,7 @@ class _PolicyCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   Icon(Icons.chevron_right, color: cs.onSurfaceVariant, size: 20),
                 ],
               ),
@@ -442,7 +443,7 @@ class _EmptyView extends StatelessWidget {
           height: constraints.maxHeight,
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.all(32),
+              padding: const EdgeInsets.all(AppSpacing.xl),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -459,7 +460,7 @@ class _EmptyView extends StatelessWidget {
                       color: cs.primary.withValues(alpha: 0.55),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.pagePaddingH),
                   Text(
                     'Sin pólizas activas',
                     style: Theme.of(context)
@@ -467,7 +468,7 @@ class _EmptyView extends StatelessWidget {
                         .titleMedium
                         ?.copyWith(fontWeight: FontWeight.w600),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     'No encontramos pólizas vigentes\nasociadas a tu documento.',
                     textAlign: TextAlign.center,
@@ -475,7 +476,7 @@ class _EmptyView extends StatelessWidget {
                           color: cs.onSurfaceVariant,
                         ),
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: AppSpacing.sectionGap),
                   FilledButton.icon(
                     onPressed: () => launchUrl(
                       Uri.parse(ExternalLinks.cotizador),
@@ -509,7 +510,7 @@ class _ErrorView extends StatelessWidget {
           height: constraints.maxHeight,
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.all(32),
+              padding: const EdgeInsets.all(AppSpacing.xl),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -526,7 +527,7 @@ class _ErrorView extends StatelessWidget {
                       color: AppColors.error,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.pagePaddingH),
                   Text(
                     'No se pudo cargar',
                     style: Theme.of(context)
@@ -534,7 +535,7 @@ class _ErrorView extends StatelessWidget {
                         .titleMedium
                         ?.copyWith(fontWeight: FontWeight.w600),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     message,
                     textAlign: TextAlign.center,
@@ -542,7 +543,7 @@ class _ErrorView extends StatelessWidget {
                           color: cs.onSurfaceVariant,
                         ),
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: AppSpacing.sectionGap),
                   FilledButton.tonal(
                     onPressed: onRetry,
                     child: const Text('Reintentar'),

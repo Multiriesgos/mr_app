@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:mr_app/core/error/app_exception.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
+import 'package:mr_app/core/theme/app_spacing.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -102,21 +103,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       backgroundColor: cs.surface,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 48),
+              const SizedBox(height: AppSpacing.xxl),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: Image.asset('assets/images/5_fit.png'),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.xl),
               Text(
                 'Iniciar sesión',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               Text(
                 'Ingresa tus datos para continuar',
                 style: Theme.of(context)
@@ -124,7 +125,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     .bodySmall
                     ?.copyWith(color: AppColors.textMuted),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
               Form(
                 key: _formKey,
                 child: Column(
@@ -142,7 +143,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ? 'Ingrese número de documento'
                           : null,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
                     TextFormField(
                       controller: _birthController,
                       keyboardType: TextInputType.datetime,
@@ -162,7 +163,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     CheckboxListTile(
                       value: _rememberMe,
                       onChanged: (v) =>
@@ -184,11 +185,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: _errorMessage != null
                           ? Padding(
                               key: const ValueKey('error-banner'),
-                              padding: const EdgeInsets.only(bottom: 16),
+                              padding: const EdgeInsets.only(bottom: AppSpacing.md),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 12,
+                                  horizontal: AppSpacing.cardGap,
+                                  vertical: AppSpacing.s04,
                                 ),
                                 decoration: BoxDecoration(
                                   color: AppColors.errorBg,
@@ -254,7 +255,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             )
                           : const Text('Ingresar'),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.s04),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -283,7 +284,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.xl),
             ],
           ),
         ),

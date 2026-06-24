@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
+import 'package:mr_app/core/theme/app_spacing.dart';
 import 'package:mr_app/features/auth/domain/entities/user.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:mr_app/features/products/presentation/providers/products_notifier.dart';
@@ -54,7 +55,7 @@ class BenefitCardScreen extends ConsumerWidget {
                     color: AppColors.primary,
                     child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsetsDirectional.fromSTEB(20, 20, 20, 25),
+                    padding: const EdgeInsets.fromLTRB(AppSpacing.pagePaddingH, AppSpacing.pagePaddingH, AppSpacing.pagePaddingH, AppSpacing.lg),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
@@ -63,11 +64,11 @@ class BenefitCardScreen extends ConsumerWidget {
                             'Tu carnet',
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.sm),
                         _CarnetButton(user: user),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.md),
                         const _BenefitGrid(),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.md),
                         _QrSection(user: user),
                       ],
                     ),
@@ -307,7 +308,7 @@ class _QrSection extends StatelessWidget {
             border: Border.all(color: AppColors.borderLight),
             boxShadow: AppColors.shadowSm,
           ),
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.cardGap, horizontal: AppSpacing.md),
           child: Column(
             children: [
               Text(
@@ -316,7 +317,7 @@ class _QrSection extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.cardGap),
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -346,7 +347,7 @@ class _QrSection extends StatelessWidget {
                     size: 13,
                     color: AppColors.textMuted,
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: AppSpacing.xs),
                   Text(
                     'Toca para ampliar',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -370,7 +371,7 @@ class _QrSection extends StatelessWidget {
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(28, 28, 28, 20),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.sectionGap, AppSpacing.sectionGap, AppSpacing.sectionGap, AppSpacing.pagePaddingH),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -387,7 +388,7 @@ class _QrSection extends StatelessWidget {
                   color: AppColors.sidebarBg,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.s04),
               Text(
                 'Muestra este código para identificarte',
                 textAlign: TextAlign.center,
@@ -395,7 +396,7 @@ class _QrSection extends StatelessWidget {
                       color: AppColors.textMuted,
                     ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
                 child: const Text('Cerrar'),
@@ -424,7 +425,7 @@ class _BenefitGrid extends StatelessWidget {
           color: AppColors.info,
           url: ExternalLinks.medic,
         ),
-        SizedBox(height: 8),
+        SizedBox(height: AppSpacing.sm),
         _BenefitTile(
           title: 'Club Ahorro',
           subtitle: 'Descuentos y beneficios',
@@ -478,7 +479,7 @@ class _BenefitTile extends StatelessWidget {
             ),
             child: ListTile(
               contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
               leading: Container(
                 width: 44,
                 height: 44,

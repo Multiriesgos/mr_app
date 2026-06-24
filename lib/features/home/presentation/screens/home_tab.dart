@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
+import 'package:mr_app/core/theme/app_spacing.dart';
 import 'package:mr_app/core/widgets/shimmer_box.dart';
 import 'package:mr_app/features/auth/domain/entities/user.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
@@ -169,7 +170,7 @@ class _HomeContent extends ConsumerWidget {
 
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.pagePaddingH, AppSpacing.lg, AppSpacing.pagePaddingH, AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -181,7 +182,7 @@ class _HomeContent extends ConsumerWidget {
               products: renewingSoon,
               onProductTap: (p) => context.go('/home/products/${p.idRen}'),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: AppSpacing.sectionGap),
           ],
           Text(
             'ACCESO RÁPIDO',
@@ -190,11 +191,11 @@ class _HomeContent extends ConsumerWidget {
                   letterSpacing: 1,
                 ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.s04),
           GridView.count(
             crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
+            crossAxisSpacing: AppSpacing.s04,
+            mainAxisSpacing: AppSpacing.s04,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             childAspectRatio: 1.25,
@@ -226,10 +227,10 @@ class _HomeContent extends ConsumerWidget {
             ],
           ),
           if (productsAsync.hasValue && productsAsync.value!.isEmpty) ...[
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.pagePaddingH),
             _NoPoliciesBanner(onCotizar: _openCotizador),
           ],
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSpacing.sectionGap),
           _SupportCard(onCall: _call),
         ],
       ),
@@ -258,10 +259,10 @@ class _RenewalAlertsSkeleton extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const ShimmerBox(width: 180, height: 12),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.s04),
         for (int i = 0; i < 2; i++) ...[
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.cardGap, vertical: AppSpacing.s04),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
@@ -271,18 +272,18 @@ class _RenewalAlertsSkeleton extends StatelessWidget {
             child: const Row(
               children: [
                 ShimmerBox(width: 40, height: 40, borderRadius: 10),
-                SizedBox(width: 12),
+                SizedBox(width: AppSpacing.s04),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ShimmerBox(width: double.infinity, height: 13),
-                      SizedBox(height: 6),
+                      SizedBox(height: AppSpacing.iconTileGap),
                       ShimmerBox(width: 100, height: 11),
                     ],
                   ),
                 ),
-                SizedBox(width: 8),
+                SizedBox(width: AppSpacing.sm),
                 ShimmerBox(width: 60, height: 22, borderRadius: 20),
               ],
             ),
@@ -341,16 +342,16 @@ class _RenewalAlertsSectionState extends State<_RenewalAlertsSection> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.s04),
         ...visible.map(
           (p) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: Dismissible(
               key: ValueKey(p.idRen),
               direction: DismissDirection.endToStart,
               background: Container(
                 alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: 20),
+                padding: const EdgeInsets.only(right: AppSpacing.pagePaddingH),
                 decoration: BoxDecoration(
                   color: AppColors.textMuted.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
@@ -398,7 +399,7 @@ class _RenewalAlertCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.cardGap, vertical: AppSpacing.s04),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: color.withValues(alpha: 0.25)),
@@ -414,7 +415,7 @@ class _RenewalAlertCard extends StatelessWidget {
                   ),
                   child: Icon(Icons.event_outlined, color: color, size: 20),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.s04),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -428,7 +429,7 @@ class _RenewalAlertCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpacing.s01),
                       Text(
                         '${product.aseguradora} · ${_fmtDate(product.fechaRenovacion!)}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -440,10 +441,10 @@ class _RenewalAlertCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
@@ -456,7 +457,7 @@ class _RenewalAlertCard extends StatelessWidget {
                         ),
                   ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: AppSpacing.xs),
                 const Icon(Icons.chevron_right, color: AppColors.textMuted, size: 18),
               ],
             ),
@@ -542,7 +543,7 @@ class _QuickActionCard extends StatelessWidget {
               border: Border.all(color: cs.outlineVariant),
               borderRadius: BorderRadius.circular(12),
             ),
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -582,7 +583,7 @@ class _SupportCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.cardGap),
       decoration: BoxDecoration(
         color: cs.primary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
@@ -599,7 +600,7 @@ class _SupportCard extends StatelessWidget {
             ),
             child: Icon(Icons.support_agent_outlined, color: cs.primary, size: 24),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: AppSpacing.cardGap),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -610,7 +611,7 @@ class _SupportCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.s01),
                 Text(
                   'Lun–Vie · 8:00–17:00',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -645,7 +646,7 @@ class _NoPoliciesBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: cs.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
@@ -663,7 +664,7 @@ class _NoPoliciesBanner extends StatelessWidget {
             ),
             child: Icon(Icons.policy_outlined, color: cs.primary, size: 22),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: AppSpacing.cardGap),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
