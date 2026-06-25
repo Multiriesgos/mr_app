@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:mr_app/core/auth/biometrics_service.dart';
 import 'package:mr_app/core/di/settings_providers.dart';
 import 'package:mr_app/core/error/app_exception.dart';
@@ -23,13 +22,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _docController = TextEditingController();
   final _birthController = TextEditingController();
-  final _birthFocusNode = FocusNode();
   bool _rememberMe = true;
   bool _hasSubmitted = false;
   String? _errorMessage;
   bool _canUseBiometrics = false;
-
-  final _birthMask = MaskTextInputFormatter(mask: '##/##/####');
 
   @override
   void initState() {
@@ -83,8 +79,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void dispose() {
     _docController.dispose();
     _birthController.dispose();
-    _birthFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickBirthDate() async {
+    DateTime? initial;
+    if (_birthController.text.length == 10) {
+      final p = _birthController.text.split('/');
+      initial = DateTime.tryParse('${p[2]}-${p[1]}-${p[0]}');
+    }
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial ?? DateTime(DateTime.now().year - 30),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      helpText: 'Fecha de nacimiento',
+      cancelText: 'Cancelar',
+      confirmText: 'Seleccionar',
+    );
+    if (picked == null || !mounted) return;
+    _clearError();
+    setState(() {
+      _birthController.text =
+          '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+    });
   }
 
   Future<void> _submit() async {
@@ -173,8 +191,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     TextFormField(
                       controller: _docController,
                       keyboardType: TextInputType.number,
-                      textInputAction: TextInputAction.next,
-                      onEditingComplete: _birthFocusNode.requestFocus,
+                      textInputAction: TextInputAction.done,
                       decoration: const InputDecoration(
                         labelText: 'No. Documento',
                         hintText: 'Digite número de documento',
@@ -187,37 +204,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: AppSpacing.md),
                     TextFormField(
                       controller: _birthController,
-                      focusNode: _birthFocusNode,
-                      keyboardType: TextInputType.datetime,
-                      textInputAction: TextInputAction.done,
-                      onEditingComplete: () {
-                        _birthFocusNode.unfocus();
-                        _submit();
-                      },
-                      maxLength: 10,
-                      inputFormatters: [_birthMask],
+                      readOnly: true,
+                      onTap: _pickBirthDate,
                       decoration: const InputDecoration(
                         labelText: 'Fecha de nacimiento',
-                        hintText: 'dd/mm/aaaa',
+                        hintText: 'Seleccionar fecha',
                         prefixIcon: Icon(Icons.cake_outlined),
-                        counterText: '',
+                        suffixIcon: Icon(Icons.calendar_today_outlined),
                       ),
-                      validator: (v) {
-                        if (v == null || v.isEmpty) {
-                          return 'Digite fecha de nacimiento';
-                        }
-                        if (v.length != 10) return 'Formato: DD/MM/AAAA';
-                        final parts = v.split('/');
-                        final d = int.tryParse(parts[0]);
-                        final m = int.tryParse(parts[1]);
-                        final y = int.tryParse(parts[2]);
-                        if (d == null || m == null || y == null ||
-                            m < 1 || m > 12 || d < 1 || d > 31 ||
-                            y < 1900 || y > DateTime.now().year) {
-                          return 'Fecha inválida';
-                        }
-                        return null;
-                      },
+                      validator: (v) => (v == null || v.isEmpty)
+                          ? 'Seleccione fecha de nacimiento'
+                          : null,
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     CheckboxListTile(
