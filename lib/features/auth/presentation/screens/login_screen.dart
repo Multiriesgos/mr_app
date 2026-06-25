@@ -216,17 +216,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: AppSpacing.md),
                     TextFormField(
                       controller: _birthController,
-                      readOnly: true,
-                      onTap: _pickBirthDate,
-                      decoration: const InputDecoration(
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.done,
+                      inputFormatters: [_DateInputFormatter()],
+                      decoration: InputDecoration(
                         labelText: 'Fecha de nacimiento',
-                        hintText: 'Seleccionar fecha',
-                        prefixIcon: Icon(Icons.cake_outlined),
-                        suffixIcon: Icon(Icons.calendar_today_outlined),
+                        hintText: 'dd/mm/aaaa',
+                        prefixIcon: const Icon(Icons.cake_outlined),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.calendar_today_outlined),
+                          tooltip: 'Seleccionar con calendario',
+                          onPressed: _pickBirthDate,
+                        ),
                       ),
-                      validator: (v) => (v == null || v.isEmpty)
-                          ? 'Seleccione fecha de nacimiento'
-                          : null,
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Ingrese fecha de nacimiento';
+                        if (v.length < 10) return 'Fecha incompleta (dd/mm/aaaa)';
+                        return null;
+                      },
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     CheckboxListTile(
@@ -322,6 +329,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DateInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digits = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+    final buffer = StringBuffer();
+    for (var i = 0; i < digits.length && i < 8; i++) {
+      if (i == 2 || i == 4) buffer.write('/');
+      buffer.write(digits[i]);
+    }
+    final formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 }

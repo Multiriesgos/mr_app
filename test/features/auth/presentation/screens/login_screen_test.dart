@@ -108,7 +108,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('Ingrese número de documento'), findsOneWidget);
-      expect(find.text('Seleccione fecha de nacimiento'), findsOneWidget);
+      expect(find.text('Ingrese fecha de nacimiento'), findsOneWidget);
     });
 
     testWidgets('acepta texto en campo Documento', (tester) async {
