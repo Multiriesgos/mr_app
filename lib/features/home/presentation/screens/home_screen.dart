@@ -71,6 +71,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Future<void> _initNotifications() async {
+    // Inicializar local notifications antes que FCM para poder usarlo en foreground.
+    await ref.read(localNotificationServiceProvider).initialize();
+
     final service = ref.read(notificationServiceProvider);
     await service.initialize();
     final granted = await service.requestPermission();
@@ -112,6 +115,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   void _showNotifBanner(NotificationPayload payload) {
     if (!mounted) return;
+
+    // Mostrar notificación del sistema para que aparezca aunque la app esté en foreground.
+    ref.read(localNotificationServiceProvider).showNow(
+      id: DateTime.now().millisecondsSinceEpoch & 0x7FFFFFFF,
+      title: payload.title,
+      body: payload.body,
+    );
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Column(
