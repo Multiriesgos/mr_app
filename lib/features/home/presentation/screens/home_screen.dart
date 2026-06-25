@@ -68,7 +68,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   Future<void> _initNotifications() async {
     final service = ref.read(notificationServiceProvider);
     await service.initialize();
-    await service.requestPermission();
+    final granted = await service.requestPermission();
+
+    // Suscribir al topic específico del usuario para notificaciones dirigidas.
+    if (granted) {
+      final authState = ref.read(authProvider).valueOrNull;
+      if (authState is AuthAuthenticated) {
+        final docTopic = 'doc_${authState.user.documentNumber.replaceAll(RegExp('[^a-zA-Z0-9]'), '_')}';
+        await FirebaseMessaging.instance.subscribeToTopic(docTopic);
+      }
+    }
 
     if (!mounted) return;
 

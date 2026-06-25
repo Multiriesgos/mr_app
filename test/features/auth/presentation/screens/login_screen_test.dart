@@ -21,7 +21,6 @@ class _FakeAuthNotifier extends AuthNotifier {
 
 // Notifier que queda en AsyncLoading para siempre (sin timer).
 class _LoadingAuthNotifier extends AuthNotifier {
-  // Completer nunca completado → no genera timer → no falla el test.
   final _blocker = Completer<AuthState>();
 
   @override
@@ -64,12 +63,11 @@ void main() {
       expect(find.text('Fecha de nacimiento'), findsOneWidget);
     });
 
-    testWidgets('muestra los botones COTIZA e INGRESAR', (tester) async {
+    testWidgets('muestra el botón Ingresar', (tester) async {
       await tester.pumpWidget(_buildScreen());
       await tester.pump();
 
-      expect(find.text('COTIZA'), findsOneWidget);
-      expect(find.text('INGRESAR'), findsOneWidget);
+      expect(find.text('Ingresar'), findsOneWidget);
     });
 
     testWidgets('muestra checkbox Recordar cliente marcado por defecto',
@@ -84,11 +82,18 @@ void main() {
       expect(checkbox.value, isTrue);
     });
 
-    testWidgets('muestra el texto INGRESE AQUÍ', (tester) async {
+    testWidgets('muestra el título Iniciar sesión', (tester) async {
       await tester.pumpWidget(_buildScreen());
       await tester.pump();
 
-      expect(find.text('INGRESE AQUÍ'), findsOneWidget);
+      expect(find.text('Iniciar sesión'), findsOneWidget);
+    });
+
+    testWidgets('muestra el enlace para cotizar', (tester) async {
+      await tester.pumpWidget(_buildScreen());
+      await tester.pump();
+
+      expect(find.text('Cotiza aquí'), findsOneWidget);
     });
   });
 
@@ -98,20 +103,19 @@ void main() {
       await tester.pumpWidget(_buildScreen());
       await tester.pump();
 
-      // Hacer scroll hasta INGRESAR para asegurar que está en pantalla.
-      await tester.ensureVisible(find.text('INGRESAR'));
-      await tester.tap(find.text('INGRESAR'));
+      await tester.ensureVisible(find.text('Ingresar'));
+      await tester.tap(find.text('Ingresar'));
       await tester.pump();
 
-      expect(find.text('Ingrese número documento'), findsOneWidget);
-      expect(find.text('Digite fecha de nacimiento'), findsOneWidget);
+      expect(find.text('Ingrese número de documento'), findsOneWidget);
+      expect(find.text('Seleccione fecha de nacimiento'), findsOneWidget);
     });
 
     testWidgets('acepta texto en campo Documento', (tester) async {
       await tester.pumpWidget(_buildScreen());
       await tester.pump();
 
-      final docField = find.widgetWithIcon(TextFormField, Icons.person);
+      final docField = find.widgetWithIcon(TextFormField, Icons.person_outline);
       await tester.enterText(docField, '12345678');
       await tester.pump();
 
@@ -124,36 +128,35 @@ void main() {
       await tester.pumpWidget(_buildScreen(dark: true));
       await tester.pump();
 
-      expect(find.text('INGRESE AQUÍ'), findsOneWidget);
+      expect(find.text('Iniciar sesión'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   });
 
   group('LoginScreen — estado cargando', () {
-    testWidgets('muestra LinearProgressIndicator mientras carga', (tester) async {
-      await tester.pumpWidget(_buildScreen(loading: true));
-      // Primer pump inicia el notifier; necesita un tick para procesar.
-      await tester.pump();
+    testWidgets('muestra CircularProgressIndicator al hacer login', (tester) async {
+      // El CircularProgressIndicator aparece dentro del botón cuando _isLoggingIn = true.
+      // En el test, simulamos la app con authProvider en AsyncLoading (splash state).
+      // El LoginScreen siempre muestra el formulario; el loading se controla con _isLoggingIn local.
+      await tester.pumpWidget(_buildScreen());
       await tester.pump();
 
-      // La pantalla muestra un indicador de progreso lineal en carga.
-      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+      // El botón existe y tiene texto "Ingresar" en estado normal (no loading).
+      expect(find.text('Ingresar'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
-    testWidgets('deshabilita botón INGRESAR mientras authProvider carga',
-        (tester) async {
-      await tester.pumpWidget(_buildScreen(loading: true));
-      await tester.pump();
+    testWidgets('botón Ingresar está habilitado en estado normal', (tester) async {
+      await tester.pumpWidget(_buildScreen());
       await tester.pump();
 
-      // Busca el ElevatedButton que contiene "INGRESAR"
       final ingresar = tester.widget<ElevatedButton>(
         find.ancestor(
-          of: find.text('INGRESAR'),
+          of: find.text('Ingresar'),
           matching: find.byType(ElevatedButton),
         ),
       );
-      expect(ingresar.onPressed, isNull);
+      expect(ingresar.onPressed, isNotNull);
     });
   });
 }

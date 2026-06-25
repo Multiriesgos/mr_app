@@ -154,6 +154,11 @@ class _HomeContent extends ConsumerWidget {
     if (await canLaunchUrl(uri)) await launchUrl(uri);
   }
 
+  Future<void> _whatsApp() async {
+    final uri = Uri.parse(ExternalLinks.whatsappCenter);
+    if (await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
   Future<void> _openCotizador() async {
     final uri = Uri.parse(ExternalLinks.cotizador);
     if (await canLaunchUrl(uri)) {
@@ -167,6 +172,7 @@ class _HomeContent extends ConsumerWidget {
     final productsAsync = ref.watch(productsProvider);
 
     final renewingSoon = _renewingSoon(productsAsync.valueOrNull);
+    final products = productsAsync.valueOrNull;
 
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -177,11 +183,17 @@ class _HomeContent extends ConsumerWidget {
           if (productsAsync.isLoading) ...[
             _RenewalAlertsSkeleton(),
             const SizedBox(height: 28),
+            _StatsSkeleton(),
+            const SizedBox(height: AppSpacing.sectionGap),
           ] else if (renewingSoon.isNotEmpty) ...[
             _RenewalAlertsSection(
               products: renewingSoon,
               onProductTap: (p) => context.go('/home/products/${p.idRen}'),
             ),
+            const SizedBox(height: AppSpacing.cardGap),
+          ],
+          if (products != null && products.isNotEmpty) ...[
+            _StatsRow(products: products),
             const SizedBox(height: AppSpacing.sectionGap),
           ],
           Text(
@@ -231,7 +243,7 @@ class _HomeContent extends ConsumerWidget {
             _NoPoliciesBanner(onCotizar: _openCotizador),
           ],
           const SizedBox(height: AppSpacing.sectionGap),
-          _SupportCard(onCall: _call),
+          _SupportCard(onCall: _call, onWhatsApp: _whatsApp),
         ],
       ),
     );
@@ -247,6 +259,153 @@ class _HomeContent extends ConsumerWidget {
     }).toList()
       ..sort((a, b) => a.fechaRenovacion!.compareTo(b.fechaRenovacion!));
     return filtered;
+  }
+}
+
+// ─── Stats row ────────────────────────────────────────────────────────────────
+
+class _StatsRow extends StatelessWidget {
+  const _StatsRow({required this.products});
+
+  final List<Product> products;
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final total = products.length;
+    final vigentes = products.where((p) {
+      if (p.fechaRenovacion == null) return true;
+      return p.fechaRenovacion!.difference(now).inDays > 30;
+    }).length;
+    final proximas = products.where((p) {
+      if (p.fechaRenovacion == null) return false;
+      final diff = p.fechaRenovacion!.difference(now).inDays;
+      return diff >= 0 && diff <= 30;
+    }).length;
+    final vencidas = products.where((p) {
+      if (p.fechaRenovacion == null) return false;
+      return p.fechaRenovacion!.isBefore(now);
+    }).length;
+
+    return Row(
+      children: [
+        _StatCard(
+          value: '$total',
+          label: total == 1 ? 'Póliza' : 'Pólizas',
+          color: Theme.of(context).colorScheme.primary,
+          icon: Icons.description_outlined,
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        _StatCard(
+          value: '$vigentes',
+          label: 'Vigentes',
+          color: AppColors.success,
+          icon: Icons.check_circle_outline,
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        if (vencidas > 0)
+          _StatCard(
+            value: '$vencidas',
+            label: 'Vencidas',
+            color: AppColors.error,
+            icon: Icons.error_outline,
+          )
+        else
+          _StatCard(
+            value: '$proximas',
+            label: 'Por vencer',
+            color: AppColors.warning,
+            icon: Icons.access_time_outlined,
+          ),
+      ],
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  const _StatCard({
+    required this.value,
+    required this.label,
+    required this.color,
+    required this.icon,
+  });
+
+  final String value;
+  final String label;
+  final Color color;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.s04, horizontal: AppSpacing.sm),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: color.withValues(alpha: 0.18)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color, size: 18),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                  ),
+            ),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                    fontSize: 10,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatsSkeleton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (int i = 0; i < 3; i++) ...[
+            if (i > 0) const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: cs.outlineVariant),
+                ),
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ShimmerBox(width: 18, height: 18),
+                    SizedBox(height: AppSpacing.xs),
+                    ShimmerBox(width: 28, height: 16),
+                    SizedBox(height: 3),
+                    ShimmerBox(width: 50, height: 10),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }
 
@@ -575,9 +734,10 @@ class _QuickActionCard extends StatelessWidget {
 // ─── Support card ─────────────────────────────────────────────────────────────
 
 class _SupportCard extends StatelessWidget {
-  const _SupportCard({required this.onCall});
+  const _SupportCard({required this.onCall, required this.onWhatsApp});
 
   final VoidCallback onCall;
+  final VoidCallback onWhatsApp;
 
   @override
   Widget build(BuildContext context) {
@@ -589,46 +749,78 @@ class _SupportCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: cs.primary.withValues(alpha: 0.15)),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: cs.primary.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.support_agent_outlined, color: cs.primary, size: 24),
-          ),
-          const SizedBox(width: AppSpacing.cardGap),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Centro de atención',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: cs.primary.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
                 ),
-                const SizedBox(height: AppSpacing.s01),
-                Text(
-                  'Lun–Vie · 8:00–17:00',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textMuted,
-                      ),
-                ),
-              ],
-            ),
+                child: Icon(Icons.support_agent_outlined, color: cs.primary, size: 24),
+              ),
+              const SizedBox(width: AppSpacing.cardGap),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Centro de atención',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  const SizedBox(height: AppSpacing.s01),
+                  Text(
+                    'Lun–Vie · 8:00–17:00',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textMuted,
+                        ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          Semantics(
-            label: 'Llamar al centro de atención',
-            button: true,
-            child: IconButton(
-              onPressed: onCall,
-              icon: Icon(Icons.phone_outlined, color: cs.primary, size: 22),
-              tooltip: 'Llamar',
-            ),
+          const SizedBox(height: AppSpacing.s04),
+          Row(
+            children: [
+              Expanded(
+                child: Semantics(
+                  label: 'Llamar al centro de atención',
+                  button: true,
+                  child: OutlinedButton.icon(
+                    onPressed: onCall,
+                    icon: Icon(Icons.phone_outlined, color: cs.primary, size: 16),
+                    label: Text('Llamar', style: TextStyle(color: cs.primary)),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: cs.primary.withValues(alpha: 0.4)),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.s04),
+              Expanded(
+                child: Semantics(
+                  label: 'Escribir por WhatsApp al centro de atención',
+                  button: true,
+                  child: OutlinedButton.icon(
+                    onPressed: onWhatsApp,
+                    icon: const Icon(Icons.chat_bubble_outline, color: Color(0xFF25D366), size: 16),
+                    label: const Text('WhatsApp', style: TextStyle(color: Color(0xFF25D366))),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0x5525D366)),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

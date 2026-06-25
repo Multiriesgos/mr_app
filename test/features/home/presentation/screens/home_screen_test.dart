@@ -42,11 +42,13 @@ Widget _buildHomeTab({bool dark = false}) {
 
 void main() {
   group('HomeTab — estructura básica', () {
-    testWidgets('muestra saludo "Bienvenido," en el AppBar', (tester) async {
+    testWidgets('muestra saludo dinámico en el AppBar', (tester) async {
       await tester.pumpWidget(_buildHomeTab());
       await tester.pump();
 
-      expect(find.text('Bienvenido,'), findsOneWidget);
+      final greetings = ['Buenos días,', 'Buenas tardes,', 'Buenas noches,'];
+      final found = greetings.any((g) => find.text(g).evaluate().isNotEmpty);
+      expect(found, isTrue, reason: 'Debe mostrar un saludo según la hora');
     });
 
     testWidgets('muestra el nombre del usuario en mayúsculas en el AppBar',
@@ -57,30 +59,41 @@ void main() {
       expect(find.text('JUAN PÉREZ'), findsOneWidget);
     });
 
-    testWidgets('muestra el título principal de bienvenida', (tester) async {
+    testWidgets('muestra sección ACCESO RÁPIDO', (tester) async {
       await tester.pumpWidget(_buildHomeTab());
       await tester.pump();
 
-      expect(find.text('Bienvenido a Multimate'), findsOneWidget);
+      expect(find.text('ACCESO RÁPIDO'), findsOneWidget);
     });
 
-    testWidgets('muestra botones de soporte y logout en AppBar', (tester) async {
+    testWidgets('muestra botón de logout en AppBar', (tester) async {
       await tester.pumpWidget(_buildHomeTab());
       await tester.pump();
 
-      final inAppBar = find.descendant(
-        of: find.byType(AppBar),
-        matching: find.byIcon(Icons.support_agent_outlined),
-      );
-      expect(inAppBar, findsOneWidget);
       expect(find.byIcon(Icons.logout_outlined), findsOneWidget);
     });
 
-    testWidgets('muestra el subtítulo de la app', (tester) async {
+    testWidgets('muestra tarjeta de soporte con ícono en el cuerpo',
+        (tester) async {
       await tester.pumpWidget(_buildHomeTab());
       await tester.pump();
 
-      expect(find.text('Tu app de seguros y beneficios'), findsOneWidget);
+      expect(find.byIcon(Icons.support_agent_outlined), findsOneWidget);
+    });
+
+    testWidgets('muestra botón WhatsApp en soporte', (tester) async {
+      await tester.pumpWidget(_buildHomeTab());
+      await tester.pump();
+
+      expect(find.byIcon(Icons.chat_bubble_outline), findsOneWidget);
+    });
+
+    testWidgets('muestra acciones rápidas de pólizas y carnet', (tester) async {
+      await tester.pumpWidget(_buildHomeTab());
+      await tester.pump();
+
+      expect(find.text('Mis pólizas'), findsOneWidget);
+      expect(find.text('Mi carnet'), findsOneWidget);
     });
   });
 
@@ -89,20 +102,20 @@ void main() {
       await tester.pumpWidget(_buildHomeTab(dark: true));
       await tester.pump();
 
-      expect(find.text('Bienvenido,'), findsOneWidget);
+      final greetings = ['Buenos días,', 'Buenas tardes,', 'Buenas noches,'];
+      final found = greetings.any((g) => find.text(g).evaluate().isNotEmpty);
+      expect(found, isTrue);
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('contiene los mismos elementos en dark y light', (tester) async {
-      // Light
       await tester.pumpWidget(_buildHomeTab());
       await tester.pump();
-      expect(find.text('Bienvenido a Multimate'), findsOneWidget);
+      expect(find.text('ACCESO RÁPIDO'), findsOneWidget);
 
-      // Dark
       await tester.pumpWidget(_buildHomeTab(dark: true));
       await tester.pump();
-      expect(find.text('Bienvenido a Multimate'), findsOneWidget);
+      expect(find.text('ACCESO RÁPIDO'), findsOneWidget);
     });
   });
 
@@ -116,6 +129,17 @@ void main() {
         find.bySemanticsLabel('Llamar al centro de atención'),
       );
       expect(semantics.label, 'Llamar al centro de atención');
+    });
+
+    testWidgets('botón de WhatsApp tiene Semantics con label descriptivo',
+        (tester) async {
+      await tester.pumpWidget(_buildHomeTab());
+      await tester.pump();
+
+      final semantics = tester.getSemantics(
+        find.bySemanticsLabel('Escribir por WhatsApp al centro de atención'),
+      );
+      expect(semantics.label, 'Escribir por WhatsApp al centro de atención');
     });
 
     testWidgets('botón de logout tiene Semantics con label descriptivo',

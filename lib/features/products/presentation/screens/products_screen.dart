@@ -13,11 +13,59 @@ import 'package:mr_app/features/products/domain/entities/product.dart';
 import 'package:mr_app/features/products/presentation/providers/products_notifier.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ProductsScreen extends ConsumerWidget {
+enum _PolicyFilter { all, vigente, proxima, vencida }
+
+class ProductsScreen extends ConsumerStatefulWidget {
   const ProductsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProductsScreen> createState() => _ProductsScreenState();
+}
+
+class _ProductsScreenState extends ConsumerState<ProductsScreen> {
+  final _searchController = TextEditingController();
+  String _query = '';
+  _PolicyFilter _filter = _PolicyFilter.all;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<Product> _applyFilter(List<Product> products) {
+    var result = products;
+    if (_query.isNotEmpty) {
+      final q = _query.toLowerCase();
+      result = result.where((p) =>
+        p.ramo.toLowerCase().contains(q) ||
+        p.tipoSeguro.toLowerCase().contains(q) ||
+        p.aseguradora.toLowerCase().contains(q) ||
+        p.placa.toLowerCase().contains(q) ||
+        (p.adjunto?.toLowerCase().contains(q) ?? false),
+      ).toList();
+    }
+    final now = DateTime.now();
+    return switch (_filter) {
+      _PolicyFilter.all => result,
+      _PolicyFilter.vigente => result.where((p) {
+          if (p.fechaRenovacion == null) return true;
+          return p.fechaRenovacion!.difference(now).inDays > 30;
+        }).toList(),
+      _PolicyFilter.proxima => result.where((p) {
+          if (p.fechaRenovacion == null) return false;
+          final d = p.fechaRenovacion!.difference(now).inDays;
+          return d >= 0 && d <= 30;
+        }).toList(),
+      _PolicyFilter.vencida => result.where((p) {
+          if (p.fechaRenovacion == null) return false;
+          return p.fechaRenovacion!.isBefore(now);
+        }).toList(),
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(productsProvider);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -46,9 +94,14 @@ class ProductsScreen extends ConsumerWidget {
                 count: state.valueOrNull?.length,
               ),
               _LastUpdatedBar(
-                lastUpdated: ref
-                    .watch(productsProvider.notifier)
-                    .lastUpdated,
+                lastUpdated: ref.watch(productsProvider.notifier).lastUpdated,
+              ),
+              _SearchAndFilter(
+                controller: _searchController,
+                query: _query,
+                filter: _filter,
+                onQueryChanged: (q) => setState(() => _query = q),
+                onFilterChanged: (f) => setState(() => _filter = f),
               ),
               Expanded(
                 child: RefreshIndicator(
@@ -64,14 +117,167 @@ class ProductsScreen extends ConsumerWidget {
                       onRetry: () =>
                           ref.read(productsProvider.notifier).reload(),
                     ),
-                    data: (products) => products.isEmpty
-                        ? const _EmptyView()
-                        : _ProductList(products: products),
+                    data: (products) {
+                      if (products.isEmpty) return const _EmptyView();
+                      final filtered = _applyFilter(products);
+                      if (filtered.isEmpty) return const _EmptySearchView();
+                      return _ProductList(products: filtered);
+                    },
                   ),
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Búsqueda y filtros ───────────────────────────────────────────────────────
+
+class _SearchAndFilter extends StatelessWidget {
+  const _SearchAndFilter({
+    required this.controller,
+    required this.query,
+    required this.filter,
+    required this.onQueryChanged,
+    required this.onFilterChanged,
+  });
+
+  final TextEditingController controller;
+  final String query;
+  final _PolicyFilter filter;
+  final ValueChanged<String> onQueryChanged;
+  final ValueChanged<_PolicyFilter> onFilterChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.xs),
+          child: TextField(
+            controller: controller,
+            onChanged: onQueryChanged,
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              hintText: 'Buscar por ramo, placa, aseguradora…',
+              prefixIcon: const Icon(Icons.search, size: 20),
+              suffixIcon: query.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, size: 18),
+                      onPressed: () {
+                        controller.clear();
+                        onQueryChanged('');
+                      },
+                    )
+                  : null,
+              contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 10),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              filled: true,
+              fillColor: cs.surfaceContainerLow,
+              isDense: true,
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 38,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            children: [
+              _FilterChipItem(label: 'Todas', value: _PolicyFilter.all, selected: filter, onTap: onFilterChanged),
+              _FilterChipItem(label: 'Vigentes', value: _PolicyFilter.vigente, selected: filter, onTap: onFilterChanged),
+              _FilterChipItem(label: 'Por vencer', value: _PolicyFilter.proxima, selected: filter, onTap: onFilterChanged),
+              _FilterChipItem(label: 'Vencidas', value: _PolicyFilter.vencida, selected: filter, onTap: onFilterChanged),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+      ],
+    );
+  }
+}
+
+class _FilterChipItem extends StatelessWidget {
+  const _FilterChipItem({
+    required this.label,
+    required this.value,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final _PolicyFilter value;
+  final _PolicyFilter selected;
+  final ValueChanged<_PolicyFilter> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isSelected = value == selected;
+    return Padding(
+      padding: const EdgeInsets.only(right: AppSpacing.xs),
+      child: FilterChip(
+        label: Text(label),
+        selected: isSelected,
+        onSelected: (_) => onTap(value),
+        selectedColor: cs.primary.withValues(alpha: 0.12),
+        checkmarkColor: cs.primary,
+        labelStyle: TextStyle(
+          fontSize: 12,
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+          color: isSelected ? cs.primary : cs.onSurfaceVariant,
+        ),
+        side: BorderSide(
+          color: isSelected ? cs.primary : cs.outlineVariant,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+        visualDensity: VisualDensity.compact,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+    );
+  }
+}
+
+// ─── Empty search result ──────────────────────────────────────────────────────
+
+class _EmptySearchView extends StatelessWidget {
+  const _EmptySearchView();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.search_off_outlined,
+              size: 48,
+              color: cs.onSurfaceVariant.withValues(alpha: 0.4),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Sin resultados',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'No hay pólizas que coincidan con tu búsqueda.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
+            ),
+          ],
         ),
       ),
     );
