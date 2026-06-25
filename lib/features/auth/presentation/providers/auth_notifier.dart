@@ -73,15 +73,12 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     required String birthDate,
     required bool rememberMe,
   }) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final user = await _login(
-        documentNumber: documentNumber,
-        birthDate: birthDate,
-        rememberMe: rememberMe,
-      );
-      return AuthAuthenticated(user);
-    });
+    final user = await _login(
+      documentNumber: documentNumber,
+      birthDate: birthDate,
+      rememberMe: rememberMe,
+    );
+    state = AsyncData(AuthAuthenticated(user));
   }
 
   Future<void> logout() async {

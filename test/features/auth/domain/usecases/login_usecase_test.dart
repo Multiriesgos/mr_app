@@ -29,6 +29,9 @@ class _FakeAuthRepository implements AuthRepository {
   Future<String?> getSavedDocumentNumber() async => null;
 
   @override
+  Future<String?> getSavedBirthDate() async => null;
+
+  @override
   Future<bool> getSavedRememberMe() async => false;
 }
 

@@ -8,6 +8,7 @@ import 'package:mr_app/core/di/settings_providers.dart';
 import 'package:mr_app/core/error/app_exception.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
 import 'package:mr_app/core/theme/app_spacing.dart';
+import 'package:mr_app/core/widgets/carbon_inline_notification.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -26,6 +27,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _hasSubmitted = false;
   String? _errorMessage;
   bool _canUseBiometrics = false;
+  bool _isLoggingIn = false;
 
   @override
   void initState() {
@@ -64,11 +66,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           reason: 'Ingresa a tu cuenta Multimate',
         );
     if (!mounted || !ok) return;
-    await ref.read(authProvider.notifier).login(
-          documentNumber: _docController.text.trim(),
-          birthDate: _birthController.text.trim(),
-          rememberMe: _rememberMe,
-        );
+    try {
+      setState(() => _isLoggingIn = true);
+      await ref.read(authProvider.notifier).login(
+            documentNumber: _docController.text.trim(),
+            birthDate: _birthController.text.trim(),
+            rememberMe: _rememberMe,
+          );
+    } catch (err) {
+      if (!mounted) return;
+      final msg = err is AppException
+          ? err.message
+          : 'Error de conexión. Intente de nuevo.';
+      setState(() { _errorMessage = msg; _isLoggingIn = false; });
+    }
   }
 
   void _clearError() {
@@ -108,11 +119,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _submit() async {
     setState(() { _errorMessage = null; _hasSubmitted = true; });
     if (!_formKey.currentState!.validate()) return;
-    await ref.read(authProvider.notifier).login(
-          documentNumber: _docController.text.trim(),
-          birthDate: _birthController.text.trim(),
-          rememberMe: _rememberMe,
-        );
+    try {
+      setState(() => _isLoggingIn = true);
+      await ref.read(authProvider.notifier).login(
+            documentNumber: _docController.text.trim(),
+            birthDate: _birthController.text.trim(),
+            rememberMe: _rememberMe,
+          );
+    } catch (err) {
+      if (!mounted) return;
+      final msg = err is AppException
+          ? err.message
+          : 'Error de conexión. Intente de nuevo.';
+      setState(() { _errorMessage = msg; _isLoggingIn = false; });
+    }
   }
 
   Future<void> _openCotizador() async {
@@ -141,16 +161,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             HapticFeedback.mediumImpact();
           }
         },
-        error: (err, _) {
-          final msg = err is AppException
-              ? err.message
-              : 'Error de conexión. Intente de nuevo.';
-          setState(() => _errorMessage = msg);
-        },
       );
     });
-
-    final isLoading = ref.watch(authProvider).isLoading;
 
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
@@ -239,57 +251,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ? Padding(
                               key: const ValueKey('error-banner'),
                               padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: AppSpacing.cardGap,
-                                  vertical: AppSpacing.s04,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.errorBg,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: AppColors.error.withValues(alpha: 0.3),
-                                  ),
-                                ),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Padding(
-                                      padding: EdgeInsets.only(top: 1),
-                                      child: Icon(
-                                        Icons.error_rounded,
-                                        color: AppColors.errorDark,
-                                        size: 20,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Text(
-                                        _errorMessage!,
-                                        style: const TextStyle(
-                                          color: AppColors.errorDark,
-                                          fontSize: 13,
-                                          height: 1.4,
-                                        ),
-                                      ),
-                                    ),
-                                    GestureDetector(
-                                      onTap: _clearError,
-                                      child: const Icon(
-                                        Icons.close_rounded,
-                                        color: AppColors.errorDark,
-                                        size: 18,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              child: CarbonInlineNotification(
+                                kind: CarbonNotificationKind.error,
+                                title: _errorMessage!,
+                                onClose: _clearError,
                               ),
                             )
                           : const SizedBox.shrink(key: ValueKey('no-error')),
                     ),
                     ElevatedButton(
-                      onPressed: isLoading ? null : _submit,
-                      child: isLoading
+                      onPressed: _isLoggingIn ? null : _submit,
+                      child: _isLoggingIn
                           ? const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               mainAxisSize: MainAxisSize.min,
@@ -311,7 +283,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     if (_canUseBiometrics) ...[
                       const SizedBox(height: AppSpacing.s04),
                       OutlinedButton.icon(
-                        onPressed: isLoading ? null : _triggerBiometric,
+                        onPressed: _isLoggingIn ? null : _triggerBiometric,
                         icon: const Icon(Icons.fingerprint),
                         label: const Text('Ingresar con biometría'),
                       ),
@@ -325,7 +297,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                         TextButton(
-                          onPressed: isLoading ? null : _openCotizador,
+                          onPressed: _isLoggingIn ? null : _openCotizador,
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.zero,
                             minimumSize: Size.zero,

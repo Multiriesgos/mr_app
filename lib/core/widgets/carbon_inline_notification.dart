@@ -13,6 +13,7 @@ class CarbonInlineNotification extends StatelessWidget {
     required this.title,
     this.subtitle,
     this.onAction,
+    this.onClose,
     super.key,
   });
 
@@ -22,6 +23,9 @@ class CarbonInlineNotification extends StatelessWidget {
 
   /// Si se provee, toda la notificación se vuelve tappable y aparece ícono →
   final VoidCallback? onAction;
+
+  /// Si se provee, muestra un botón X para cerrar la notificación.
+  final VoidCallback? onClose;
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +69,13 @@ class CarbonInlineNotification extends StatelessWidget {
               Icons.open_in_new_outlined,
               size: 18,
               color: fg.withValues(alpha: 0.70),
+            ),
+          ],
+          if (onClose != null) ...[
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: onClose,
+              child: Icon(Icons.close_rounded, size: 18, color: fg.withValues(alpha: 0.70)),
             ),
           ],
         ],

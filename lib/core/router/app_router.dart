@@ -64,8 +64,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       final authAsync = ref.read(authProvider);
       final loc = state.matchedLocation;
 
-      if (authAsync.isLoading || !authAsync.hasValue) {
+      // Startup inicial: sin valor previo → splash
+      if (authAsync.isLoading && !authAsync.hasValue) {
         return loc == '/' ? null : '/';
+      }
+
+      // Error de login → permanecer en login (no redirigir a splash)
+      if (authAsync.hasError) {
+        return loc == '/login' ? null : '/login';
+      }
+
+      if (!authAsync.hasValue) {
+        return loc == '/login' ? null : '/login';
       }
 
       final auth = authAsync.requireValue;
