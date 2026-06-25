@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:mr_app/core/auth/biometrics_service.dart';
+import 'package:mr_app/core/di/settings_providers.dart';
 import 'package:mr_app/core/error/app_exception.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
 import 'package:mr_app/core/theme/app_spacing.dart';
@@ -23,6 +27,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _rememberMe = true;
   bool _hasSubmitted = false;
   String? _errorMessage;
+  bool _canUseBiometrics = false;
 
   final _birthMask = MaskTextInputFormatter(mask: '##/##/####');
 
@@ -43,6 +48,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (savedDoc != null) _docController.text = savedDoc;
       if (savedBirth != null) _birthController.text = savedBirth;
     });
+    if (savedDoc != null && savedBirth != null) unawaited(_checkBiometrics());
+  }
+
+  Future<void> _checkBiometrics() async {
+    final enabled = await ref.read(biometricsEnabledProvider.future);
+    if (!enabled || !mounted) return;
+    final availability =
+        await ref.read(biometricsServiceProvider).checkAvailability();
+    if (!mounted) return;
+    if (availability == BiometricAvailability.available) {
+      setState(() => _canUseBiometrics = true);
+      unawaited(_triggerBiometric());
+    }
+  }
+
+  Future<void> _triggerBiometric() async {
+    final ok = await ref.read(biometricsServiceProvider).authenticate(
+          reason: 'Ingresa a tu cuenta Multimate',
+        );
+    if (!mounted || !ok) return;
+    await ref.read(authProvider.notifier).login(
+          documentNumber: _docController.text.trim(),
+          birthDate: _birthController.text.trim(),
+          rememberMe: _rememberMe,
+        );
   }
 
   void _clearError() {
@@ -281,6 +311,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             )
                           : const Text('Ingresar'),
                     ),
+                    if (_canUseBiometrics) ...[
+                      const SizedBox(height: AppSpacing.s04),
+                      OutlinedButton.icon(
+                        onPressed: isLoading ? null : _triggerBiometric,
+                        icon: const Icon(Icons.fingerprint),
+                        label: const Text('Ingresar con biometría'),
+                      ),
+                    ],
                     const SizedBox(height: AppSpacing.s04),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
