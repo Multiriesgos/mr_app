@@ -29,8 +29,12 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen>
     with WidgetsBindingObserver {
   int _currentIndex = 0;
-  bool _needsBiometricCheck = false;
+  DateTime? _backgroundedAt;
   StreamSubscription<NotificationPayload>? _notifSubscription;
+
+  // Re-auth biométrica solo si el usuario estuvo fuera más de este umbral.
+  // Evita pedir biométrico al volver de links externos (llamada, WhatsApp, cotizador).
+  static const _kBiometricTimeoutSeconds = 300; // 5 minutos
   final List<ScrollController> _scrollControllers =
       List.generate(4, (_) => ScrollController());
 
@@ -148,10 +152,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     if (state == AppLifecycleState.paused) {
       final biometricsEnabled =
           ref.read(biometricsEnabledProvider).valueOrNull ?? false;
-      if (biometricsEnabled) _needsBiometricCheck = true;
-    } else if (state == AppLifecycleState.resumed && _needsBiometricCheck) {
-      _needsBiometricCheck = false;
-      _runBiometricCheck();
+      if (biometricsEnabled) _backgroundedAt = DateTime.now();
+    } else if (state == AppLifecycleState.resumed) {
+      final at = _backgroundedAt;
+      _backgroundedAt = null;
+      if (at != null) {
+        final elapsed = DateTime.now().difference(at).inSeconds;
+        if (elapsed >= _kBiometricTimeoutSeconds) _runBiometricCheck();
+      }
     }
   }
 
