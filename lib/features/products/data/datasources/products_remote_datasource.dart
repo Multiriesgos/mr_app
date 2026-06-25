@@ -47,10 +47,12 @@ class ProductsRemoteDataSourceImpl implements ProductsRemoteDataSource {
     }
 
     final list = jsonDecode(response.body) as List<dynamic>;
-    return list
+    final models = list
         .cast<Map<String, dynamic>>()
         .map(ProductModel.fromJson)
         .toList();
+    appLogger.info('products: cargado ${models.length} pólizas');
+    return models;
   }
 
   @override

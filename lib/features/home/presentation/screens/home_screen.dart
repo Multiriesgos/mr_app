@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/core/auth/biometrics_service.dart';
+import 'package:mr_app/core/logging/app_logger.dart';
 import 'package:mr_app/core/di/settings_providers.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
@@ -76,6 +77,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       if (authState is AuthAuthenticated) {
         final docTopic = 'doc_${authState.user.documentNumber.replaceAll(RegExp('[^a-zA-Z0-9]'), '_')}';
         await FirebaseMessaging.instance.subscribeToTopic(docTopic);
+        appLogger.info('notifications: suscrito al topic "$docTopic"');
       }
     }
 
