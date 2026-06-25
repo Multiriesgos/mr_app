@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
+import 'package:mr_app/core/theme/app_motion.dart';
 import 'package:mr_app/core/theme/app_spacing.dart';
+import 'package:mr_app/core/theme/app_text_styles.dart';
 import 'package:mr_app/core/widgets/shimmer_box.dart';
 import 'package:mr_app/features/auth/domain/entities/user.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
@@ -94,28 +96,96 @@ class HomeTab extends ConsumerWidget {
     );
   }
 
+  // Carbon Modal: sin ícono, título alineado a la izquierda, X de cierre,
+  // divisor antes del footer, botones alineados a la derecha.
   static void _showLogoutDialog(BuildContext context, WidgetRef ref) {
-    showDialog<void>(
+    showGeneralDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        icon: const Icon(Icons.logout_outlined, color: AppColors.error, size: 32),
-        title: const Text('¿Cerrar sesión?'),
-        content: const Text('Tendrás que volver a ingresar tus credenciales.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
-            onPressed: () async {
-              Navigator.of(ctx).pop();
-              await ref.read(authProvider.notifier).logout();
-              if (context.mounted) context.go('/login');
-            },
-            child: const Text('Cerrar sesión'),
-          ),
-        ],
+      barrierDismissible: true,
+      barrierLabel: 'Cerrar',
+      barrierColor: Colors.black54,
+      transitionDuration: AppMotion.moderate02,
+      transitionBuilder: (ctx, anim, _, child) => FadeTransition(
+        opacity: CurvedAnimation(parent: anim, curve: AppMotion.entrance),
+        child: ScaleTransition(
+          scale: Tween<double>(begin: 0.96, end: 1)
+              .animate(CurvedAnimation(parent: anim, curve: AppMotion.entrance)),
+          child: child,
+        ),
+      ),
+      pageBuilder: (ctx, _, __) => Dialog(
+        shape: const RoundedRectangleBorder(),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header Carbon: título izquierda + X derecha
+            Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.xs, AppSpacing.xs),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '¿Cerrar sesión?',
+                      style: AppTextStyles.heading02.copyWith(color: AppColors.textPrimary),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    icon: const Icon(Icons.close, size: 20),
+                    color: AppColors.textMuted,
+                    tooltip: 'Cancelar',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                  ),
+                ],
+              ),
+            ),
+            // Contenido
+            Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.lg),
+              child: Text(
+                'Tendrás que volver a ingresar tus credenciales la próxima vez.',
+                style: AppTextStyles.body01.copyWith(color: AppColors.textBody),
+              ),
+            ),
+            // Divisor Carbon antes del footer
+            const Divider(height: 1),
+            // Footer: Cancelar (ghost) + Cerrar sesión (danger)
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      shape: const RoundedRectangleBorder(),
+                    ),
+                    child: const Text('Cancelar'),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.error,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(0, 40),
+                      shape: const RoundedRectangleBorder(),
+                    ),
+                    onPressed: () async {
+                      Navigator.of(ctx).pop();
+                      await ref.read(authProvider.notifier).logout();
+                      if (context.mounted) context.go('/login');
+                    },
+                    child: const Text('Cerrar sesión'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,11 +8,13 @@ import 'package:intl/intl.dart';
 import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/error/app_exception.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
+import 'package:mr_app/core/theme/app_motion.dart';
 import 'package:mr_app/core/theme/app_spacing.dart';
 import 'package:mr_app/core/widgets/carbon_tag.dart';
 import 'package:mr_app/core/widgets/skeleton_product_list.dart';
 import 'package:mr_app/features/products/domain/entities/product.dart';
 import 'package:mr_app/features/products/presentation/providers/products_notifier.dart';
+import 'package:share_plus/share_plus.dart' show ShareParams, SharePlus;
 import 'package:url_launcher/url_launcher.dart';
 
 enum _PolicyFilter { all, vigente, proxima, vencida }
@@ -430,13 +434,13 @@ class _AnimatedPolicyCardState extends State<_AnimatedPolicyCard>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 350),
+    duration: AppMotion.slow01,
   );
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(milliseconds: widget.index * 70), () {
+    Future.delayed(Duration(milliseconds: widget.index * AppMotion.fast01.inMilliseconds), () {
       if (mounted) _ctrl.forward();
     });
   }
@@ -450,11 +454,11 @@ class _AnimatedPolicyCardState extends State<_AnimatedPolicyCard>
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _ctrl,
+      animation: CurvedAnimation(parent: _ctrl, curve: AppMotion.entrance),
       builder: (context, child) => Opacity(
         opacity: _ctrl.value,
         child: Transform.translate(
-          offset: Offset(0, 16 * (1 - _ctrl.value)),
+          offset: Offset(0, 12 * (1 - _ctrl.value)),
           child: child,
         ),
       ),
@@ -462,6 +466,12 @@ class _AnimatedPolicyCardState extends State<_AnimatedPolicyCard>
     );
   }
 }
+
+// ─── Carbon Tile ──────────────────────────────────────────────────────────────
+// Patrón IBM Carbon: sin sombra, borde 1px, border-radius 2px, franja izquierda
+// de color semántico, overflow menu ⋮ en lugar de chevron_right.
+
+enum _PolicyAction { detail, copy, share }
 
 class _PolicyCard extends StatelessWidget {
   const _PolicyCard({required this.product});
@@ -483,123 +493,123 @@ class _PolicyCard extends StatelessWidget {
           '${dateStr != null ? ", renovación $dateStr" : ""}',
       button: true,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 5),
+        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+        // Carbon Tile: borde 1px, radius 2px, sin sombra
         decoration: BoxDecoration(
           color: cs.surface,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(2),
           border: Border.all(color: cs.outlineVariant),
-          boxShadow: AppColors.shadowSm,
         ),
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: () => context.push(
-              '/home/products/${product.idRen}',
-              extra: product,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: ramoColor.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(ramoIcon, color: ramoColor, size: 22),
-                  ),
-                  const SizedBox(width: AppSpacing.cardGap),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(2),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => context.push('/home/products/${product.idRen}', extra: product),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Franja izquierda de color semántico (Carbon-adjacent pattern)
+                    Container(width: 4, color: ramoColor),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(AppSpacing.sm, AppSpacing.sm, 0, AppSpacing.sm),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Ícono del ramo
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: ramoColor.withValues(alpha: 0.10),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                              child: Icon(ramoIcon, color: ramoColor, size: 20),
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            // Contenido principal
                             Expanded(
-                              child: Text(
-                                product.ramo,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall
-                                    ?.copyWith(fontWeight: FontWeight.w600),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          product.ramo,
+                                          style: Theme.of(context).textTheme.titleSmall
+                                              ?.copyWith(fontWeight: FontWeight.w600),
+                                        ),
+                                      ),
+                                      if (statusWidget != null) ...[
+                                        const SizedBox(width: AppSpacing.xs),
+                                        statusWidget,
+                                      ],
+                                    ],
+                                  ),
+                                  const SizedBox(height: AppSpacing.xs),
+                                  Text(
+                                    product.tipoSeguro,
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(color: cs.onSurfaceVariant),
+                                  ),
+                                  if (product.placa.isNotEmpty) ...[
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      product.placa,
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                            color: cs.onSurfaceVariant,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                    ),
+                                  ],
+                                  if (dateStr != null) ...[
+                                    const SizedBox(height: AppSpacing.xs),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.calendar_today_outlined, size: 11, color: cs.onSurfaceVariant),
+                                        const SizedBox(width: AppSpacing.xs),
+                                        Text(
+                                          'Renueva: $dateStr',
+                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                color: cs.onSurfaceVariant,
+                                                fontSize: 11,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                  if (product.fechaRenovacion != null &&
+                                      product.fechaRenovacion!.difference(DateTime.now()).inDays <= 30) ...[
+                                    const SizedBox(height: AppSpacing.iconTileGap),
+                                    CarbonTag(
+                                      label: 'Renovar',
+                                      type: product.fechaRenovacion!.isBefore(DateTime.now())
+                                          ? CarbonTagType.error
+                                          : CarbonTagType.warning,
+                                      icon: Icons.autorenew_rounded,
+                                      onTap: () async {
+                                        final uri = Uri.parse(ExternalLinks.cotizador);
+                                        if (await canLaunchUrl(uri)) {
+                                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ],
                               ),
                             ),
-                            if (statusWidget != null) ...[
-                              const SizedBox(width: AppSpacing.sm),
-                              statusWidget,
-                            ],
                           ],
                         ),
-                        const SizedBox(height: 3),
-                        Text(
-                          product.tipoSeguro,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: cs.onSurfaceVariant,
-                              ),
-                        ),
-                        if (product.placa.isNotEmpty) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            product.placa,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: cs.onSurfaceVariant,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                          ),
-                        ],
-                        if (dateStr != null) ...[
-                          const SizedBox(height: 5),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.calendar_today_outlined,
-                                size: 11,
-                                color: cs.onSurfaceVariant,
-                              ),
-                              const SizedBox(width: AppSpacing.xs),
-                              Text(
-                                'Renueva: $dateStr',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: cs.onSurfaceVariant,
-                                      fontSize: 11,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ],
-                        if (product.fechaRenovacion != null &&
-                            product.fechaRenovacion!
-                                    .difference(DateTime.now())
-                                    .inDays <=
-                                30) ...[
-                          const SizedBox(height: AppSpacing.iconTileGap),
-                          CarbonTag(
-                            label: 'Renovar',
-                            type: product.fechaRenovacion!.isBefore(DateTime.now())
-                                ? CarbonTagType.error
-                                : CarbonTagType.warning,
-                            icon: Icons.autorenew_rounded,
-                            onTap: () async {
-                              final uri = Uri.parse(ExternalLinks.cotizador);
-                              if (await canLaunchUrl(uri)) {
-                                await launchUrl(uri, mode: LaunchMode.externalApplication);
-                              }
-                            },
-                          ),
-                        ],
-                      ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Icon(Icons.chevron_right, color: cs.onSurfaceVariant, size: 20),
-                ],
+                    // Overflow menu Carbon (⋮) — reemplaza chevron_right
+                    _OverflowMenu(product: product, ramoColor: ramoColor),
+                  ],
+                ),
               ),
             ),
           ),
@@ -632,6 +642,93 @@ class _PolicyCard extends StatelessWidget {
     if (days < 0) return const CarbonTag(label: 'Vencida', type: CarbonTagType.error);
     if (days <= 30) return CarbonTag(label: 'Vence en ${days}d', type: CarbonTagType.warning);
     return const CarbonTag(label: 'Vigente', type: CarbonTagType.success);
+  }
+}
+
+// ─── Carbon Overflow Menu ─────────────────────────────────────────────────────
+
+class _OverflowMenu extends StatelessWidget {
+  const _OverflowMenu({required this.product, required this.ramoColor});
+  final Product product;
+  final Color ramoColor;
+
+  Future<void> _onSelected(BuildContext context, _PolicyAction action) async {
+    switch (action) {
+      case _PolicyAction.detail:
+        unawaited(context.push('/home/products/${product.idRen}', extra: product));
+      case _PolicyAction.copy:
+        await Clipboard.setData(ClipboardData(text: '${product.idRen}'));
+        await HapticFeedback.lightImpact();
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('ID de póliza copiado'),
+              duration: Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      case _PolicyAction.share:
+        final dateStr = product.fechaRenovacion != null
+            ? DateFormat('dd/MM/yyyy').format(product.fechaRenovacion!)
+            : 'Sin fecha';
+        final text = '📋 Póliza Multiriesgos\n'
+            'Ramo: ${product.ramo}\n'
+            'Tipo: ${product.tipoSeguro}\n'
+            'Aseguradora: ${product.aseguradora}\n'
+            '${product.placa.isNotEmpty ? "Placa: ${product.placa}\n" : ""}'
+            'Renovación: $dateStr';
+        await SharePlus.instance.share(ShareParams(text: text));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return PopupMenuButton<_PolicyAction>(
+      onSelected: (action) => _onSelected(context, action),
+      icon: Icon(Icons.more_vert, size: 20, color: cs.onSurfaceVariant),
+      padding: EdgeInsets.zero,
+      tooltip: 'Más acciones',
+      // Carbon overflow menu: radio mínimo, sin sombra elevada
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(2),
+        side: BorderSide(color: cs.outlineVariant),
+      ),
+      elevation: 2,
+      itemBuilder: (_) => [
+        const PopupMenuItem(
+          value: _PolicyAction.detail,
+          child: Row(
+            children: [
+              Icon(Icons.open_in_new_outlined, size: 16),
+              SizedBox(width: 12),
+              Text('Ver detalle'),
+            ],
+          ),
+        ),
+        const PopupMenuItem(
+          value: _PolicyAction.copy,
+          child: Row(
+            children: [
+              Icon(Icons.content_copy_outlined, size: 16),
+              SizedBox(width: 12),
+              Text('Copiar ID de póliza'),
+            ],
+          ),
+        ),
+        const PopupMenuItem(
+          value: _PolicyAction.share,
+          child: Row(
+            children: [
+              Icon(Icons.share_outlined, size: 16),
+              SizedBox(width: 12),
+              Text('Compartir'),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 

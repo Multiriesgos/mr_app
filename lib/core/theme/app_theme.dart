@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
+import 'package:mr_app/core/theme/app_text_styles.dart';
 
 abstract final class AppTheme {
   static ThemeData get light => _base(AppColors.lightColorScheme);
@@ -101,20 +102,23 @@ abstract final class AppTheme {
       unselectedLabelStyle:  GoogleFonts.ibmPlexSans(fontSize: 11),
       type:                  BottomNavigationBarType.fixed,
     ),
+    // Carbon v11 productive type scale — sizes/weights/lh/ls from AppTextStyles,
+    // color from ColorScheme so dark/light mode works automatically.
     textTheme: GoogleFonts.ibmPlexSansTextTheme().copyWith(
-      displayLarge:  GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontWeight: FontWeight.w700),
-      displayMedium: GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontWeight: FontWeight.w700),
-      headlineLarge: GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontWeight: FontWeight.w600, fontSize: 24),
-      headlineMedium: GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontWeight: FontWeight.w600, fontSize: 20),
-      headlineSmall:  GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontWeight: FontWeight.w600, fontSize: 18),
-      titleLarge:   GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontWeight: FontWeight.w600, fontSize: 16),
-      titleMedium:  GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontWeight: FontWeight.w500, fontSize: 15),
-      titleSmall:   GoogleFonts.ibmPlexSans(color: scheme.onSurface.withValues(alpha: alphaHigh), fontWeight: FontWeight.w500, fontSize: 14),
-      bodyLarge:    GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontSize: 15),
-      bodyMedium:   GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontSize: 14),
-      bodySmall:    GoogleFonts.ibmPlexSans(color: scheme.onSurface.withValues(alpha: alphaHigh), fontSize: 12),
-      labelLarge:   GoogleFonts.ibmPlexSans(color: scheme.onSurface, fontWeight: FontWeight.w600, fontSize: 14),
-      labelMedium:  GoogleFonts.ibmPlexSans(color: scheme.onSurface.withValues(alpha: alphaHigh), fontSize: 12),
+      displayLarge:   AppTextStyles.heading05.copyWith(color: scheme.onSurface, fontWeight: FontWeight.w700),
+      displayMedium:  AppTextStyles.heading04.copyWith(color: scheme.onSurface, fontWeight: FontWeight.w700),
+      headlineLarge:  AppTextStyles.heading04.copyWith(color: scheme.onSurface, fontWeight: FontWeight.w600),
+      headlineMedium: AppTextStyles.heading03.copyWith(color: scheme.onSurface, fontWeight: FontWeight.w600),
+      headlineSmall:  AppTextStyles.headingCompact02.copyWith(color: scheme.onSurface, fontSize: 18),
+      titleLarge:     AppTextStyles.headingCompact02.copyWith(color: scheme.onSurface),
+      titleMedium:    AppTextStyles.headingCompact01.copyWith(color: scheme.onSurface, fontWeight: FontWeight.w500),
+      titleSmall:     AppTextStyles.headingCompact01.copyWith(color: scheme.onSurface.withValues(alpha: alphaHigh)),
+      bodyLarge:      AppTextStyles.bodyCompact02.copyWith(color: scheme.onSurface),
+      bodyMedium:     AppTextStyles.bodyCompact01.copyWith(color: scheme.onSurface),
+      bodySmall:      AppTextStyles.label01.copyWith(color: scheme.onSurface.withValues(alpha: alphaHigh)),
+      labelLarge:     AppTextStyles.productiveHeading02.copyWith(color: scheme.onSurface),
+      labelMedium:    AppTextStyles.label01.copyWith(color: scheme.onSurface.withValues(alpha: alphaHigh)),
+      labelSmall:     AppTextStyles.productiveHeading01.copyWith(color: scheme.onSurface.withValues(alpha: alphaHigh)),
     ),
   );
   }
