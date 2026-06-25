@@ -23,7 +23,7 @@ class AuthRepositoryImpl implements AuthRepository {
       documentNumber: documentNumber,
       birthDate: birthDate,
     );
-    await _local.saveUser(model, rememberMe: rememberMe);
+    await _local.saveUser(model, rememberMe: rememberMe, birthDate: birthDate);
     return model.toEntity();
   }
 
@@ -36,6 +36,9 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<String?> getSavedDocumentNumber() =>
       _local.getSavedDocumentNumber();
+
+  @override
+  Future<String?> getSavedBirthDate() => _local.getSavedBirthDate();
 
   @override
   Future<bool> getSavedRememberMe() => _local.getSavedRememberMe();

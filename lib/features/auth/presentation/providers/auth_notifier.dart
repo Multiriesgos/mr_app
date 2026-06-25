@@ -93,6 +93,10 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   /// Devuelve el número de documento guardado (para pre-llenar el form de login).
   Future<String?> getSavedDocumentNumber() =>
       ref.read(authRepositoryProvider).getSavedDocumentNumber();
+
+  /// Devuelve la fecha de nacimiento guardada (para pre-llenar el form de login).
+  Future<String?> getSavedBirthDate() =>
+      ref.read(authRepositoryProvider).getSavedBirthDate();
 }
 
 final authProvider =

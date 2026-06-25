@@ -9,6 +9,7 @@ abstract interface class AuthRepository {
 
   Future<User?> getSavedUser();
   Future<String?> getSavedDocumentNumber();
+  Future<String?> getSavedBirthDate();
   Future<bool> getSavedRememberMe();
   Future<void> logout();
 }

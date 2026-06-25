@@ -35,11 +35,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _loadSavedDoc() async {
-    final saved =
-        await ref.read(authProvider.notifier).getSavedDocumentNumber();
-    if (saved != null && mounted) {
-      setState(() => _docController.text = saved);
-    }
+    final notifier = ref.read(authProvider.notifier);
+    final savedDoc = await notifier.getSavedDocumentNumber();
+    final savedBirth = await notifier.getSavedBirthDate();
+    if (!mounted) return;
+    setState(() {
+      if (savedDoc != null) _docController.text = savedDoc;
+      if (savedBirth != null) _birthController.text = savedBirth;
+    });
   }
 
   void _clearError() {
