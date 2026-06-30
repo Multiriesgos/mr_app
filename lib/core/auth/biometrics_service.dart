@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 
@@ -19,7 +18,7 @@ class BiometricsService {
       return available.isEmpty
           ? BiometricAvailability.notEnrolled
           : BiometricAvailability.available;
-    } on PlatformException {
+    } on LocalAuthException {
       return BiometricAvailability.notAvailable;
     }
   }
@@ -28,11 +27,9 @@ class BiometricsService {
     try {
       return await _auth.authenticate(
         localizedReason: reason,
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-        ),
+        persistAcrossBackgrounding: true,
       );
-    } on PlatformException {
+    } on LocalAuthException {
       return false;
     }
   }
