@@ -32,4 +32,10 @@ class ProductsRepositoryImpl implements ProductsRepository {
     );
     return model?.toEntity();
   }
+
+  @override
+  Future<ContactInfo?> getDefaultContactInfo() async {
+    final model = await _remote.getDefaultContactInfo();
+    return model?.toEntity();
+  }
 }

@@ -30,6 +30,9 @@ class _FakeProductsRepository implements ProductsRepository {
     required String tipoSeguro,
   }) async =>
       contactResult;
+
+  @override
+  Future<ContactInfo?> getDefaultContactInfo() async => contactResult;
 }
 
 void main() {

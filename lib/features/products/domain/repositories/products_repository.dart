@@ -8,4 +8,5 @@ abstract interface class ProductsRepository {
     required String ramo,
     required String tipoSeguro,
   });
+  Future<ContactInfo?> getDefaultContactInfo();
 }

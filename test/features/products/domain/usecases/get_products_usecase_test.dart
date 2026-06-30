@@ -26,6 +26,10 @@ class _FakeProductsRepository implements ProductsRepository {
     required String tipoSeguro,
   }) async =>
       throw UnimplementedError();
+
+  @override
+  Future<ContactInfo?> getDefaultContactInfo() async =>
+      throw UnimplementedError();
 }
 
 void main() {

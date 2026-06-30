@@ -118,13 +118,19 @@ class _HomeContent extends ConsumerWidget {
 
   final ValueChanged<int>? onTabChange;
 
-  Future<void> _call() async {
-    final uri = Uri.parse(ExternalLinks.callCenter);
+  Future<void> _call(String? phone) async {
+    final raw = phone != null && phone.isNotEmpty ? phone : null;
+    final uri = raw != null
+        ? Uri.parse('tel:+503$raw')
+        : Uri.parse(ExternalLinks.callCenter);
     if (await canLaunchUrl(uri)) await launchUrl(uri);
   }
 
-  Future<void> _whatsApp() async {
-    final uri = Uri.parse(ExternalLinks.whatsappCenter);
+  Future<void> _whatsApp(String? whatsapp) async {
+    final raw = whatsapp != null && whatsapp.isNotEmpty ? whatsapp : null;
+    final uri = raw != null
+        ? Uri.parse('https://wa.me/503$raw')
+        : Uri.parse(ExternalLinks.whatsappCenter);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
@@ -143,6 +149,7 @@ class _HomeContent extends ConsumerWidget {
     final productsAsync = ref.watch(productsProvider);
     final renewingSoon  = _renewingSoon(productsAsync.valueOrNull);
     final products      = productsAsync.valueOrNull;
+    final contact       = ref.watch(homeContactProvider).valueOrNull;
 
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -174,7 +181,11 @@ class _HomeContent extends ConsumerWidget {
           ],
 
           // ── Centro de atención ───────────────────────────────────────────
-          _SupportCard(onCall: _call, onWhatsApp: _whatsApp),
+          _SupportCard(
+            onCall:      () => _call(contact?.phone),
+            onWhatsApp:  () => _whatsApp(contact?.whatsapp),
+            hasWhatsApp: contact?.hasWhatsApp ?? true,
+          ),
           const SizedBox(height: AppSpacing.sectionGap),
 
           // ── Acceso rápido ────────────────────────────────────────────────
@@ -329,7 +340,6 @@ class _StatCard extends StatelessWidget {
           border:       Border.all(color: color.withValues(alpha: 0.18)),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
               width: 40,
@@ -658,8 +668,7 @@ class _QuickActionCardState extends State<_QuickActionCard>
               vertical: AppSpacing.lg,
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment:  MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
                   width:  60,
@@ -692,9 +701,14 @@ class _QuickActionCardState extends State<_QuickActionCard>
 // ─── Support card ─────────────────────────────────────────────────────────────
 
 class _SupportCard extends StatelessWidget {
-  const _SupportCard({required this.onCall, required this.onWhatsApp});
+  const _SupportCard({
+    required this.onCall,
+    required this.onWhatsApp,
+    this.hasWhatsApp = true,
+  });
   final VoidCallback onCall;
   final VoidCallback onWhatsApp;
+  final bool hasWhatsApp;
 
   @override
   Widget build(BuildContext context) {
@@ -753,25 +767,7 @@ class _SupportCard extends StatelessWidget {
                     icon:  Icon(Icons.phone_outlined, color: cs.primary, size: 16),
                     label: Text('Llamar', style: TextStyle(color: cs.primary)),
                     style: OutlinedButton.styleFrom(
-                      side:            BorderSide(color: cs.primary.withValues(alpha: 0.4)),
-                      padding:         const EdgeInsets.symmetric(vertical: 10),
-                      shape:           RoundedRectangleBorder(borderRadius: AppRadius.smBR),
-                      minimumSize:     const Size(0, 44),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.s04),
-              Expanded(
-                child: Semantics(
-                  label: 'Escribir por WhatsApp al centro de atención',
-                  button: true,
-                  child: OutlinedButton.icon(
-                    onPressed: onWhatsApp,
-                    icon:  const Icon(Icons.chat_bubble_outline, color: Color(0xFF25D366), size: 16),
-                    label: const Text('WhatsApp', style: TextStyle(color: Color(0xFF25D366))),
-                    style: OutlinedButton.styleFrom(
-                      side:        const BorderSide(color: Color(0x5525D366)),
+                      side:        BorderSide(color: cs.primary.withValues(alpha: 0.4)),
                       padding:     const EdgeInsets.symmetric(vertical: 10),
                       shape:       RoundedRectangleBorder(borderRadius: AppRadius.smBR),
                       minimumSize: const Size(0, 44),
@@ -779,6 +775,26 @@ class _SupportCard extends StatelessWidget {
                   ),
                 ),
               ),
+              if (hasWhatsApp) ...[
+                const SizedBox(width: AppSpacing.s04),
+                Expanded(
+                  child: Semantics(
+                    label: 'Escribir por WhatsApp al centro de atención',
+                    button: true,
+                    child: OutlinedButton.icon(
+                      onPressed: onWhatsApp,
+                      icon:  const Icon(Icons.chat_bubble_outline, color: Color(0xFF25D366), size: 16),
+                      label: const Text('WhatsApp', style: TextStyle(color: Color(0xFF25D366))),
+                      style: OutlinedButton.styleFrom(
+                        side:        const BorderSide(color: Color(0x5525D366)),
+                        padding:     const EdgeInsets.symmetric(vertical: 10),
+                        shape:       RoundedRectangleBorder(borderRadius: AppRadius.smBR),
+                        minimumSize: const Size(0, 44),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ],

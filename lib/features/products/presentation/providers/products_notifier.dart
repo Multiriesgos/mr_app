@@ -54,6 +54,12 @@ class ProductsNotifier extends AsyncNotifier<List<Product>> {
   }
 }
 
+// ---------- Home contact (genérico MULTIRIESGOS/CABINA/CONTACTOS) ----------
+
+final homeContactProvider = FutureProvider<ContactInfo?>((ref) async {
+  return ref.read(productsRepositoryProvider).getDefaultContactInfo();
+});
+
 // ---------- Product detail ----------
 
 final productDetailProvider = AsyncNotifierProviderFamily<

@@ -14,6 +14,7 @@ abstract interface class ProductsRemoteDataSource {
     required String ramo,
     required String tipoSeguro,
   });
+  Future<ContactInfoModel?> getDefaultContactInfo();
 }
 
 class ProductsRemoteDataSourceImpl implements ProductsRemoteDataSource {
@@ -22,12 +23,18 @@ class ProductsRemoteDataSourceImpl implements ProductsRemoteDataSource {
 
   final http.Client _client;
 
-  static const _kHost = 'secure.multiriesgos.com';
+  static const _kHost    = 'secure.multiriesgos.com';
   static const _kTimeout = Duration(seconds: 30);
   static const _kHeaders = {
     'Content-Type': 'application/json; charset=UTF-8',
     'MRApiKey': Constants.kMrApiKey,
   };
+
+  // Llave genérica: usada como fallback cuando el cab específico no tiene datos
+  // y como contacto principal del Centro de atención en el home.
+  static const _kDefaultAseg    = 'MULTIRIESGOS';
+  static const _kDefaultRamo    = 'CABINA';
+  static const _kDefaultTipaseg = 'CONTACTOS';
 
   @override
   Future<List<ProductModel>> getProducts(String docSearch) async {
@@ -76,24 +83,54 @@ class ProductsRemoteDataSourceImpl implements ProductsRemoteDataSource {
     required String ramo,
     required String tipoSeguro,
   }) async {
+    final result = await _fetchCab(
+      aseguradora: aseguradora,
+      ramo: ramo,
+      tipoSeguro: tipoSeguro,
+    );
+    if (result != null) return result;
+
+    // Si el cab específico no tiene datos, usar la llave genérica como fallback,
+    // pero solo si los params ya no son la llave genérica (evitar bucle).
+    final isAlreadyDefault = aseguradora == _kDefaultAseg &&
+        ramo == _kDefaultRamo &&
+        tipoSeguro == _kDefaultTipaseg;
+    if (isAlreadyDefault) return null;
+
+    return _fetchCab(
+      aseguradora: _kDefaultAseg,
+      ramo: _kDefaultRamo,
+      tipoSeguro: _kDefaultTipaseg,
+    );
+  }
+
+  @override
+  Future<ContactInfoModel?> getDefaultContactInfo() => _fetchCab(
+        aseguradora: _kDefaultAseg,
+        ramo: _kDefaultRamo,
+        tipoSeguro: _kDefaultTipaseg,
+      );
+
+  Future<ContactInfoModel?> _fetchCab({
+    required String aseguradora,
+    required String ramo,
+    required String tipoSeguro,
+  }) async {
     final uri = Uri.https(_kHost, '/api/cab', {
       'aseg': aseguradora,
       'ramo': ramo,
       'tipaseg': tipoSeguro,
     });
-    final http.Response response;
     try {
-      response = await _client
+      final response = await _client
           .post(uri, headers: _kHeaders)
           .timeout(_kTimeout);
+      if (response.statusCode != 200) return null;
+      final list = jsonDecode(response.body) as List<dynamic>;
+      if (list.isEmpty) return null;
+      return ContactInfoModel.fromJson(list.first as Map<String, dynamic>);
     } on Exception {
       return null;
     }
-
-    if (response.statusCode != 200) return null;
-
-    final list = jsonDecode(response.body) as List<dynamic>;
-    if (list.isEmpty) return null;
-    return ContactInfoModel.fromJson(list.first as Map<String, dynamic>);
   }
 }
