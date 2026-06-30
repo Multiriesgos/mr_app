@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mr_app/core/network/mr_http_client.dart';
+import 'package:mr_app/core/storage/secure_storage.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:mr_app/features/products/data/datasources/products_local_datasource.dart';
 import 'package:mr_app/features/products/data/datasources/products_remote_datasource.dart';
 import 'package:mr_app/features/products/data/repositories/products_repository_impl.dart';
 import 'package:mr_app/features/products/domain/entities/product.dart';
@@ -15,8 +17,16 @@ final _productsRemoteDataSourceProvider =
   return ProductsRemoteDataSourceImpl(client: ref.watch(httpClientProvider));
 });
 
+final _productsLocalDataSourceProvider =
+    Provider<ProductsLocalDataSource>((ref) {
+  return ProductsLocalDataSourceImpl(ref.watch(secureStorageProvider));
+});
+
 final productsRepositoryProvider = Provider<ProductsRepository>((ref) {
-  return ProductsRepositoryImpl(ref.watch(_productsRemoteDataSourceProvider));
+  return ProductsRepositoryImpl(
+    ref.watch(_productsRemoteDataSourceProvider),
+    ref.watch(_productsLocalDataSourceProvider),
+  );
 });
 
 // ---------- Products list ----------

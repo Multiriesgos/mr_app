@@ -55,6 +55,24 @@ class ProductModel {
         periodoPago: json['periodo_pago'] as String?,
       );
 
+  Map<String, dynamic> toJson() => {
+        'id_ren': idRen,
+        'ramo': ramo,
+        'tipo_seguro': tipoSeguro,
+        'aseguradora': aseguradora,
+        'asegurado': asegurado,
+        'placa': placa,
+        'fecha_renovacion': fechaRenovacion?.toIso8601String(),
+        'adjunto': adjunto,
+        'suma': suma,
+        'prima_neta': primaNeta,
+        'prima_total': primaTotal,
+        'descripcion_seguro': descripcionSeguro,
+        'ejecutivo': ejecutivo,
+        'forma_pago': formaPago,
+        'periodo_pago': periodoPago,
+      };
+
   Product toEntity() => Product(
         idRen: idRen,
         ramo: ramo,

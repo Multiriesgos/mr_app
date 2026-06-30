@@ -269,11 +269,8 @@ class _DetailBody extends StatelessWidget {
                 _InfoRow('Placa / Identificador', product.placa),
               if (dateStr != null)
                 _InfoRow('Fecha de renovación', dateStr),
-              _InfoRow(
-                'N.° de póliza',
-                product.adjunto?.isNotEmpty ?? false ? product.adjunto! : 'No disponible',
-                copyable: product.adjunto?.isNotEmpty ?? false,
-              ),
+              if (product.adjunto?.isNotEmpty ?? false)
+                _InfoRow('N.° de póliza', product.adjunto!, copyable: true),
             ],),
 
             // Cobertura

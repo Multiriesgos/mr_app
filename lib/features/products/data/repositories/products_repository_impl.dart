@@ -1,16 +1,28 @@
+import 'dart:async';
+
+import 'package:mr_app/core/error/app_exception.dart';
+import 'package:mr_app/features/products/data/datasources/products_local_datasource.dart';
 import 'package:mr_app/features/products/data/datasources/products_remote_datasource.dart';
 import 'package:mr_app/features/products/domain/entities/product.dart';
 import 'package:mr_app/features/products/domain/repositories/products_repository.dart';
 
 class ProductsRepositoryImpl implements ProductsRepository {
-  const ProductsRepositoryImpl(this._remote);
+  const ProductsRepositoryImpl(this._remote, this._local);
 
   final ProductsRemoteDataSource _remote;
+  final ProductsLocalDataSource  _local;
 
   @override
   Future<List<Product>> getProducts(String docSearch) async {
-    final models = await _remote.getProducts(docSearch);
-    return models.map((m) => m.toEntity()).toList();
+    try {
+      final models = await _remote.getProducts(docSearch);
+      unawaited(_local.cacheProducts(models));
+      return models.map((m) => m.toEntity()).toList();
+    } on NetworkException {
+      final cached = await _local.getCachedProducts();
+      if (cached != null) return cached.map((m) => m.toEntity()).toList();
+      rethrow;
+    }
   }
 
   @override
