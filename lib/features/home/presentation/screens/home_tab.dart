@@ -173,6 +173,10 @@ class _HomeContent extends ConsumerWidget {
             ],
           ],
 
+          // ── Centro de atención ───────────────────────────────────────────
+          _SupportCard(onCall: _call, onWhatsApp: _whatsApp),
+          const SizedBox(height: AppSpacing.sectionGap),
+
           // ── Acceso rápido ────────────────────────────────────────────────
           Text(
             'ACCESO RÁPIDO',
@@ -187,7 +191,7 @@ class _HomeContent extends ConsumerWidget {
             mainAxisSpacing: AppSpacing.sm,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            childAspectRatio: 1.20,
+            childAspectRatio: 1.05,
             children: [
               _QuickActionCard(
                 icon:  Icons.description_outlined,
@@ -220,8 +224,6 @@ class _HomeContent extends ConsumerWidget {
             const SizedBox(height: AppSpacing.pagePaddingH),
             _NoPoliciesBanner(onCotizar: _openCotizador),
           ],
-          const SizedBox(height: AppSpacing.sectionGap),
-          _SupportCard(onCall: _call, onWhatsApp: _whatsApp),
         ],
       ),
     );
@@ -641,22 +643,29 @@ class _QuickActionCardState extends State<_QuickActionCard>
               border:       Border.all(color: cs.outlineVariant),
               boxShadow:    AppColors.shadowSm,
             ),
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.lg,
+            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment:  MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment:  MainAxisAlignment.center,
               children: [
                 Container(
-                  width:  44,
-                  height: 44,
+                  width:  60,
+                  height: 60,
                   decoration: BoxDecoration(
                     color:        widget.color.withValues(alpha: 0.10),
-                    borderRadius: AppRadius.smBR,
+                    borderRadius: AppRadius.mdBR,
                   ),
-                  child: Icon(widget.icon, color: widget.color, size: 24),
+                  child: Icon(widget.icon, color: widget.color, size: 30),
                 ),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   widget.label,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
