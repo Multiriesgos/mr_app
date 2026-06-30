@@ -181,7 +181,19 @@ abstract final class AppColors {
     ),
   ];
 
-  // ── Login gradient ───────────────────────────────────────────────────
+  // ── Overlay y Scrim ─────────────────────────────────────────────────────────
+  static const Color overlay  = Color(0x52000000); // 32 % negro — barrier color
+  static const Color scrim    = Color(0x7A000000); // 48 % negro — modal scrim
+
+  // ── Disabled ────────────────────────────────────────────────────────────────
+  static const Color disabled     = _cCoolGray20;  // #DDE1E6 — surface desactivada
+  static const Color disabledText = _cCoolGray40;  // #A2A9B0 — texto desactivado
+
+  // ── Surface containers extra (complemento M3) ────────────────────────────────
+  static const Color surfaceContainerLow  = Color(0xFFF8FAFC);
+  static const Color surfaceContainerHigh = Color(0xFFEEF2F8);
+
+  // ── Gradientes ────────────────────────────────────────────────────────────────
   static const LinearGradient loginGradient = LinearGradient(
     begin: Alignment.topLeft,
     end:   Alignment.bottomRight,
@@ -192,5 +204,13 @@ abstract final class AppColors {
       Color(0xFF1530B8),
       Color(0xFF2B48D4),
     ],
+  );
+
+  // Gradiente vertical para el header del Login (más suave)
+  static const LinearGradient headerGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end:   Alignment.bottomCenter,
+    stops: [0.0, 1.0],
+    colors: [Color(0xFF060D45), Color(0xFF1530B8)],
   );
 }

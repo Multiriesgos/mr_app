@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
+import 'package:mr_app/core/theme/app_radius.dart';
 import 'package:mr_app/core/theme/app_spacing.dart';
+import 'package:mr_app/core/widgets/app_nav_bar.dart';
 import 'package:mr_app/features/auth/domain/entities/user.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:mr_app/features/products/presentation/providers/products_notifier.dart';
@@ -39,43 +41,51 @@ class BenefitCardScreen extends ConsumerWidget {
         statusBarIconBrightness: Brightness.light,
       ),
       child: Scaffold(
+        appBar: AppNavBar(
+          title: 'Mis beneficios',
+          leading: context.canPop() ? AppNavBarLeading.back : AppNavBarLeading.none,
+          actions: [
+            if (user != null)
+              Semantics(
+                label: 'Compartir carnet',
+                button: true,
+                child: IconButton(
+                  icon: const Icon(Icons.share_outlined, color: Colors.white, size: 22),
+                  tooltip: 'Compartir carnet',
+                  onPressed: () => _shareCarnet(user),
+                ),
+              ),
+          ],
+        ),
         body: SafeArea(
           child: GestureDetector(
             onTap: () => FocusScope.of(context).unfocus(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _Header(
-                  onBack: () => context.pop(),
-                  onShare: user == null ? null : () => _shareCarnet(user),
+            child: RefreshIndicator(
+              onRefresh: () => ref.read(productsProvider.notifier).reload(),
+              color: AppColors.primary,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.pagePaddingH, AppSpacing.pagePaddingH,
+                  AppSpacing.pagePaddingH, AppSpacing.lg,
                 ),
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: () => ref.read(productsProvider.notifier).reload(),
-                    color: AppColors.primary,
-                    child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(AppSpacing.pagePaddingH, AppSpacing.pagePaddingH, AppSpacing.pagePaddingH, AppSpacing.lg),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (MediaQuery.orientationOf(context) == Orientation.portrait)
-                          Text(
-                            'Tu carnet',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        const SizedBox(height: AppSpacing.sm),
-                        _CarnetButton(user: user),
-                        const SizedBox(height: AppSpacing.md),
-                        const _BenefitGrid(),
-                        const SizedBox(height: AppSpacing.md),
-                        _QrSection(user: user),
-                      ],
-                    ),
-                  ),
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (MediaQuery.orientationOf(context) == Orientation.portrait)
+                      Text(
+                        'Tu carnet',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    const SizedBox(height: AppSpacing.sm),
+                    _CarnetButton(user: user),
+                    const SizedBox(height: AppSpacing.md),
+                    const _BenefitGrid(),
+                    const SizedBox(height: AppSpacing.md),
+                    _QrSection(user: user),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -84,78 +94,16 @@ class BenefitCardScreen extends ConsumerWidget {
   }
 }
 
-class _Header extends StatelessWidget {
-  const _Header({required this.onBack, this.onShare});
-  final VoidCallback onBack;
-  final VoidCallback? onShare;
-
-  @override
-  Widget build(BuildContext context) {
-    final canPop = context.canPop();
-    return Container(
-      height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: const BoxDecoration(
-        color: AppColors.sidebarBg,
-        border: Border(bottom: BorderSide(color: Colors.white12)),
-      ),
-      child: Row(
-        children: [
-          if (canPop)
-            Semantics(
-              label: 'Volver',
-              button: true,
-              child: IconButton(
-                onPressed: onBack,
-                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 24),
-                tooltip: 'Volver',
-              ),
-            )
-          else
-            const SizedBox(width: 48),
-          const Expanded(
-            child: Text(
-              'Mis beneficios',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          if (onShare != null)
-            Semantics(
-              label: 'Compartir carnet',
-              button: true,
-              child: IconButton(
-                onPressed: onShare,
-                icon: const Icon(Icons.share_outlined, color: Colors.white, size: 22),
-                tooltip: 'Compartir carnet',
-              ),
-            )
-          else
-            const SizedBox(width: 48),
-        ],
-      ),
-    );
-  }
-}
+// ─── Carnet ───────────────────────────────────────────────────────────────────
 
 class _CarnetButton extends StatelessWidget {
   const _CarnetButton({required this.user});
   final User? user;
 
-  // Aspect ratio real de la imagen: 331 × 219 px
-  static const double _kAspect = 331 / 219;
-
-  // Posiciones medidas en píxeles sobre la imagen 331 × 219
-  // Banda "Nombre:": y = 50..64,  valor empieza en x = 62 (+2px margen)
+  static const double _kAspect    = 331 / 219;
   static const double _kNombreLeft   = 62 / 331;
   static const double _kNombreTop    = 50 / 219;
   static const double _kNombreHeight = 14 / 219;
-
-  // Banda "DUI:":    y = 69..84,  valor empieza en x = 41 (+2px margen)
   static const double _kDuiLeft   = 41 / 331;
   static const double _kDuiTop    = 69 / 219;
   static const double _kDuiHeight = 15 / 219;
@@ -182,75 +130,72 @@ class _CarnetButton extends StatelessWidget {
           aspectRatio: _kAspect,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final w = constraints.maxWidth;
-              final h = constraints.maxHeight;
-              final bandH = h * _kNombreHeight;
+              final w      = constraints.maxWidth;
+              final h      = constraints.maxHeight;
+              final bandH  = h * _kNombreHeight;
               final fontSize = (bandH * 0.62).clamp(8.0, 13.0);
 
               return ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: AppRadius.mdBR,
                 child: Stack(
                   children: [
                     Image.asset(
                       'assets/images/Card-bg-1.png',
-                      width: w,
+                      width:  w,
                       height: h,
-                      fit: BoxFit.fill,
+                      fit:    BoxFit.fill,
                     ),
-                    // Nombre sobre la banda naranja
                     Positioned(
-                      left: w * _kNombreLeft,
-                      top: h * _kNombreTop,
-                      right: w * 0.04,
+                      left:   w * _kNombreLeft,
+                      top:    h * _kNombreTop,
+                      right:  w * 0.04,
                       height: h * _kNombreHeight,
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
                           name,
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: fontSize,
-                            fontWeight: FontWeight.w700,
-                            height: 1,
+                            color:       Colors.white,
+                            fontSize:    fontSize,
+                            fontWeight:  FontWeight.w700,
+                            height:      1,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
-                    // DUI sobre la banda naranja
                     Positioned(
-                      left: w * _kDuiLeft,
-                      top: h * _kDuiTop,
-                      right: w * 0.04,
+                      left:   w * _kDuiLeft,
+                      top:    h * _kDuiTop,
+                      right:  w * 0.04,
                       height: h * _kDuiHeight,
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
                           doc,
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: fontSize,
-                            fontWeight: FontWeight.w700,
-                            height: 1,
+                            color:       Colors.white,
+                            fontSize:    fontSize,
+                            fontWeight:  FontWeight.w700,
+                            height:      1,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
-                    // Botón "Ver carnet"
                     Positioned(
-                      right: 8,
+                      right:  8,
                       bottom: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
-                          vertical: 3,
+                          vertical:   3,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(20),
+                          color:        Colors.black.withValues(alpha: 0.35),
+                          borderRadius: AppRadius.pillBR,
                         ),
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
@@ -260,9 +205,9 @@ class _CarnetButton extends StatelessWidget {
                             Text(
                               'Ver carnet',
                               style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
+                                color:       Colors.white,
+                                fontSize:    11,
+                                fontWeight:  FontWeight.w500,
                               ),
                             ),
                           ],
@@ -280,13 +225,13 @@ class _CarnetButton extends StatelessWidget {
   }
 }
 
-// ─── QR del carnet ───────────────────────────────────────────────────────────
+// ─── Código QR ────────────────────────────────────────────────────────────────
 
 class _QrSection extends StatelessWidget {
   const _QrSection({required this.user});
   final User? user;
 
-  static const _kQrSize = 148.0;
+  static const double _kQrSize = 148;
 
   @override
   Widget build(BuildContext context) {
@@ -294,7 +239,7 @@ class _QrSection extends StatelessWidget {
     if (docSearch.isEmpty) return const SizedBox.shrink();
 
     final qrData = ExternalLinks.carnetDigital(docSearch);
-    final cs = Theme.of(context).colorScheme;
+    final cs     = Theme.of(context).colorScheme;
 
     return Semantics(
       label: 'Código QR del carnet. Toca para ampliar.',
@@ -303,38 +248,42 @@ class _QrSection extends StatelessWidget {
         onTap: () => _showFullScreen(context, qrData),
         child: Container(
           decoration: BoxDecoration(
-            color: cs.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.borderLight),
-            boxShadow: AppColors.shadowSm,
+            color:        cs.surface,
+            borderRadius: AppRadius.mdBR,
+            border:       Border.all(color: AppColors.borderLight),
+            boxShadow:    AppColors.shadowSm,
           ),
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.cardGap, horizontal: AppSpacing.md),
+          padding: const EdgeInsets.symmetric(
+            vertical:   AppSpacing.cardGap,
+            horizontal: AppSpacing.md,
+          ),
           child: Column(
             children: [
               Text(
                 'Tu código QR',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: AppSpacing.cardGap),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
+                  color:        Colors.white,
+                  borderRadius: AppRadius.smBR,
                 ),
                 padding: const EdgeInsets.all(6),
                 child: QrImageView(
-                  data: qrData,
-                  size: _kQrSize,
+                  data:            qrData,
+                  size:            _kQrSize,
                   backgroundColor: Colors.white,
                   eyeStyle: const QrEyeStyle(
                     eyeShape: QrEyeShape.square,
-                    color: AppColors.sidebarBg,
+                    color:    AppColors.sidebarBg,
                   ),
                   dataModuleStyle: const QrDataModuleStyle(
                     dataModuleShape: QrDataModuleShape.square,
-                    color: AppColors.sidebarBg,
+                    color:           AppColors.sidebarBg,
                   ),
                 ),
               ),
@@ -344,15 +293,16 @@ class _QrSection extends StatelessWidget {
                 children: [
                   const Icon(
                     Icons.open_in_full_rounded,
-                    size: 13,
+                    size:  13,
                     color: AppColors.textMuted,
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
                     'Toca para ampliar',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textMuted,
-                        ),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: AppColors.textMuted),
                   ),
                 ],
               ),
@@ -368,33 +318,36 @@ class _QrSection extends StatelessWidget {
       context: context,
       builder: (ctx) => Dialog(
         backgroundColor: Colors.white,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.lgBR),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.sectionGap, AppSpacing.sectionGap, AppSpacing.sectionGap, AppSpacing.pagePaddingH),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.sectionGap, AppSpacing.sectionGap,
+            AppSpacing.sectionGap, AppSpacing.pagePaddingH,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               QrImageView(
-                data: data,
-                size: 260,
+                data:            data,
+                size:            260,
                 backgroundColor: Colors.white,
                 eyeStyle: const QrEyeStyle(
                   eyeShape: QrEyeShape.square,
-                  color: AppColors.sidebarBg,
+                  color:    AppColors.sidebarBg,
                 ),
                 dataModuleStyle: const QrDataModuleStyle(
                   dataModuleShape: QrDataModuleShape.square,
-                  color: AppColors.sidebarBg,
+                  color:           AppColors.sidebarBg,
                 ),
               ),
               const SizedBox(height: AppSpacing.s04),
               Text(
                 'Muestra este código para identificarte',
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textMuted,
-                    ),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: AppColors.textMuted),
               ),
               const SizedBox(height: AppSpacing.xs),
               TextButton(
@@ -419,19 +372,19 @@ class _BenefitGrid extends StatelessWidget {
     return const Column(
       children: [
         _BenefitTile(
-          title: 'Medic',
+          title:    'Medic',
           subtitle: 'Telemedicina 24/7',
-          icon: Icons.medical_services_outlined,
-          color: AppColors.info,
-          url: ExternalLinks.medic,
+          icon:     Icons.medical_services_outlined,
+          color:    AppColors.info,
+          url:      ExternalLinks.medic,
         ),
         SizedBox(height: AppSpacing.sm),
         _BenefitTile(
-          title: 'Club Ahorro',
+          title:    'Club Ahorro',
           subtitle: 'Descuentos y beneficios',
-          icon: Icons.savings_outlined,
-          color: AppColors.accent,
-          url: ExternalLinks.clubahorro,
+          icon:     Icons.savings_outlined,
+          color:    AppColors.accent,
+          url:      ExternalLinks.clubahorro,
         ),
       ],
     );
@@ -447,11 +400,11 @@ class _BenefitTile extends StatelessWidget {
     required this.url,
   });
 
-  final String title;
-  final String subtitle;
+  final String   title;
+  final String   subtitle;
   final IconData icon;
-  final Color color;
-  final String url;
+  final Color    color;
+  final String   url;
 
   Future<void> _launch() async {
     final uri = Uri.parse(url);
@@ -464,28 +417,30 @@ class _BenefitTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Semantics(
-      label: '$title — $subtitle. Abrir en el navegador',
+      label:  '$title — $subtitle. Abrir en el navegador',
       button: true,
       child: Material(
-        color: color.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(12),
+        color:        color.withValues(alpha: 0.05),
+        borderRadius: AppRadius.mdBR,
         child: InkWell(
-          onTap: _launch,
-          borderRadius: BorderRadius.circular(12),
+          onTap:        _launch,
+          borderRadius: AppRadius.mdBR,
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: color.withValues(alpha: 0.18)),
+              borderRadius: AppRadius.mdBR,
+              border:       Border.all(color: color.withValues(alpha: 0.18)),
             ),
             child: ListTile(
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical:   AppSpacing.xs,
+              ),
               leading: Container(
-                width: 44,
+                width:  44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
+                  color:        color.withValues(alpha: 0.12),
+                  borderRadius: AppRadius.smBR,
                 ),
                 child: Icon(icon, color: color, size: 24),
               ),
@@ -503,7 +458,7 @@ class _BenefitTile extends StatelessWidget {
               trailing: Icon(
                 Icons.open_in_new_outlined,
                 color: color.withValues(alpha: 0.60),
-                size: 18,
+                size:  18,
               ),
             ),
           ),

@@ -5,11 +5,14 @@ import 'package:go_router/go_router.dart';
 import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
 import 'package:mr_app/core/theme/app_motion.dart';
+import 'package:mr_app/core/theme/app_radius.dart';
 import 'package:mr_app/core/theme/app_spacing.dart';
-import 'package:mr_app/core/theme/app_text_styles.dart';
+import 'package:mr_app/core/widgets/app_avatar.dart';
+import 'package:mr_app/core/widgets/app_logout_dialog.dart';
+import 'package:mr_app/core/widgets/app_status_badge.dart';
+import 'package:mr_app/core/widgets/policy_utils.dart';
 import 'package:mr_app/core/widgets/shimmer_box.dart';
 import 'package:mr_app/features/auth/domain/entities/user.dart';
-import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:mr_app/features/products/domain/entities/product.dart';
 import 'package:mr_app/features/products/presentation/providers/products_notifier.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -27,51 +30,48 @@ class HomeTab extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        toolbarHeight: 72,
+        scrolledUnderElevation: 0,
+        backgroundColor: AppColors.sidebarBg,
+        toolbarHeight: 68,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               _greeting(),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white70,
-                  ),
+              style: const TextStyle(
+                color:       Colors.white60,
+                fontSize:    12,
+                fontWeight:  FontWeight.w400,
+                letterSpacing: 0.2,
+              ),
             ),
+            const SizedBox(height: 1),
             Text(
-              _shortName(name).toUpperCase(),
+              _shortName(name),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
+              style: const TextStyle(
+                color:       Colors.white,
+                fontSize:    17,
+                fontWeight:  FontWeight.w600,
+                letterSpacing: -0.3,
+              ),
             ),
           ],
         ),
         bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(1),
-          child: Divider(height: 1, color: Colors.white12),
+          preferredSize: Size.fromHeight(0.5),
+          child: Divider(height: 0.5, color: Colors.white12),
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: Semantics(
-              label: 'Ver perfil',
-              button: true,
-              child: GestureDetector(
-                onTap: () => onTabChange?.call(3),
-                child: CircleAvatar(
-                  radius: 18,
-                  backgroundColor: Colors.white.withValues(alpha: 0.15),
-                  child: Text(
-                    _initials(name),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
+          Semantics(
+            label: 'Ver perfil',
+            button: true,
+            child: GestureDetector(
+              onTap: () { HapticFeedback.lightImpact(); onTabChange?.call(3); },
+              child: Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: AppAvatar(name: name, radius: 18),
               ),
             ),
           ),
@@ -79,9 +79,9 @@ class HomeTab extends ConsumerWidget {
             label: 'Cerrar sesión',
             button: true,
             child: IconButton(
-              icon: const Icon(Icons.logout_outlined, color: Colors.white),
+              icon: const Icon(Icons.logout_outlined, color: Colors.white, size: 22),
               tooltip: 'Cerrar sesión',
-              onPressed: () => _showLogoutDialog(context, ref),
+              onPressed: () => showLogoutDialog(context, ref),
             ),
           ),
         ],
@@ -96,100 +96,6 @@ class HomeTab extends ConsumerWidget {
     );
   }
 
-  // Carbon Modal: sin ícono, título alineado a la izquierda, X de cierre,
-  // divisor antes del footer, botones alineados a la derecha.
-  static void _showLogoutDialog(BuildContext context, WidgetRef ref) {
-    showGeneralDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: 'Cerrar',
-      barrierColor: Colors.black54,
-      transitionDuration: AppMotion.moderate02,
-      transitionBuilder: (ctx, anim, _, child) => FadeTransition(
-        opacity: CurvedAnimation(parent: anim, curve: AppMotion.entrance),
-        child: ScaleTransition(
-          scale: Tween<double>(begin: 0.96, end: 1)
-              .animate(CurvedAnimation(parent: anim, curve: AppMotion.entrance)),
-          child: child,
-        ),
-      ),
-      pageBuilder: (ctx, _, __) => Dialog(
-        shape: const RoundedRectangleBorder(),
-        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Header Carbon: título izquierda + X derecha
-            Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.xs, AppSpacing.xs),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      '¿Cerrar sesión?',
-                      style: AppTextStyles.heading02.copyWith(color: AppColors.textPrimary),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    icon: const Icon(Icons.close, size: 20),
-                    color: AppColors.textMuted,
-                    tooltip: 'Cancelar',
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-                  ),
-                ],
-              ),
-            ),
-            // Contenido
-            Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.lg),
-              child: Text(
-                'Tendrás que volver a ingresar tus credenciales la próxima vez.',
-                style: AppTextStyles.body01.copyWith(color: AppColors.textBody),
-              ),
-            ),
-            // Divisor Carbon antes del footer
-            const Divider(height: 1),
-            // Footer: Cancelar (ghost) + Cerrar sesión (danger)
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      shape: const RoundedRectangleBorder(),
-                    ),
-                    child: const Text('Cancelar'),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.error,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(0, 40),
-                      shape: const RoundedRectangleBorder(),
-                    ),
-                    onPressed: () async {
-                      Navigator.of(ctx).pop();
-                      await ref.read(authProvider.notifier).logout();
-                      if (context.mounted) context.go('/login');
-                    },
-                    child: const Text('Cerrar sesión'),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   static String _shortName(String name) {
     final parts = name.trim().split(RegExp(r'\s+'))
       ..removeWhere((p) => p.isEmpty);
@@ -197,22 +103,15 @@ class HomeTab extends ConsumerWidget {
     return '${parts.first} ${parts.last}';
   }
 
-  static String _initials(String name) {
-    final parts = name.trim().split(RegExp(r'\s+'));
-    if (parts.isEmpty || parts.first.isEmpty) return '?';
-    if (parts.length == 1) return parts.first[0].toUpperCase();
-    return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
-  }
-
   static String _greeting() {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Buenos días,';
-    if (hour < 19) return 'Buenas tardes,';
-    return 'Buenas noches,';
+    if (hour < 12) return 'Buenos días';
+    if (hour < 19) return 'Buenas tardes';
+    return 'Buenas noches';
   }
 }
 
-// ─── Contenido principal ──────────────────────────────────────────────────────
+// ─── Contenido ────────────────────────────────────────────────────────────────
 
 class _HomeContent extends ConsumerWidget {
   const _HomeContent({this.onTabChange});
@@ -226,7 +125,9 @@ class _HomeContent extends ConsumerWidget {
 
   Future<void> _whatsApp() async {
     final uri = Uri.parse(ExternalLinks.whatsappCenter);
-    if (await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   Future<void> _openCotizador() async {
@@ -238,76 +139,83 @@ class _HomeContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
+    final cs            = Theme.of(context).colorScheme;
     final productsAsync = ref.watch(productsProvider);
-
-    final renewingSoon = _renewingSoon(productsAsync.valueOrNull);
-    final products = productsAsync.valueOrNull;
+    final renewingSoon  = _renewingSoon(productsAsync.valueOrNull);
+    final products      = productsAsync.valueOrNull;
 
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(AppSpacing.pagePaddingH, AppSpacing.lg, AppSpacing.pagePaddingH, AppSpacing.lg),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.pagePaddingH, AppSpacing.lg,
+        AppSpacing.pagePaddingH, AppSpacing.lg,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Stats / Skeletons ────────────────────────────────────────────
           if (productsAsync.isLoading) ...[
             _RenewalAlertsSkeleton(),
-            const SizedBox(height: 28),
+            const SizedBox(height: AppSpacing.sectionGap),
             _StatsSkeleton(),
             const SizedBox(height: AppSpacing.sectionGap),
-          ] else if (renewingSoon.isNotEmpty) ...[
-            _RenewalAlertsSection(
-              products: renewingSoon,
-              onProductTap: (p) => context.go('/home/products/${p.idRen}'),
-            ),
-            const SizedBox(height: AppSpacing.cardGap),
+          ] else ...[
+            if (renewingSoon.isNotEmpty) ...[
+              _RenewalAlertsSection(
+                products: renewingSoon,
+                onProductTap: (p) => context.go('/home/products/${p.idRen}'),
+              ),
+              const SizedBox(height: AppSpacing.cardGap),
+            ],
+            if (products != null && products.isNotEmpty) ...[
+              _StatsRow(products: products),
+              const SizedBox(height: AppSpacing.sectionGap),
+            ],
           ],
-          if (products != null && products.isNotEmpty) ...[
-            _StatsRow(products: products),
-            const SizedBox(height: AppSpacing.sectionGap),
-          ],
+
+          // ── Acceso rápido ────────────────────────────────────────────────
           Text(
             'ACCESO RÁPIDO',
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: cs.onSurfaceVariant,
-                  letterSpacing: 1,
-                ),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: cs.onSurfaceVariant,
+            ),
           ),
-          const SizedBox(height: AppSpacing.s04),
+          const SizedBox(height: AppSpacing.sm),
           GridView.count(
             crossAxisCount: 2,
-            crossAxisSpacing: AppSpacing.s04,
-            mainAxisSpacing: AppSpacing.s04,
+            crossAxisSpacing: AppSpacing.sm,
+            mainAxisSpacing: AppSpacing.sm,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            childAspectRatio: 1.25,
+            childAspectRatio: 1.20,
             children: [
               _QuickActionCard(
-                icon: Icons.description_outlined,
+                icon:  Icons.description_outlined,
                 label: 'Mis pólizas',
                 color: cs.primary,
                 onTap: () => onTabChange?.call(2),
               ),
               _QuickActionCard(
-                icon: Icons.credit_card_outlined,
+                icon:  Icons.credit_card_outlined,
                 label: 'Mi carnet',
                 color: AppColors.info,
                 onTap: () => onTabChange?.call(1),
               ),
               _QuickActionCard(
-                icon: Icons.person_outline,
+                icon:  Icons.person_outline,
                 label: 'Mi perfil',
                 color: AppColors.success,
                 onTap: () => onTabChange?.call(3),
               ),
               _QuickActionCard(
-                icon: Icons.calculate_outlined,
+                icon:  Icons.calculate_outlined,
                 label: 'Cotizar en línea',
                 color: AppColors.accent,
                 onTap: _openCotizador,
               ),
             ],
           ),
+
           if (productsAsync.hasValue && productsAsync.value!.isEmpty) ...[
             const SizedBox(height: AppSpacing.pagePaddingH),
             _NoPoliciesBanner(onCotizar: _openCotizador),
@@ -336,21 +244,20 @@ class _HomeContent extends ConsumerWidget {
 
 class _StatsRow extends StatelessWidget {
   const _StatsRow({required this.products});
-
   final List<Product> products;
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
-    final total = products.length;
+    final now      = DateTime.now();
+    final total    = products.length;
     final vigentes = products.where((p) {
       if (p.fechaRenovacion == null) return true;
       return p.fechaRenovacion!.difference(now).inDays > 30;
     }).length;
     final proximas = products.where((p) {
       if (p.fechaRenovacion == null) return false;
-      final diff = p.fechaRenovacion!.difference(now).inDays;
-      return diff >= 0 && diff <= 30;
+      final d = p.fechaRenovacion!.difference(now).inDays;
+      return d >= 0 && d <= 30;
     }).length;
     final vencidas = products.where((p) {
       if (p.fechaRenovacion == null) return false;
@@ -363,14 +270,14 @@ class _StatsRow extends StatelessWidget {
           value: '$total',
           label: total == 1 ? 'Póliza' : 'Pólizas',
           color: Theme.of(context).colorScheme.primary,
-          icon: Icons.description_outlined,
+          icon:  Icons.description_outlined,
         ),
         const SizedBox(width: AppSpacing.sm),
         _StatCard(
           value: '$vigentes',
           label: 'Vigentes',
           color: AppColors.success,
-          icon: Icons.check_circle_outline,
+          icon:  Icons.check_circle_outline,
         ),
         const SizedBox(width: AppSpacing.sm),
         if (vencidas > 0)
@@ -378,14 +285,14 @@ class _StatsRow extends StatelessWidget {
             value: '$vencidas',
             label: 'Vencidas',
             color: AppColors.error,
-            icon: Icons.error_outline,
+            icon:  Icons.error_outline,
           )
         else
           _StatCard(
             value: '$proximas',
             label: 'Por vencer',
-            color: AppColors.warning,
-            icon: Icons.access_time_outlined,
+            color: AppColors.statWarning,
+            icon:  Icons.access_time_outlined,
           ),
       ],
     );
@@ -400,9 +307,9 @@ class _StatCard extends StatelessWidget {
     required this.icon,
   });
 
-  final String value;
-  final String label;
-  final Color color;
+  final String   value;
+  final String   label;
+  final Color    color;
   final IconData icon;
 
   @override
@@ -410,30 +317,35 @@ class _StatCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.s04, horizontal: AppSpacing.sm),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.sm,
+          horizontal: AppSpacing.sm,
+        ),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.07),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: color.withValues(alpha: 0.18)),
+          color:        color.withValues(alpha: 0.07),
+          borderRadius: AppRadius.mdBR,
+          border:       Border.all(color: color.withValues(alpha: 0.18)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: color, size: 18),
+            Icon(icon, color: color, size: 20),
             const SizedBox(height: AppSpacing.xs),
             Text(
               value,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: color,
-                  ),
+                fontWeight: FontWeight.w800,
+                color: color,
+              ),
             ),
             Text(
               label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: cs.onSurfaceVariant,
-                    fontSize: 10,
-                  ),
+              style: TextStyle(
+                fontSize:    11,
+                fontWeight:  FontWeight.w500,
+                color:       cs.onSurfaceVariant,
+                letterSpacing: 0.1,
+              ),
             ),
           ],
         ),
@@ -446,35 +358,32 @@ class _StatsSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (int i = 0; i < 3; i++) ...[
-            if (i > 0) const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: cs.outlineVariant),
-                ),
-                child: const Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ShimmerBox(width: 18, height: 18),
-                    SizedBox(height: AppSpacing.xs),
-                    ShimmerBox(width: 28, height: 16),
-                    SizedBox(height: 3),
-                    ShimmerBox(width: 50, height: 10),
-                  ],
-                ),
+    return Row(
+      children: [
+        for (int i = 0; i < 3; i++) ...[
+          if (i > 0) const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                borderRadius: AppRadius.mdBR,
+                border: Border.all(color: cs.outlineVariant),
+              ),
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ShimmerBox(width: 20, height: 20),
+                  SizedBox(height: AppSpacing.xs),
+                  ShimmerBox(width: 30, height: 16),
+                  SizedBox(height: 3),
+                  ShimmerBox(width: 56, height: 11),
+                ],
               ),
             ),
-          ],
+          ),
         ],
-      ),
+      ],
     );
   }
 }
@@ -491,33 +400,34 @@ class _RenewalAlertsSkeleton extends StatelessWidget {
         const SizedBox(height: AppSpacing.s04),
         for (int i = 0; i < 2; i++) ...[
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.cardGap, vertical: AppSpacing.s04),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outlineVariant,
-              ),
+              borderRadius: AppRadius.mdBR,
+              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
             ),
             child: const Row(
               children: [
                 ShimmerBox(width: 40, height: 40, borderRadius: 10),
-                SizedBox(width: AppSpacing.s04),
+                SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ShimmerBox(width: double.infinity, height: 13),
-                      SizedBox(height: AppSpacing.iconTileGap),
+                      SizedBox(height: AppSpacing.xs),
                       ShimmerBox(width: 100, height: 11),
                     ],
                   ),
                 ),
                 SizedBox(width: AppSpacing.sm),
-                ShimmerBox(width: 60, height: 22, borderRadius: 20),
+                ShimmerBox(width: 64, height: 22, borderRadius: 20),
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
         ],
       ],
     );
@@ -531,9 +441,8 @@ class _RenewalAlertsSection extends StatefulWidget {
     required this.products,
     required this.onProductTap,
   });
-
-  final List<Product> products;
-  final ValueChanged<Product> onProductTap;
+  final List<Product>           products;
+  final ValueChanged<Product>   onProductTap;
 
   @override
   State<_RenewalAlertsSection> createState() => _RenewalAlertsSectionState();
@@ -544,7 +453,7 @@ class _RenewalAlertsSectionState extends State<_RenewalAlertsSection> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final cs      = Theme.of(context).colorScheme;
     final visible = widget.products
         .where((p) => !_dismissed.contains(p.idRen))
         .toList();
@@ -558,20 +467,19 @@ class _RenewalAlertsSectionState extends State<_RenewalAlertsSection> {
           children: [
             const Icon(
               Icons.notifications_active_outlined,
-              size: 15,
-              color: AppColors.warning,
+              size: 14,
+              color: AppColors.statWarning,
             ),
             const SizedBox(width: 6),
             Text(
               'PRÓXIMAS RENOVACIONES',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: cs.onSurfaceVariant,
-                    letterSpacing: 1,
-                  ),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: cs.onSurfaceVariant,
+              ),
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.s04),
+        const SizedBox(height: AppSpacing.sm),
         ...visible.map(
           (p) => Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -582,20 +490,15 @@ class _RenewalAlertsSectionState extends State<_RenewalAlertsSection> {
                 alignment: Alignment.centerRight,
                 padding: const EdgeInsets.only(right: AppSpacing.pagePaddingH),
                 decoration: BoxDecoration(
-                  color: AppColors.textMuted.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
+                  color: AppColors.textMuted.withValues(alpha: 0.12),
+                  borderRadius: AppRadius.mdBR,
                 ),
-                child: const Icon(
-                  Icons.close_rounded,
-                  color: AppColors.textMuted,
-                ),
+                child: const Icon(Icons.close_rounded, color: AppColors.textMuted),
               ),
-              onDismissed: (_) {
-                setState(() => _dismissed.add(p.idRen));
-              },
+              onDismissed: (_) => setState(() => _dismissed.add(p.idRen)),
               child: _RenewalAlertCard(
                 product: p,
-                onTap: () => widget.onProductTap(p),
+                onTap:   () => widget.onProductTap(p),
               ),
             ),
           ),
@@ -607,30 +510,32 @@ class _RenewalAlertsSectionState extends State<_RenewalAlertsSection> {
 
 class _RenewalAlertCard extends StatelessWidget {
   const _RenewalAlertCard({required this.product, required this.onTap});
-
-  final Product product;
+  final Product      product;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
-    final diff = product.fechaRenovacion!.difference(now).inDays;
-    final urgency = _Urgency.of(diff);
-    final color = urgency.color;
+    final now    = DateTime.now();
+    final days   = product.fechaRenovacion!.difference(now).inDays;
+    final status = PolicyUtils.statusOf(product.fechaRenovacion);
+    final color  = status.color;
 
     return Semantics(
-      label: '${product.tipoSeguro}, ${urgency.label(diff)}',
+      label: '${product.tipoSeguro}, ${status.label(days)}',
       button: true,
       child: Material(
-        color: color.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(12),
+        color:        color.withValues(alpha: 0.05),
+        borderRadius: AppRadius.mdBR,
         child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
+          onTap:        onTap,
+          borderRadius: AppRadius.mdBR,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.cardGap, vertical: AppSpacing.s04),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: AppRadius.mdBR,
               border: Border.all(color: color.withValues(alpha: 0.25)),
             ),
             child: Row(
@@ -639,31 +544,30 @@ class _RenewalAlertCard extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
+                    color:        color.withValues(alpha: 0.12),
+                    borderRadius: AppRadius.smBR,
                   ),
                   child: Icon(Icons.event_outlined, color: color, size: 20),
                 ),
-                const SizedBox(width: AppSpacing.s04),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         product.tipoSeguro,
-                        style:
-                            Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: AppSpacing.s01),
+                      const SizedBox(height: 2),
                       Text(
-                        '${product.aseguradora} · ${_fmtDate(product.fechaRenovacion!)}',
+                        '${product.aseguradora} · ${PolicyUtils.fmtDate(product.fechaRenovacion!)}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textMuted,
-                            ),
+                          color: AppColors.textMuted,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -671,21 +575,7 @@ class _RenewalAlertCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    urgency.label(diff),
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: color,
-                          fontWeight: FontWeight.w700,
-                        ),
-                  ),
-                ),
+                AppStatusBadge(date: product.fechaRenovacion),
                 const SizedBox(width: AppSpacing.xs),
                 const Icon(Icons.chevron_right, color: AppColors.textMuted, size: 18),
               ],
@@ -697,100 +587,78 @@ class _RenewalAlertCard extends StatelessWidget {
   }
 }
 
-// ─── Urgencia ─────────────────────────────────────────────────────────────────
-
-enum _Urgency {
-  expired,
-  critical,
-  warning,
-  upcoming;
-
-  static _Urgency of(int days) {
-    if (days < 0) return _Urgency.expired;
-    if (days <= 7) return _Urgency.critical;
-    if (days <= 15) return _Urgency.warning;
-    return _Urgency.upcoming;
-  }
-
-  Color get color => switch (this) {
-        _Urgency.expired => AppColors.error,
-        _Urgency.critical => AppColors.error,
-        _Urgency.warning => AppColors.warning,
-        _Urgency.upcoming => AppColors.info,
-      };
-
-  String label(int days) => switch (this) {
-        _Urgency.expired =>
-          'Vencida hace ${(-days) == 1 ? "1 día" : "${-days} días"}',
-        _Urgency.critical =>
-          days == 0 ? '¡Vence hoy!' : 'Vence en ${days == 1 ? "1 día" : "$days días"}',
-        _Urgency.warning => 'Vence en $days días',
-        _Urgency.upcoming => '$days días',
-      };
-}
-
-String _fmtDate(DateTime d) {
-  const months = [
-    'ene', 'feb', 'mar', 'abr', 'may', 'jun',
-    'jul', 'ago', 'sep', 'oct', 'nov', 'dic',
-  ];
-  return '${d.day} ${months[d.month - 1]}';
-}
-
 // ─── Quick action card ────────────────────────────────────────────────────────
 
-class _QuickActionCard extends StatelessWidget {
+class _QuickActionCard extends StatefulWidget {
   const _QuickActionCard({
     required this.icon,
     required this.label,
     required this.color,
     required this.onTap,
   });
-
-  final IconData icon;
-  final String label;
-  final Color color;
+  final IconData     icon;
+  final String       label;
+  final Color        color;
   final VoidCallback onTap;
+
+  @override
+  State<_QuickActionCard> createState() => _QuickActionCardState();
+}
+
+class _QuickActionCardState extends State<_QuickActionCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _press = AnimationController(
+    vsync: this,
+    duration: AppMotion.press,
+  );
+
+  late final Animation<double> _scale = Tween<double>(begin: 1, end: 0.96)
+      .animate(CurvedAnimation(parent: _press, curve: Curves.easeInOut));
+
+  @override
+  void dispose() {
+    _press.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Semantics(
-      label: label,
+      label:  widget.label,
       button: true,
-      child: Material(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            onTap();
-          },
-          borderRadius: BorderRadius.circular(12),
+      child: GestureDetector(
+        onTapDown:  (_) => _press.forward(),
+        onTapUp:    (_) { _press.reverse(); HapticFeedback.lightImpact(); widget.onTap(); },
+        onTapCancel: ()  => _press.reverse(),
+        child: ScaleTransition(
+          scale: _scale,
           child: Container(
             decoration: BoxDecoration(
-              border: Border.all(color: cs.outlineVariant),
-              borderRadius: BorderRadius.circular(12),
+              color:        cs.surface,
+              borderRadius: AppRadius.mdBR,
+              border:       Border.all(color: cs.outlineVariant),
+              boxShadow:    AppColors.shadowSm,
             ),
             padding: const EdgeInsets.all(AppSpacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment:  MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width:  44,
+                  height: 44,
                   decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(10),
+                    color:        widget.color.withValues(alpha: 0.10),
+                    borderRadius: AppRadius.smBR,
                   ),
-                  child: Icon(icon, color: color, size: 22),
+                  child: Icon(widget.icon, color: widget.color, size: 24),
                 ),
                 Text(
-                  label,
+                  widget.label,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -805,7 +673,6 @@ class _QuickActionCard extends StatelessWidget {
 
 class _SupportCard extends StatelessWidget {
   const _SupportCard({required this.onCall, required this.onWhatsApp});
-
   final VoidCallback onCall;
   final VoidCallback onWhatsApp;
 
@@ -813,11 +680,11 @@ class _SupportCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.cardGap),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.15)),
+        color:        cs.surfaceContainerHighest,
+        borderRadius: AppRadius.mdBR,
+        border:       Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -828,8 +695,8 @@ class _SupportCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: cs.primary.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
+                  color:  cs.primary.withValues(alpha: 0.10),
+                  shape:  BoxShape.circle,
                 ),
                 child: Icon(Icons.support_agent_outlined, color: cs.primary, size: 24),
               ),
@@ -840,21 +707,21 @@ class _SupportCard extends StatelessWidget {
                   Text(
                     'Centro de atención',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                  const SizedBox(height: AppSpacing.s01),
+                  const SizedBox(height: 2),
                   Text(
                     'Lun–Vie · 8:00–17:00',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textMuted,
-                        ),
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.s04),
+          const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
               Expanded(
@@ -863,12 +730,13 @@ class _SupportCard extends StatelessWidget {
                   button: true,
                   child: OutlinedButton.icon(
                     onPressed: onCall,
-                    icon: Icon(Icons.phone_outlined, color: cs.primary, size: 16),
+                    icon:  Icon(Icons.phone_outlined, color: cs.primary, size: 16),
                     label: Text('Llamar', style: TextStyle(color: cs.primary)),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: cs.primary.withValues(alpha: 0.4)),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      side:            BorderSide(color: cs.primary.withValues(alpha: 0.4)),
+                      padding:         const EdgeInsets.symmetric(vertical: 10),
+                      shape:           RoundedRectangleBorder(borderRadius: AppRadius.smBR),
+                      minimumSize:     const Size(0, 44),
                     ),
                   ),
                 ),
@@ -880,12 +748,13 @@ class _SupportCard extends StatelessWidget {
                   button: true,
                   child: OutlinedButton.icon(
                     onPressed: onWhatsApp,
-                    icon: const Icon(Icons.chat_bubble_outline, color: Color(0xFF25D366), size: 16),
+                    icon:  const Icon(Icons.chat_bubble_outline, color: Color(0xFF25D366), size: 16),
                     label: const Text('WhatsApp', style: TextStyle(color: Color(0xFF25D366))),
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Color(0x5525D366)),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      side:        const BorderSide(color: Color(0x5525D366)),
+                      padding:     const EdgeInsets.symmetric(vertical: 10),
+                      shape:       RoundedRectangleBorder(borderRadius: AppRadius.smBR),
+                      minimumSize: const Size(0, 44),
                     ),
                   ),
                 ),
@@ -910,9 +779,9 @@ class _NoPoliciesBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.15)),
+        color:        cs.primary.withValues(alpha: 0.05),
+        borderRadius: AppRadius.mdBR,
+        border:       Border.all(color: cs.primary.withValues(alpha: 0.15)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -921,8 +790,8 @@ class _NoPoliciesBanner extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: cs.primary.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(10),
+              color:        cs.primary.withValues(alpha: 0.10),
+              borderRadius: AppRadius.smBR,
             ),
             child: Icon(Icons.policy_outlined, color: cs.primary, size: 22),
           ),
@@ -934,28 +803,28 @@ class _NoPoliciesBanner extends StatelessWidget {
                 Text(
                   'Sin pólizas activas',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 3),
                 Text(
                   'No encontramos pólizas vigentes asociadas a tu documento.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
+                    color: cs.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Semantics(
-                  label: 'Cotizar una nueva póliza en línea',
+                  label:  'Cotizar una nueva póliza en línea',
                   button: true,
                   child: TextButton.icon(
                     onPressed: onCotizar,
-                    icon: const Icon(Icons.calculate_outlined, size: 16),
+                    icon:  const Icon(Icons.calculate_outlined, size: 16),
                     label: const Text('Cotizar en línea'),
                     style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      padding:         EdgeInsets.zero,
+                      minimumSize:     Size.zero,
+                      tapTargetSize:   MaterialTapTargetSize.shrinkWrap,
                     ),
                   ),
                 ),

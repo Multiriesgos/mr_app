@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
@@ -33,14 +34,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: 'products',
-            pageBuilder: (context, state) => _slidePage(
+            pageBuilder: (context, state) => _adaptivePage(
               state: state,
               child: const ProductsScreen(),
             ),
             routes: [
               GoRoute(
                 path: ':id',
-                pageBuilder: (context, state) => _slidePage(
+                pageBuilder: (context, state) => _adaptivePage(
                   state: state,
                   child: ProductDetailScreen(
                     idRen: int.parse(state.pathParameters['id']!),
@@ -52,7 +53,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: 'benefits',
-            pageBuilder: (context, state) => _slidePage(
+            pageBuilder: (context, state) => _adaptivePage(
               state: state,
               child: const BenefitCardScreen(),
             ),
@@ -64,33 +65,40 @@ final routerProvider = Provider<GoRouter>((ref) {
       final authAsync = ref.read(authProvider);
       final loc = state.matchedLocation;
 
-      // Startup inicial: sin valor previo → splash
       if (authAsync.isLoading && !authAsync.hasValue) {
         return loc == '/' ? null : '/';
       }
-
-      // Error de login → permanecer en login (no redirigir a splash)
       if (authAsync.hasError) {
         return loc == '/login' ? null : '/login';
       }
-
       if (!authAsync.hasValue) {
         return loc == '/login' ? null : '/login';
       }
 
       final auth = authAsync.requireValue;
-
       return switch (auth) {
-        AuthLoading() => loc == '/' ? null : '/',
-        AuthAuthenticated() =>
-          (loc == '/' || loc == '/login') ? '/home' : null,
+        AuthLoading()        => loc == '/' ? null : '/',
+        AuthAuthenticated()  => (loc == '/' || loc == '/login') ? '/home' : null,
         AuthUnauthenticated() => loc == '/login' ? null : '/login',
       };
     },
   );
 });
 
-CustomTransitionPage<void> _slidePage({
+/// Transición adaptativa:
+/// - iOS → `CupertinoPage` (slide nativo desde la derecha + swipe-back).
+/// - Android → slide personalizado idéntico al anterior.
+Page<void> _adaptivePage({
+  required GoRouterState state,
+  required Widget child,
+}) {
+  if (defaultTargetPlatform == TargetPlatform.iOS) {
+    return CupertinoPage<void>(key: state.pageKey, child: child);
+  }
+  return _androidSlidePage(state: state, child: child);
+}
+
+CustomTransitionPage<void> _androidSlidePage({
   required GoRouterState state,
   required Widget child,
 }) {
@@ -102,7 +110,7 @@ CustomTransitionPage<void> _slidePage({
     transitionsBuilder: (_, animation, __, child) => SlideTransition(
       position: Tween(
         begin: const Offset(1, 0),
-        end: Offset.zero,
+        end:   Offset.zero,
       ).chain(CurveTween(curve: Curves.easeInOut)).animate(animation),
       child: child,
     ),

@@ -111,4 +111,26 @@ abstract final class AppTextStyles {
   static const TextStyle productiveHeading04 = TextStyle(
     fontSize: 28, fontWeight: FontWeight.w400, height: 1.286,
   );
+
+  // ─── Display (áreas hero) ─────────────────────────────────────────────────
+  /// 40px / SemiBold / lh 48 — sumas de dinero, stats grandes
+  static const TextStyle displayXs = TextStyle(
+    fontSize: 40, fontWeight: FontWeight.w600, height: 1.2,
+  );
+
+  /// 32px / Regular / lh 40 — hero de pantalla
+  static const TextStyle displaySm = TextStyle(
+    fontSize: 32, fontWeight: FontWeight.w400, height: 1.25,
+  );
+
+  // ─── Caption / overline ───────────────────────────────────────────────────
+  /// 11px / Regular / lh 16 / ls 0.4 — metadata compacto
+  static const TextStyle caption = TextStyle(
+    fontSize: 11, fontWeight: FontWeight.w400, height: 1.455, letterSpacing: 0.4,
+  );
+
+  /// 11px / SemiBold / lh 16 / ls 0.8 — etiquetas de sección en mayúsculas
+  static const TextStyle overline = TextStyle(
+    fontSize: 11, fontWeight: FontWeight.w600, height: 1.455, letterSpacing: 0.8,
+  );
 }

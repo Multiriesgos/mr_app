@@ -3,12 +3,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mr_app/core/auth/biometrics_service.dart';
 import 'package:mr_app/core/config/external_links.dart';
 import 'package:mr_app/core/di/settings_providers.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
+import 'package:mr_app/core/theme/app_radius.dart';
 import 'package:mr_app/core/theme/app_spacing.dart';
+import 'package:mr_app/core/widgets/app_avatar.dart';
+import 'package:mr_app/core/widgets/app_logout_dialog.dart';
+import 'package:mr_app/core/widgets/app_nav_bar.dart';
 import 'package:mr_app/features/auth/domain/entities/user.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -23,10 +26,9 @@ class ProfileScreen extends ConsumerWidget {
     final user = authState is AuthAuthenticated ? authState.user : null;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Perfil y ajustes'),
-        centerTitle: true,
-        elevation: 0,
+      appBar: const AppNavBar(
+        title:   'Perfil y ajustes',
+        leading: AppNavBarLeading.none,
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
@@ -62,13 +64,15 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.s04, AppSpacing.md, AppSpacing.xs),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md, AppSpacing.s04, AppSpacing.md, AppSpacing.xs,
+      ),
       child: Text(
         title,
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w600,
-            ),
+          color:       AppColors.primary,
+          fontWeight:  FontWeight.w600,
+        ),
       ),
     );
   }
@@ -78,38 +82,19 @@ class _SectionTitle extends StatelessWidget {
 
 class _UserHeader extends StatelessWidget {
   const _UserHeader({required this.user});
-
   final User? user;
-
-  static String _initials(String name) {
-    final parts = name.trim().split(RegExp(r'\s+'));
-    if (parts.isEmpty || parts.first.isEmpty) return '?';
-    if (parts.length == 1) return parts.first[0].toUpperCase();
-    return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
-  }
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final name = user?.name ?? '';
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePaddingH, vertical: AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.pagePaddingH,
+        vertical:   AppSpacing.lg,
+      ),
       child: Column(
         children: [
-          CircleAvatar(
-            radius: 46,
-            backgroundColor: cs.primary.withValues(alpha: 0.12),
-            child: name.isNotEmpty
-                ? Text(
-                    _initials(name),
-                    style: TextStyle(
-                      color: cs.primary,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  )
-                : Icon(Icons.person, size: 52, color: cs.primary),
-          ),
+          AppAvatar.profile(name: name),
           if (user != null) ...[
             const SizedBox(height: AppSpacing.s04),
             Text(
@@ -149,43 +134,30 @@ class _ThemeTile extends ConsumerWidget {
     final mode = themeAsync.valueOrNull ?? ThemeMode.system;
 
     return ListTile(
-      leading: Icon(
-        mode == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
-      ),
-      title: const Text('Modo oscuro'),
+      leading: Icon(mode == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode),
+      title:   const Text('Modo oscuro'),
       subtitle: Text(_modeLabel(mode)),
       trailing: DropdownButton<ThemeMode>(
-        value: mode,
-        underline: const SizedBox.shrink(),
-        borderRadius: BorderRadius.circular(8),
+        value:       mode,
+        underline:   const SizedBox.shrink(),
+        borderRadius: AppRadius.smBR,
         items: const [
-          DropdownMenuItem(
-            value: ThemeMode.system,
-            child: Text('Automático'),
-          ),
-          DropdownMenuItem(
-            value: ThemeMode.light,
-            child: Text('Claro'),
-          ),
-          DropdownMenuItem(
-            value: ThemeMode.dark,
-            child: Text('Oscuro'),
-          ),
+          DropdownMenuItem(value: ThemeMode.system, child: Text('Automático')),
+          DropdownMenuItem(value: ThemeMode.light,  child: Text('Claro')),
+          DropdownMenuItem(value: ThemeMode.dark,   child: Text('Oscuro')),
         ],
         onChanged: (m) {
-          if (m != null) {
-            ref.read(themeModeProvider.notifier).setMode(m);
-          }
+          if (m != null) ref.read(themeModeProvider.notifier).setMode(m);
         },
       ),
     );
   }
 
   String _modeLabel(ThemeMode mode) => switch (mode) {
-        ThemeMode.system => 'Igual al sistema',
-        ThemeMode.light => 'Siempre claro',
-        ThemeMode.dark => 'Siempre oscuro',
-      };
+    ThemeMode.system => 'Igual al sistema',
+    ThemeMode.light  => 'Siempre claro',
+    ThemeMode.dark   => 'Siempre oscuro',
+  };
 }
 
 // ─── Toggle biometría ────────────────────────────────────────────────────────
@@ -193,20 +165,19 @@ class _ThemeTile extends ConsumerWidget {
 class _BiometricsTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final biometrics = ref.watch(biometricsServiceProvider);
+    final biometrics   = ref.watch(biometricsServiceProvider);
     final enabledAsync = ref.watch(biometricsEnabledProvider);
-    final enabled = enabledAsync.valueOrNull ?? false;
+    final enabled      = enabledAsync.valueOrNull ?? false;
 
     return FutureBuilder<BiometricAvailability>(
       future: biometrics.checkAvailability(),
       builder: (context, snap) {
-        final availability =
-            snap.data ?? BiometricAvailability.notAvailable;
-        final isAvailable = availability == BiometricAvailability.available;
+        final availability  = snap.data ?? BiometricAvailability.notAvailable;
+        final isAvailable   = availability == BiometricAvailability.available;
 
         return ListTile(
-          leading: const Icon(Icons.fingerprint),
-          title: const Text('Bloqueo biométrico'),
+          leading:  const Icon(Icons.fingerprint),
+          title:    const Text('Bloqueo biométrico'),
           subtitle: Text(
             !isAvailable
                 ? 'No disponible en este dispositivo'
@@ -215,19 +186,16 @@ class _BiometricsTile extends ConsumerWidget {
                     : 'Desactivado',
           ),
           trailing: Switch(
-            value: enabled && isAvailable,
+            value:     enabled && isAvailable,
             onChanged: isAvailable
                 ? (val) async {
                     if (val) {
-                      // Verificar antes de activar
                       final ok = await biometrics.authenticate(
                         reason: 'Activa el bloqueo biométrico',
                       );
                       if (!ok) return;
                     }
-                    await ref
-                        .read(biometricsEnabledProvider.notifier)
-                        .toggle(val);
+                    await ref.read(biometricsEnabledProvider.notifier).toggle(val);
                   }
                 : null,
           ),
@@ -247,12 +215,10 @@ class _AppVersionTile extends StatelessWidget {
       builder: (context, snap) {
         final info = snap.data;
         return ListTile(
-          leading: const Icon(Icons.info_outline),
-          title: const Text('Versión'),
+          leading:  const Icon(Icons.info_outline),
+          title:    const Text('Versión'),
           trailing: Text(
-            info != null
-                ? '${info.version}+${info.buildNumber}'
-                : '—',
+            info != null ? '${info.version}+${info.buildNumber}' : '—',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         );
@@ -270,7 +236,7 @@ class _FcmTokenTile extends StatefulWidget {
 
 class _FcmTokenTileState extends State<_FcmTokenTile> {
   String? _token;
-  bool _loading = true;
+  bool    _loading = true;
 
   @override
   void initState() {
@@ -286,7 +252,7 @@ class _FcmTokenTileState extends State<_FcmTokenTile> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Token FCM copiado al portapapeles'),
+        content:  Text('Token FCM copiado al portapapeles'),
         duration: Duration(seconds: 2),
       ),
     );
@@ -301,12 +267,12 @@ class _FcmTokenTileState extends State<_FcmTokenTile> {
             : '${_token!.substring(0, 12)}…${_token!.substring(_token!.length - 8)}';
 
     return ListTile(
-      leading: const Icon(Icons.key_outlined, color: AppColors.warning),
-      title: const Text('[DEBUG] Token FCM'),
+      leading:  const Icon(Icons.key_outlined, color: AppColors.warning),
+      title:    const Text('[DEBUG] Token FCM'),
       subtitle: Text(display, style: Theme.of(context).textTheme.bodySmall),
       trailing: _token != null
           ? IconButton(
-              icon: const Icon(Icons.copy_outlined, size: 18),
+              icon:    const Icon(Icons.copy_outlined, size: 18),
               tooltip: 'Copiar token completo',
               onPressed: _copy,
             )
@@ -322,8 +288,8 @@ class _PrivacyPolicyTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: const Icon(Icons.privacy_tip_outlined),
-      title: const Text('Política de privacidad'),
+      leading:  const Icon(Icons.privacy_tip_outlined),
+      title:    const Text('Política de privacidad'),
       trailing: const Icon(Icons.open_in_new, size: 18),
       onTap: () => launchUrl(
         Uri.parse(ExternalLinks.privacyPolicy),
@@ -340,37 +306,8 @@ class _LogoutTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ListTile(
       leading: const Icon(Icons.logout_outlined, color: AppColors.error),
-      title: const Text(
-        'Cerrar sesión',
-        style: TextStyle(color: AppColors.error),
-      ),
-      onTap: () => _showLogoutDialog(context, ref),
-    );
-  }
-
-  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        icon: const Icon(Icons.logout_outlined, color: AppColors.error, size: 32),
-        title: const Text('¿Cerrar sesión?'),
-        content: const Text('Tendrás que volver a ingresar tus credenciales.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
-            onPressed: () async {
-              Navigator.of(ctx).pop();
-              await ref.read(authProvider.notifier).logout();
-              if (context.mounted) context.go('/login');
-            },
-            child: const Text('Cerrar sesión'),
-          ),
-        ],
-      ),
+      title:   const Text('Cerrar sesión', style: TextStyle(color: AppColors.error)),
+      onTap:   () => showLogoutDialog(context, ref),
     );
   }
 }

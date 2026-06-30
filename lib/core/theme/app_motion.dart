@@ -43,4 +43,21 @@ abstract final class AppMotion {
 
   /// Expressive standard: modals, drawers, sidebars
   static const Curve expressiveStandard = Cubic(0.4, 0.14, 0.3, 1);
+
+  // ─── iOS-inspired spring curve ────────────────────────────────────────────
+  /// Overshoot suave — botones, cards, hero transitions
+  static const Curve spring = Cubic(0.34, 1.20, 0.64, 1);
+
+  /// Bounce ligero — para scale press feedback
+  static const Curve springBounce = Cubic(0.22, 1.40, 0.36, 1);
+
+  // ─── Duraciones adicionales ───────────────────────────────────────────────
+  /// 80 ms — press scale down feedback
+  static const Duration press = Duration(milliseconds: 80);
+
+  /// 350 ms — hero / shared element transitions
+  static const Duration hero = Duration(milliseconds: 350);
+
+  /// 600 ms — onboarding / splash entry
+  static const Duration intro = Duration(milliseconds: 600);
 }

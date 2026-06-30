@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/core/auth/biometrics_service.dart';
 import 'package:mr_app/core/di/settings_providers.dart';
 import 'package:mr_app/core/logging/app_logger.dart';
+import 'package:mr_app/core/platform/app_platform.dart';
 import 'package:mr_app/core/theme/app_colors.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:mr_app/features/benefits/presentation/screens/benefit_card_screen.dart';
@@ -32,9 +34,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   DateTime? _backgroundedAt;
   StreamSubscription<NotificationPayload>? _notifSubscription;
 
-  // Re-auth biométrica solo si el usuario estuvo fuera más de este umbral.
-  // Evita pedir biométrico al volver de links externos (llamada, WhatsApp, cotizador).
-  static const _kBiometricTimeoutSeconds = 300; // 5 minutos
+  static const _kBiometricTimeoutSeconds = 300;
   final List<ScrollController> _scrollControllers =
       List.generate(4, (_) => ScrollController());
 
@@ -71,18 +71,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Future<void> _initNotifications() async {
-    // Inicializar local notifications antes que FCM para poder usarlo en foreground.
     await ref.read(localNotificationServiceProvider).initialize();
-
     final service = ref.read(notificationServiceProvider);
     await service.initialize();
     final granted = await service.requestPermission();
 
-    // Suscribir al topic específico del usuario para notificaciones dirigidas.
     if (granted) {
       final authState = ref.read(authProvider).valueOrNull;
       if (authState is AuthAuthenticated) {
-        final docTopic = 'doc_${authState.user.documentNumber.replaceAll(RegExp('[^a-zA-Z0-9]'), '_')}';
+        final docTopic =
+            'doc_${authState.user.documentNumber.replaceAll(RegExp('[^a-zA-Z0-9]'), '_')}';
         await FirebaseMessaging.instance.subscribeToTopic(docTopic);
         appLogger.info('notifications: suscrito al topic "$docTopic"');
       }
@@ -90,20 +88,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     if (!mounted) return;
 
-    // App abierta desde tap en notificación (app terminada).
     final initial = await FirebaseMessaging.instance.getInitialMessage();
     if (initial != null && mounted) _handleNotifNavigation(initial.data);
 
-    // Tap en notificación con app en background.
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
       if (mounted) _handleNotifNavigation(message.data);
     });
 
-    // Mensajes mientras la app está en primer plano.
     _notifSubscription = service.onForegroundMessage.listen(_showNotifBanner);
   }
 
-  /// Navega a la ruta indicada en el payload o al tab Inicio por defecto.
   void _handleNotifNavigation(Map<String, dynamic> data) {
     final route = data['route'] as String?;
     if (route != null && mounted) {
@@ -116,12 +110,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void _showNotifBanner(NotificationPayload payload) {
     if (!mounted) return;
 
-    // Mostrar notificación del sistema para que aparezca aunque la app esté en foreground.
     ref.read(localNotificationServiceProvider).showNow(
-      id: DateTime.now().millisecondsSinceEpoch & 0x7FFFFFFF,
-      title: payload.title,
-      body: payload.body,
-    );
+          id: DateTime.now().millisecondsSinceEpoch & 0x7FFFFFFF,
+          title: payload.title,
+          body: payload.body,
+        );
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -131,15 +124,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           children: [
             Text(
               payload.title,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
             ),
-            Text(
-              payload.body,
-              style: const TextStyle(color: Colors.white70),
-            ),
+            Text(payload.body, style: const TextStyle(color: Colors.white70)),
           ],
         ),
         action: payload.route != null
@@ -150,9 +137,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               )
             : null,
         backgroundColor: AppColors.sidebarBg,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         duration: const Duration(seconds: 5),
       ),
     );
@@ -161,9 +145,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
-      final biometricsEnabled =
-          ref.read(biometricsEnabledProvider).valueOrNull ?? false;
-      if (biometricsEnabled) _backgroundedAt = DateTime.now();
+      final enabled = ref.read(biometricsEnabledProvider).valueOrNull ?? false;
+      if (enabled) _backgroundedAt = DateTime.now();
     } else if (state == AppLifecycleState.resumed) {
       final at = _backgroundedAt;
       _backgroundedAt = null;
@@ -175,10 +158,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Future<void> _runBiometricCheck() async {
-    final biometricsService = ref.read(biometricsServiceProvider);
-    final ok = await biometricsService.authenticate(
-      reason: 'Verifica tu identidad para continuar',
-    );
+    final ok = await ref
+        .read(biometricsServiceProvider)
+        .authenticate(reason: 'Verifica tu identidad para continuar');
     if (!ok && mounted) {
       await ref.read(authProvider.notifier).logout();
       if (mounted) context.go('/login');
@@ -192,8 +174,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     ref.listen<AsyncValue<List<Product>>>(productsProvider, (_, next) {
       next.whenData((products) {
-        final svc = ref.read(localNotificationServiceProvider);
-        scheduleRenewalReminders(products, svc);
+        scheduleRenewalReminders(
+          products,
+          ref.read(localNotificationServiceProvider),
+        );
       });
     });
 
@@ -227,7 +211,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     return Scaffold(
       body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 150),
+        duration: const Duration(milliseconds: 180),
         switchInCurve: Curves.easeIn,
         switchOutCurve: Curves.easeOut,
         transitionBuilder: (child, animation) =>
@@ -237,36 +221,84 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           child: tabs[_currentIndex],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: _buildTabBar(urgentCount),
+    );
+  }
+
+  Widget _buildTabBar(int urgentCount) {
+    // ── iOS: CupertinoTabBar nativo ────────────────────────────────────────
+    if (AppPlatform.isIOS) {
+      final cs = Theme.of(context).colorScheme;
+      return CupertinoTabBar(
         currentIndex: _currentIndex,
         onTap: _onTabTap,
+        backgroundColor: cs.surface,
+        activeColor: AppColors.primary,
+        inactiveColor: AppColors.textMuted,
+        border: const Border(top: BorderSide(color: AppColors.border, width: 0.5),),
         items: [
           const BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
+            icon: Icon(CupertinoIcons.house),
+            activeIcon: Icon(CupertinoIcons.house_fill),
             label: 'Inicio',
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.credit_card_outlined),
-            activeIcon: Icon(Icons.credit_card),
+            icon: Icon(CupertinoIcons.creditcard),
+            activeIcon: Icon(CupertinoIcons.creditcard_fill),
             label: 'Carnet',
           ),
           BottomNavigationBarItem(
             icon: Badge(
               isLabelVisible: urgentCount > 0 && _currentIndex != 2,
               label: urgentCount > 9 ? const Text('9+') : Text('$urgentCount'),
-              child: const Icon(Icons.description_outlined),
+              child: const Icon(CupertinoIcons.doc_text),
             ),
-            activeIcon: const Icon(Icons.description),
+            activeIcon: Badge(
+              isLabelVisible: urgentCount > 0 && _currentIndex != 2,
+              label: urgentCount > 9 ? const Text('9+') : Text('$urgentCount'),
+              child: const Icon(CupertinoIcons.doc_text_fill),
+            ),
             label: 'Pólizas',
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
+            icon: Icon(CupertinoIcons.person),
+            activeIcon: Icon(CupertinoIcons.person_fill),
             label: 'Perfil',
           ),
         ],
-      ),
+      );
+    }
+
+    // ── Android: BottomNavigationBar Material ──────────────────────────────
+    return BottomNavigationBar(
+      currentIndex: _currentIndex,
+      onTap: _onTabTap,
+      items: [
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.home_outlined),
+          activeIcon: Icon(Icons.home),
+          label: 'Inicio',
+        ),
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.credit_card_outlined),
+          activeIcon: Icon(Icons.credit_card),
+          label: 'Carnet',
+        ),
+        BottomNavigationBarItem(
+          icon: Badge(
+            isLabelVisible: urgentCount > 0 && _currentIndex != 2,
+            label: urgentCount > 9 ? const Text('9+') : Text('$urgentCount'),
+            child: const Icon(Icons.description_outlined),
+          ),
+          activeIcon: const Icon(Icons.description),
+          label: 'Pólizas',
+        ),
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.person_outline),
+          activeIcon: Icon(Icons.person),
+          label: 'Perfil',
+        ),
+      ],
     );
   }
 }
