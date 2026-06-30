@@ -16,10 +16,10 @@ class ProductsRepositoryImpl implements ProductsRepository {
   Future<List<Product>> getProducts(String docSearch) async {
     try {
       final models = await _remote.getProducts(docSearch);
-      unawaited(_local.cacheProducts(models));
+      unawaited(_local.cacheProducts(models, docSearch));
       return models.map((m) => m.toEntity()).toList();
     } on NetworkException {
-      final cached = await _local.getCachedProducts();
+      final cached = await _local.getCachedProducts(docSearch);
       if (cached != null) return cached.map((m) => m.toEntity()).toList();
       rethrow;
     }

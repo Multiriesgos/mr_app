@@ -80,7 +80,7 @@ Widget _buildScreen(List<Override> overrides) {
     routes: [
       GoRoute(
         path: '/product/:id',
-        builder: (_, __) => ProductDetailScreen(idRen: _kIdRen),
+        builder: (_, __) => const ProductDetailScreen(idRen: _kIdRen),
       ),
     ],
   );
