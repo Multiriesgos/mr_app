@@ -13,14 +13,14 @@ class ProductsRepositoryImpl implements ProductsRepository {
   final ProductsLocalDataSource  _local;
 
   @override
-  Future<List<Product>> getProducts(String docSearch) async {
+  Future<(List<Product>, bool fromCache)> getProducts(String docSearch) async {
     try {
       final models = await _remote.getProducts(docSearch);
       unawaited(_local.cacheProducts(models, docSearch));
-      return models.map((m) => m.toEntity()).toList();
+      return (models.map((m) => m.toEntity()).toList(), false);
     } on NetworkException {
       final cached = await _local.getCachedProducts(docSearch);
-      if (cached != null) return cached.map((m) => m.toEntity()).toList();
+      if (cached != null) return (cached.map((m) => m.toEntity()).toList(), true);
       rethrow;
     }
   }
@@ -50,4 +50,7 @@ class ProductsRepositoryImpl implements ProductsRepository {
     final model = await _remote.getDefaultContactInfo();
     return model?.toEntity();
   }
+
+  @override
+  Future<void> clearCache(String docSearch) => _local.clearCache(docSearch);
 }

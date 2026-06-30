@@ -6,6 +6,6 @@ class GetProductsUseCase {
 
   final ProductsRepository _repository;
 
-  Future<List<Product>> call(String docSearch) =>
+  Future<(List<Product>, bool fromCache)> call(String docSearch) =>
       _repository.getProducts(docSearch);
 }

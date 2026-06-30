@@ -88,7 +88,21 @@ class HomeTab extends ConsumerWidget {
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () => ref.read(productsProvider.notifier).reload(),
+          onRefresh: () async {
+            final messenger = ScaffoldMessenger.of(context);
+            await ref.read(productsProvider.notifier).reload();
+            if (!context.mounted) return;
+            final n = ref.read(productsProvider.notifier);
+            if (!n.fromCache && ref.read(productsProvider).hasValue) {
+              messenger.showSnackBar(
+                const SnackBar(
+                  content: Text('Pólizas actualizadas'),
+                  duration: Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          },
           color: AppColors.primary,
           child: _HomeContent(onTabChange: onTabChange),
         ),
@@ -280,14 +294,14 @@ class _StatsRow extends StatelessWidget {
     return Row(
       children: [
         _StatCard(
-          value: '$total',
+          value: total,
           label: total == 1 ? 'Póliza' : 'Pólizas',
           color: Theme.of(context).colorScheme.primary,
           icon:  Icons.description_outlined,
         ),
         const SizedBox(width: AppSpacing.sm),
         _StatCard(
-          value: '$vigentes',
+          value: vigentes,
           label: 'Vigentes',
           color: AppColors.success,
           icon:  Icons.check_circle_outline,
@@ -295,14 +309,14 @@ class _StatsRow extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
         if (vencidas > 0)
           _StatCard(
-            value: '$vencidas',
+            value: vencidas,
             label: 'Vencidas',
             color: AppColors.error,
             icon:  Icons.error_outline,
           )
         else
           _StatCard(
-            value: '$proximas',
+            value: proximas,
             label: 'Por vencer',
             color: AppColors.statWarning,
             icon:  Icons.access_time_outlined,
@@ -320,14 +334,15 @@ class _StatCard extends StatelessWidget {
     required this.icon,
   });
 
-  final String   value;
+  final int      value;
   final String   label;
   final Color    color;
   final IconData icon;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final cs           = Theme.of(context).colorScheme;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(
@@ -351,12 +366,17 @@ class _StatCard extends StatelessWidget {
               child: Icon(icon, color: color, size: 22),
             ),
             const SizedBox(height: AppSpacing.xs),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: color,
-                height: 1.1,
+            TweenAnimationBuilder<int>(
+              tween: IntTween(begin: 0, end: value),
+              duration: reduceMotion ? Duration.zero : AppMotion.slow01,
+              curve: AppMotion.entrance,
+              builder: (_, animated, __) => Text(
+                '$animated',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: color,
+                  height: 1.1,
+                ),
               ),
             ),
             Text(

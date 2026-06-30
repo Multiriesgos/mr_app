@@ -10,9 +10,9 @@ class _FakeProductsRepository implements ProductsRepository {
   final Object productsResult;
 
   @override
-  Future<List<Product>> getProducts(String docSearch) async {
+  Future<(List<Product>, bool fromCache)> getProducts(String docSearch) async {
     if (productsResult is Exception) throw productsResult as Exception;
-    return productsResult as List<Product>;
+    return (productsResult as List<Product>, false);
   }
 
   @override
@@ -30,6 +30,9 @@ class _FakeProductsRepository implements ProductsRepository {
   @override
   Future<ContactInfo?> getDefaultContactInfo() async =>
       throw UnimplementedError();
+
+  @override
+  Future<void> clearCache(String docSearch) async {}
 }
 
 void main() {
@@ -61,10 +64,11 @@ void main() {
         _FakeProductsRepository(productsResult: tProducts),
       );
 
-      final result = await sut(tDocSearch);
+      final (products, fromCache) = await sut(tDocSearch);
 
-      expect(result, equals(tProducts));
-      expect(result.length, 2);
+      expect(products, equals(tProducts));
+      expect(products.length, 2);
+      expect(fromCache, isFalse);
     });
 
     test('retorna lista vacía cuando no hay productos', () async {
@@ -72,9 +76,9 @@ void main() {
         _FakeProductsRepository(productsResult: <Product>[]),
       );
 
-      final result = await sut(tDocSearch);
+      final (products, _) = await sut(tDocSearch);
 
-      expect(result, isEmpty);
+      expect(products, isEmpty);
     });
 
     test('propaga NetworkException cuando falla la red', () async {

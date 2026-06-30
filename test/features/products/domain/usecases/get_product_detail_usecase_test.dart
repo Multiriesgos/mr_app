@@ -14,7 +14,7 @@ class _FakeProductsRepository implements ProductsRepository {
   final ContactInfo? contactResult;
 
   @override
-  Future<List<Product>> getProducts(String docSearch) async =>
+  Future<(List<Product>, bool)> getProducts(String docSearch) async =>
       throw UnimplementedError();
 
   @override
@@ -33,6 +33,9 @@ class _FakeProductsRepository implements ProductsRepository {
 
   @override
   Future<ContactInfo?> getDefaultContactInfo() async => contactResult;
+
+  @override
+  Future<void> clearCache(String docSearch) async {}
 }
 
 void main() {

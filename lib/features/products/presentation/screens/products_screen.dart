@@ -14,6 +14,7 @@ import 'package:mr_app/core/theme/app_spacing.dart';
 import 'package:mr_app/core/widgets/app_empty_state.dart';
 import 'package:mr_app/core/widgets/app_nav_bar.dart';
 import 'package:mr_app/core/widgets/app_status_badge.dart';
+import 'package:mr_app/core/widgets/carbon_inline_notification.dart';
 import 'package:mr_app/core/widgets/carbon_tag.dart';
 import 'package:mr_app/core/widgets/policy_utils.dart';
 import 'package:mr_app/core/widgets/skeleton_product_list.dart';
@@ -76,9 +77,11 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(productsProvider);
-    final count = state.valueOrNull?.length;
-    final title = count != null && count > 0 ? 'Mis pólizas ($count)' : 'Mis pólizas';
+    final state    = ref.watch(productsProvider);
+    final notifier = ref.read(productsProvider.notifier);
+    final count    = state.valueOrNull?.length;
+    final title    = count != null && count > 0 ? 'Mis pólizas ($count)' : 'Mis pólizas';
+    final fromCache = state.hasValue && notifier.fromCache;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -105,19 +108,38 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              _LastUpdatedBar(
-                lastUpdated: ref.watch(productsProvider.notifier).lastUpdated,
-              ),
+              _LastUpdatedBar(lastUpdated: notifier.lastUpdated),
               _SearchAndFilter(
                 controller: _searchController,
                 query: _query,
                 filter: _filter,
+                products: state.valueOrNull ?? const [],
                 onQueryChanged: (q) => setState(() => _query = q),
                 onFilterChanged: (f) => setState(() => _filter = f),
               ),
+              if (fromCache)
+                const CarbonInlineNotification(
+                  kind: CarbonNotificationKind.warning,
+                  title: 'Datos sin conexión',
+                  subtitle: 'No se pudo actualizar. Deslizá hacia abajo para reintentar.',
+                ),
               Expanded(
                 child: RefreshIndicator(
-                  onRefresh: () => ref.read(productsProvider.notifier).reload(),
+                  onRefresh: () async {
+                    final messenger = ScaffoldMessenger.of(context);
+                    await ref.read(productsProvider.notifier).reload();
+                    if (!mounted) return;
+                    final n = ref.read(productsProvider.notifier);
+                    if (!n.fromCache && ref.read(productsProvider).hasValue) {
+                      messenger.showSnackBar(
+                        const SnackBar(
+                          content: Text('Pólizas actualizadas'),
+                          duration: Duration(seconds: 2),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
                   color: AppColors.primary,
                   child: state.when(
                     skipLoadingOnReload: true,
@@ -169,13 +191,50 @@ class _SearchAndFilter extends StatelessWidget {
     required this.filter,
     required this.onQueryChanged,
     required this.onFilterChanged,
+    this.products = const [],
   });
 
-  final TextEditingController  controller;
-  final String                 query;
-  final _PolicyFilter          filter;
-  final ValueChanged<String>   onQueryChanged;
+  final TextEditingController       controller;
+  final String                      query;
+  final _PolicyFilter               filter;
+  final ValueChanged<String>        onQueryChanged;
   final ValueChanged<_PolicyFilter> onFilterChanged;
+  final List<Product>               products;
+
+  List<Product> _textFiltered() {
+    if (query.isEmpty || products.isEmpty) return products;
+    final q = query.toLowerCase();
+    return products.where((p) =>
+      p.ramo.toLowerCase().contains(q) ||
+      p.tipoSeguro.toLowerCase().contains(q) ||
+      p.aseguradora.toLowerCase().contains(q) ||
+      p.placa.toLowerCase().contains(q) ||
+      (p.adjunto?.toLowerCase().contains(q) ?? false),
+    ).toList();
+  }
+
+  String _label(String base, _PolicyFilter value) {
+    if (products.isEmpty) return base;
+    final now = DateTime.now();
+    final tf  = _textFiltered();
+    final n   = switch (value) {
+      _PolicyFilter.all     => tf.length,
+      _PolicyFilter.vigente => tf.where((p) {
+        if (p.fechaRenovacion == null) return true;
+        return p.fechaRenovacion!.difference(now).inDays > 30;
+      }).length,
+      _PolicyFilter.proxima => tf.where((p) {
+        if (p.fechaRenovacion == null) return false;
+        final d = p.fechaRenovacion!.difference(now).inDays;
+        return d >= 0 && d <= 30;
+      }).length,
+      _PolicyFilter.vencida => tf.where((p) {
+        if (p.fechaRenovacion == null) return false;
+        return p.fechaRenovacion!.isBefore(now);
+      }).length,
+    };
+    return '$base ($n)';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -216,10 +275,10 @@ class _SearchAndFilter extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             children: [
-              _FilterChip(label: 'Todas',     value: _PolicyFilter.all,     filter: filter, onTap: onFilterChanged),
-              _FilterChip(label: 'Vigentes',  value: _PolicyFilter.vigente, filter: filter, onTap: onFilterChanged),
-              _FilterChip(label: 'Por vencer',value: _PolicyFilter.proxima, filter: filter, onTap: onFilterChanged),
-              _FilterChip(label: 'Vencidas',  value: _PolicyFilter.vencida, filter: filter, onTap: onFilterChanged),
+              _FilterChip(label: _label('Todas',      _PolicyFilter.all),     value: _PolicyFilter.all,     filter: filter, onTap: onFilterChanged),
+              _FilterChip(label: _label('Vigentes',   _PolicyFilter.vigente), value: _PolicyFilter.vigente, filter: filter, onTap: onFilterChanged),
+              _FilterChip(label: _label('Por vencer', _PolicyFilter.proxima), value: _PolicyFilter.proxima, filter: filter, onTap: onFilterChanged),
+              _FilterChip(label: _label('Vencidas',   _PolicyFilter.vencida), value: _PolicyFilter.vencida, filter: filter, onTap: onFilterChanged),
             ],
           ),
         ),

@@ -38,29 +38,44 @@ final productsProvider =
 
 class ProductsNotifier extends AsyncNotifier<List<Product>> {
   DateTime? lastUpdated;
+  bool fromCache = false;
 
   @override
   Future<List<Product>> build() async {
     final authState = ref.watch(authProvider).valueOrNull;
     if (authState is! AuthAuthenticated) return [];
 
-    final result = await GetProductsUseCase(ref.read(productsRepositoryProvider))(
-      authState.user.docSearch,
-    );
+    final (result, cached) = await GetProductsUseCase(
+      ref.read(productsRepositoryProvider),
+    )(authState.user.docSearch);
+    fromCache = cached;
     lastUpdated = DateTime.now();
     return result;
   }
 
   Future<void> reload() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(
-      () => GetProductsUseCase(ref.read(productsRepositoryProvider))(
-        (ref.read(authProvider).requireValue as AuthAuthenticated)
-            .user
-            .docSearch,
-      ),
-    );
-    if (state.hasValue) lastUpdated = DateTime.now();
+    var cached = false;
+    state = await AsyncValue.guard(() async {
+      final (products, isCached) = await GetProductsUseCase(
+        ref.read(productsRepositoryProvider),
+      )(
+        (ref.read(authProvider).requireValue as AuthAuthenticated).user.docSearch,
+      );
+      cached = isCached;
+      return products;
+    });
+    if (state.hasValue) {
+      lastUpdated = DateTime.now();
+      fromCache = cached;
+    }
+  }
+
+  Future<void> clearCacheAndReload() async {
+    final authState = ref.read(authProvider).valueOrNull;
+    if (authState is! AuthAuthenticated) return;
+    await ref.read(productsRepositoryProvider).clearCache(authState.user.docSearch);
+    await reload();
   }
 }
 

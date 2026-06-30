@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +16,7 @@ import 'package:mr_app/core/widgets/app_logout_dialog.dart';
 import 'package:mr_app/core/widgets/app_nav_bar.dart';
 import 'package:mr_app/features/auth/domain/entities/user.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:mr_app/features/products/presentation/providers/products_notifier.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -41,6 +44,9 @@ class ProfileScreen extends ConsumerWidget {
           const Divider(indent: AppSpacing.md, endIndent: AppSpacing.md),
           const _SectionTitle('Seguridad'),
           _BiometricsTile(),
+          const Divider(indent: AppSpacing.md, endIndent: AppSpacing.md),
+          const _SectionTitle('Datos'),
+          _ClearCacheTile(),
           const Divider(indent: AppSpacing.md, endIndent: AppSpacing.md),
           const _SectionTitle('Información'),
           _AppVersionTile(),
@@ -295,6 +301,32 @@ class _PrivacyPolicyTile extends StatelessWidget {
         Uri.parse(ExternalLinks.privacyPolicy),
         mode: LaunchMode.externalApplication,
       ),
+    );
+  }
+}
+
+// ─── Limpiar caché ───────────────────────────────────────────────────────────
+
+class _ClearCacheTile extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListTile(
+      leading: const Icon(Icons.cleaning_services_outlined),
+      title:   const Text('Limpiar caché de pólizas'),
+      subtitle: const Text('Fuerza una recarga desde el servidor'),
+      onTap: () async {
+        unawaited(HapticFeedback.mediumImpact());
+        final messenger = ScaffoldMessenger.of(context);
+        await ref.read(productsProvider.notifier).clearCacheAndReload();
+        if (!context.mounted) return;
+        messenger.showSnackBar(
+          const SnackBar(
+            content:  Text('Caché eliminado. Recargando pólizas…'),
+            duration: Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      },
     );
   }
 }
