@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Package Android: `multiriesgos.multimate.app`
 - Package iOS: `com.multiriesgos.multimate`
 - Active platforms: **Android + iOS only**. Windows/macOS/Linux/web are default scaffolds, not deployed.
-- Version: `2.1.0+6` (current)
+- Version: `2.1.1+7` (current)
 
 ## Common Commands
 
@@ -70,10 +70,12 @@ Each feature: `data/{datasources,models,repositories}` · `domain/{entities,repo
 ## HTTP & Security
 
 - `MrHttpClient.create()` → `IOClient` via `httpClientProvider` (Riverpod)
-- Certificate pinning: structure in place, SHA-256 pins pending. See `lib/core/network/mr_http_client.dart` for instructions.
-- Android: `network_security_config.xml` (pin-set commented, activate when pins obtained)
-- iOS: `NSPinnedDomains` in `Info.plist` (commented, same reason)
-- `_StrictHttpOverrides` active in release builds — rejects all bad certs
+- Certificate pinning: **ACTIVO** — SPKI SHA-256 del intermedio Let's Encrypt R12 (`kZwN96eHtZftBWrOZUsd6cA4es80n3NzSk/XtYz2EqQ=`)
+  - Android: `network_security_config.xml` — `<pin-set expiration="2027-02-28">` activo
+  - iOS: `NSPinnedDomains → NSPinnedCAIdentities` en `Info.plist` activo
+  - Renovar antes del **2027-02-28** si Let's Encrypt cambia su intermedio (muy infrecuente)
+  - Instrucciones de renovación en `lib/core/network/mr_http_client.dart`
+- `badCertificateCallback → false` rechaza todo cert con fallo de validación del sistema
 - R8 + minify + shrinkResources enabled in Android release
 
 ## Theme System
