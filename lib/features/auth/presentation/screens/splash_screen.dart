@@ -22,6 +22,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   late Animation<double>   _taglineFade;
 
   @override
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _controller.value = 1;
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(

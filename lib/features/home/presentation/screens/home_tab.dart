@@ -70,7 +70,7 @@ class HomeTab extends ConsumerWidget {
             child: GestureDetector(
               onTap: () { HapticFeedback.lightImpact(); onTabChange?.call(3); },
               child: Padding(
-                padding: const EdgeInsets.only(right: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                 child: AppAvatar(name: name, radius: 18),
               ),
             ),
@@ -623,16 +623,17 @@ class _QuickActionCardState extends State<_QuickActionCard>
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final cs         = Theme.of(context).colorScheme;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
     return Semantics(
       label:  widget.label,
       button: true,
       child: GestureDetector(
-        onTapDown:  (_) => _press.forward(),
-        onTapUp:    (_) { _press.reverse(); HapticFeedback.lightImpact(); widget.onTap(); },
-        onTapCancel: ()  => _press.reverse(),
+        onTapDown:   reduceMotion ? null : (_) => _press.forward(),
+        onTapUp:     (_) { if (!reduceMotion) _press.reverse(); HapticFeedback.lightImpact(); widget.onTap(); },
+        onTapCancel: reduceMotion ? null : ()  => _press.reverse(),
         child: ScaleTransition(
-          scale: _scale,
+          scale: reduceMotion ? const AlwaysStoppedAnimation(1) : _scale,
           child: Container(
             decoration: BoxDecoration(
               color:        cs.surface,

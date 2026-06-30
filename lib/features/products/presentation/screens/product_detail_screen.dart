@@ -197,14 +197,17 @@ class _DetailBody extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Container(
-                    width:  48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color:        rColor.withValues(alpha: 0.12),
-                      borderRadius: AppRadius.smBR,
+                  Hero(
+                    tag: 'policy-icon-${product.idRen}',
+                    child: Container(
+                      width:  48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color:        rColor.withValues(alpha: 0.12),
+                        borderRadius: AppRadius.smBR,
+                      ),
+                      child: Icon(rIcon, color: rColor, size: 26),
                     ),
-                    child: Icon(rIcon, color: rColor, size: 26),
                   ),
                   const SizedBox(width: AppSpacing.cardGap),
                   Expanded(

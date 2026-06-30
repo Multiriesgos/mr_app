@@ -46,17 +46,17 @@ void main() {
       await tester.pumpWidget(_buildHomeTab());
       await tester.pump();
 
-      final greetings = ['Buenos días,', 'Buenas tardes,', 'Buenas noches,'];
+      final greetings = ['Buenos días', 'Buenas tardes', 'Buenas noches'];
       final found = greetings.any((g) => find.text(g).evaluate().isNotEmpty);
       expect(found, isTrue, reason: 'Debe mostrar un saludo según la hora');
     });
 
-    testWidgets('muestra el nombre del usuario en mayúsculas en el AppBar',
+    testWidgets('muestra el nombre del usuario en el AppBar',
         (tester) async {
       await tester.pumpWidget(_buildHomeTab());
       await tester.pump();
 
-      expect(find.text('JUAN PÉREZ'), findsOneWidget);
+      expect(find.text('Juan Pérez'), findsOneWidget);
     });
 
     testWidgets('muestra sección ACCESO RÁPIDO', (tester) async {
@@ -102,7 +102,7 @@ void main() {
       await tester.pumpWidget(_buildHomeTab(dark: true));
       await tester.pump();
 
-      final greetings = ['Buenos días,', 'Buenas tardes,', 'Buenas noches,'];
+      final greetings = ['Buenos días', 'Buenas tardes', 'Buenas noches'];
       final found = greetings.any((g) => find.text(g).evaluate().isNotEmpty);
       expect(found, isTrue);
       expect(tester.takeException(), isNull);

@@ -387,6 +387,9 @@ class _AnimatedPolicyCardState extends State<_AnimatedPolicyCard>
 
   @override
   Widget build(BuildContext context) {
+    if (MediaQuery.disableAnimationsOf(context)) {
+      return _PolicyCard(product: widget.product);
+    }
     return AnimatedBuilder(
       animation: CurvedAnimation(parent: _ctrl, curve: AppMotion.entrance),
       builder: (context, child) => Opacity(
@@ -458,14 +461,17 @@ class _PolicyCard extends StatelessWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color:        rColor.withValues(alpha: 0.10),
-                                borderRadius: AppRadius.smBR,
+                            Hero(
+                              tag: 'policy-icon-${product.idRen}',
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color:        rColor.withValues(alpha: 0.10),
+                                  borderRadius: AppRadius.smBR,
+                                ),
+                                child: Icon(rIcon, color: rColor, size: 20),
                               ),
-                              child: Icon(rIcon, color: rColor, size: 20),
                             ),
                             const SizedBox(width: AppSpacing.sm),
                             Expanded(
