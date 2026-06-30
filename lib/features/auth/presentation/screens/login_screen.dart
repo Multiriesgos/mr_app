@@ -211,7 +211,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor:            Colors.transparent,
-        statusBarIconBrightness:   Brightness.light,
+        statusBarIconBrightness:   isDark ? Brightness.light : Brightness.dark,
         systemNavigationBarColor:  isDark ? AppColors.darkBackground : Colors.white,
         systemNavigationBarIconBrightness:
             isDark ? Brightness.light : Brightness.dark,
@@ -227,6 +227,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     });
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Column(
         children: [
           // ── Header con gradiente de marca ────────────────────────────────
@@ -277,7 +278,7 @@ class _LoginHeader extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(24, topPadding + 32, 24, 32),
-      decoration: const BoxDecoration(gradient: AppColors.headerGradient),
+      color: Colors.white,
       child: Column(
         children: [
           Image.asset(
@@ -289,7 +290,7 @@ class _LoginHeader extends StatelessWidget {
           const Text(
             'MULTIRIESGOS',
             style: TextStyle(
-              color:       Colors.white70,
+              color:       Colors.black87,
               fontSize:    11,
               fontWeight:  FontWeight.w700,
               letterSpacing: 3.5,
