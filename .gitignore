@@ -3,7 +3,6 @@
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
-pubspec.lock
 
 # Build directories
 build/
@@ -105,3 +104,10 @@ r3_*.png
 r4_*.png
 trigger_notif.py
 cert_key.pem
+
+# Auditoría de seguridad — artefactos generados, no parte del código
+SECURITY_CHECKLIST.md
+VULN_REPORT.md
+android/dependency-check-suppressions.xml
+scripts/
+build/dependency-check-report/

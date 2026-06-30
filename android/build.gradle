@@ -1,8 +1,26 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.owasp:dependency-check-gradle:10.0.3'
+    }
+}
+
 allprojects {
     repositories {
         google()
         mavenCentral()
     }
+}
+
+apply plugin: 'org.owasp.dependencycheck'
+
+dependencyCheck {
+    failBuildOnCVSS = 7
+    suppressionFile = 'dependency-check-suppressions.xml'
+    formats = ['HTML', 'JSON']
+    outputDirectory = '../build/dependency-check-report'
 }
 
 rootProject.buildDir = "../build"

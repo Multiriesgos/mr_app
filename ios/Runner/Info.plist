@@ -27,7 +27,9 @@
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>https</string>
-		<string>http</string>
+		<string>tel</string>
+		<string>mailto</string>
+		<string>whatsapp</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>

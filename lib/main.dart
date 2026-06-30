@@ -10,7 +10,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:marionette_flutter/marionette_flutter.dart';
+import 'package:marionette_flutter/marionette_flutter.dart'; // ignore: depend_on_referenced_packages
 import 'package:mr_app/core/di/settings_providers.dart';
 import 'package:mr_app/core/logging/app_logger.dart';
 import 'package:mr_app/core/network/mr_http_client.dart';
