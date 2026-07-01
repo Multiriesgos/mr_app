@@ -83,7 +83,7 @@ Each feature: `data/{datasources,models,repositories}` · `domain/{entities,repo
 - `lib/core/theme/app_colors.dart` — **single source of truth** (static constants + ColorScheme factories)
 - `lib/core/theme/app_theme.dart` — `AppTheme.light` and `AppTheme.dark` (Material 3)
 - `themeModeProvider` (AsyncNotifier) — persisted in `flutter_secure_storage`
-- All active screens use `Theme.of(context)` / `AppColors`. `FinTechTheme` is a legacy compatibility shim; do not use it in new code.
+- All active screens use `Theme.of(context)` / `AppColors`.
 
 ## Localization
 
@@ -92,18 +92,18 @@ Each feature: `data/{datasources,models,repositories}` · `domain/{entities,repo
 
 ## Biometrics (Fase 5)
 
-- `local_auth ^2.3.0` — `BiometricsService` in `lib/core/auth/biometrics_service.dart`
+- `local_auth ^3.0.1` — `BiometricsService` in `lib/core/auth/biometrics_service.dart`
 - Re-auth on app resume when enabled: `HomeScreen` uses `WidgetsBindingObserver`
 - Toggle persisted in SecureStorage via `biometricsEnabledProvider`
 - Android: `USE_BIOMETRIC` + `USE_FINGERPRINT` permissions
 - iOS: `NSFaceIDUsageDescription` in Info.plist
 
-## Push Notifications (Fase 5 — scaffold pendiente Firebase)
+## Push Notifications (Fase 5 — activo)
 
 - Interface: `lib/features/notifications/domain/notification_service.dart`
-- Current: `NotificationServiceStub` (noop)
-- To activate: see 7-step instructions in the interface docstring
-- Steps: create Firebase project → add `firebase_core ^3.x` + `firebase_messaging ^15.x` → replace stub
+- Implementation: `FirebaseNotificationService` (wired in `notification_providers.dart`), backed by `firebase_messaging` + Crashlytics
+- Local reminders: `LocalNotificationService` (`core/notifications/`) via `flutter_local_notifications`
+- Firebase project config: `lib/firebase_options.dart` (values committed — not secrets, restricted by Firebase security rules)
 
 ## CI/CD (Codemagic)
 
@@ -123,8 +123,3 @@ Three workflows in `codemagic.yaml`:
 
 Custom fonts: `WorkSans` (Regular/Medium/SemiBold/Bold), `Roboto` (Regular/Medium/Bold) — in `assets/fonts/`.
 Images in `assets/images/` (PNG/JPG). For future network images use `cached_network_image`.
-
-## Legacy Files (do not modify, scheduled for eventual deletion)
-
-- `lib/theme/fintech_theme.dart` — compatibility shim only; all new code uses `AppColors`/`Theme.of`
-- `lib/theme/fintech_util.dart`, `lib/theme/fintech_widgets.dart` — no active usages
