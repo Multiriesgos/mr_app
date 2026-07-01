@@ -108,7 +108,8 @@ Each feature: `data/{datasources,models,repositories}` · `domain/{entities,repo
 ## CI/CD (Codemagic)
 
 Three workflows in `codemagic.yaml`:
-- `pr-validation`: Linux · `flutter analyze --fatal-warnings` + `flutter test --coverage` on every PR to `main`
+- `pr-validation`: mac_mini_m1 · `flutter analyze --fatal-warnings` + `flutter test --coverage` + coverage threshold gate on every PR to `main`
+  - Gate: sums `LF:`/`LH:` across `coverage/lcov.info` (awk, no extra deps) and fails the build if total coverage drops below **75%** (current baseline: 78.3%, as of 2026-07-01)
 - `ios-release`: mac_mini_m2 → TestFlight (App Store Connect API)
 - `android-release`: linux_x2 → AAB to Google Play `internal` + APK split per ABI as artifact
 
