@@ -23,7 +23,7 @@ Future<void> firebaseBackgroundHandler(RemoteMessage message) async {
 
     final plugin = FlutterLocalNotificationsPlugin();
     await plugin.initialize(
-      const InitializationSettings(
+      settings: const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
         iOS: DarwinInitializationSettings(),
       ),
@@ -40,10 +40,10 @@ Future<void> firebaseBackgroundHandler(RemoteMessage message) async {
         );
 
     await plugin.show(
-      message.hashCode,
-      title,
-      body,
-      const NotificationDetails(
+      id: message.hashCode,
+      title: title,
+      body: body,
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           _kChannelId,
           _kChannelName,
