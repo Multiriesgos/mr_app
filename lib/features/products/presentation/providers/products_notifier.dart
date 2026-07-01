@@ -66,7 +66,10 @@ class ProductsNotifier extends AsyncNotifier<List<Product>> {
       cached = isCached;
       return products;
     });
-    if (state.hasValue) {
+    // No usar state.hasValue: AsyncValue conserva el valor previo aunque el
+    // estado actual sea de error, así que hasValue sigue en true tras un
+    // reload fallido con datos previos.
+    if (!state.hasError) {
       lastUpdated = DateTime.now();
       fromCache = cached;
     }
