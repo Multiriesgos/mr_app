@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/core/error/app_exception.dart';
@@ -14,25 +15,28 @@ import 'package:mr_app/features/products/presentation/screens/product_detail_scr
 // ── Notifiers falsos ───────────────────────────────────────────────────────────
 
 class _FakeDetailNotifier extends ProductDetailNotifier {
-  _FakeDetailNotifier(this._product, [this._contact]);
+  _FakeDetailNotifier(this._product, [this._contact]) : super(_kIdRen);
   final Product      _product;
   final ContactInfo? _contact;
 
   @override
-  Future<(Product, ContactInfo?)> build(int arg) async => (_product, _contact);
+  Future<(Product, ContactInfo?)> build() async => (_product, _contact);
 }
 
 class _ErrorDetailNotifier extends ProductDetailNotifier {
+  _ErrorDetailNotifier() : super(_kIdRen);
+
   @override
-  Future<(Product, ContactInfo?)> build(int arg) async =>
+  Future<(Product, ContactInfo?)> build() async =>
       throw const NetworkException();
 }
 
 class _LoadingDetailNotifier extends ProductDetailNotifier {
+  _LoadingDetailNotifier() : super(_kIdRen);
   final _blocker = Completer<(Product, ContactInfo?)>();
 
   @override
-  Future<(Product, ContactInfo?)> build(int arg) => _blocker.future;
+  Future<(Product, ContactInfo?)> build() => _blocker.future;
 }
 
 // ── Datos de prueba ────────────────────────────────────────────────────────────
@@ -87,6 +91,7 @@ Widget _buildScreen(List<Override> overrides) {
 
   return ProviderScope(
     overrides: overrides,
+    retry: (_, __) => null,
     child: MaterialApp.router(
       routerConfig: router,
       theme: AppTheme.light,
@@ -101,7 +106,7 @@ void main() {
     testWidgets('muestra skeleton mientras carga', (tester) async {
       await tester.pumpWidget(
         _buildScreen([
-          productDetailProvider.overrideWith(_LoadingDetailNotifier.new),
+          productDetailProvider.overrideWith2((_) => _LoadingDetailNotifier()),
         ]),
       );
       await tester.pump();
@@ -116,7 +121,7 @@ void main() {
     testWidgets('muestra icono de error cuando falla la conexión', (tester) async {
       await tester.pumpWidget(
         _buildScreen([
-          productDetailProvider.overrideWith(_ErrorDetailNotifier.new),
+          productDetailProvider.overrideWith2((_) => _ErrorDetailNotifier()),
         ]),
       );
       await tester.pump();
@@ -128,7 +133,7 @@ void main() {
     testWidgets('muestra botón Volver en estado de error', (tester) async {
       await tester.pumpWidget(
         _buildScreen([
-          productDetailProvider.overrideWith(_ErrorDetailNotifier.new),
+          productDetailProvider.overrideWith2((_) => _ErrorDetailNotifier()),
         ]),
       );
       await tester.pump();
@@ -142,8 +147,8 @@ void main() {
     testWidgets('muestra ramo y aseguradora en el hero', (tester) async {
       await tester.pumpWidget(
         _buildScreen([
-          productDetailProvider.overrideWith(
-            () => _FakeDetailNotifier(_tProductBasic),
+          productDetailProvider.overrideWith2(
+            (_) => _FakeDetailNotifier(_tProductBasic),
           ),
         ]),
       );
@@ -157,8 +162,8 @@ void main() {
         (tester) async {
       await tester.pumpWidget(
         _buildScreen([
-          productDetailProvider.overrideWith(
-            () => _FakeDetailNotifier(_tProductBasic),
+          productDetailProvider.overrideWith2(
+            (_) => _FakeDetailNotifier(_tProductBasic),
           ),
         ]),
       );
@@ -171,8 +176,8 @@ void main() {
     testWidgets('oculta fila N.° de póliza cuando adjunto es nulo', (tester) async {
       await tester.pumpWidget(
         _buildScreen([
-          productDetailProvider.overrideWith(
-            () => _FakeDetailNotifier(_tProductBasic), // adjunto: null
+          productDetailProvider.overrideWith2(
+            (_) => _FakeDetailNotifier(_tProductBasic), // adjunto: null
           ),
         ]),
       );
@@ -186,8 +191,8 @@ void main() {
         (tester) async {
       await tester.pumpWidget(
         _buildScreen([
-          productDetailProvider.overrideWith(
-            () => _FakeDetailNotifier(_tProductWithAdjunto),
+          productDetailProvider.overrideWith2(
+            (_) => _FakeDetailNotifier(_tProductWithAdjunto),
           ),
         ]),
       );
@@ -204,8 +209,8 @@ void main() {
         (tester) async {
       await tester.pumpWidget(
         _buildScreen([
-          productDetailProvider.overrideWith(
-            () => _FakeDetailNotifier(_tProductExpiring),
+          productDetailProvider.overrideWith2(
+            (_) => _FakeDetailNotifier(_tProductExpiring),
           ),
         ]),
       );
@@ -218,8 +223,8 @@ void main() {
         (tester) async {
       await tester.pumpWidget(
         _buildScreen([
-          productDetailProvider.overrideWith(
-            () => _FakeDetailNotifier(_tProductBasic), // 60 días
+          productDetailProvider.overrideWith2(
+            (_) => _FakeDetailNotifier(_tProductBasic), // 60 días
           ),
         ]),
       );
@@ -235,8 +240,8 @@ void main() {
         (tester) async {
       await tester.pumpWidget(
         _buildScreen([
-          productDetailProvider.overrideWith(
-            () => _FakeDetailNotifier(_tProductBasic, _tContact),
+          productDetailProvider.overrideWith2(
+            (_) => _FakeDetailNotifier(_tProductBasic, _tContact),
           ),
         ]),
       );
@@ -250,8 +255,8 @@ void main() {
         (tester) async {
       await tester.pumpWidget(
         _buildScreen([
-          productDetailProvider.overrideWith(
-            () => _FakeDetailNotifier(_tProductBasic), // contact: null
+          productDetailProvider.overrideWith2(
+            (_) => _FakeDetailNotifier(_tProductBasic), // contact: null
           ),
         ]),
       );

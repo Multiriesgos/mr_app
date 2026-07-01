@@ -79,7 +79,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final granted = await service.requestPermission();
 
     if (granted) {
-      final authState = ref.read(authProvider).valueOrNull;
+      final authState = ref.read(authProvider).value;
       if (authState is AuthAuthenticated) {
         final docTopic =
             'doc_${authState.user.documentNumber.replaceAll(RegExp('[^a-zA-Z0-9]'), '_')}';
@@ -149,7 +149,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
-      final enabled = ref.read(biometricsEnabledProvider).valueOrNull ?? false;
+      final enabled = ref.read(biometricsEnabledProvider).value ?? false;
       if (enabled) _backgroundedAt = DateTime.now();
     } else if (state == AppLifecycleState.resumed) {
       final at = _backgroundedAt;
@@ -175,7 +175,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider).valueOrNull;
+    final authState = ref.watch(authProvider).value;
     final user = authState is AuthAuthenticated ? authState.user : null;
 
     ref.listen<AsyncValue<List<Product>>>(productsProvider, (_, next) {
@@ -189,7 +189,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       });
     });
 
-    final products = ref.watch(productsProvider).valueOrNull ?? [];
+    final products = ref.watch(productsProvider).value ?? [];
     final urgentCount = products.where((p) {
       if (p.fechaRenovacion == null) return false;
       return p.fechaRenovacion!.difference(DateTime.now()).inDays <= 30;

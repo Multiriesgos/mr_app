@@ -36,7 +36,7 @@ class BenefitCardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider).valueOrNull;
+    final authState = ref.watch(authProvider).value;
     final user = authState is AuthAuthenticated ? authState.user : null;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(

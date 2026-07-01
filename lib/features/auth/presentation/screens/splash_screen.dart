@@ -59,7 +59,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   void _navigate() {
     if (!mounted) return;
-    final auth = ref.read(authProvider).valueOrNull;
+    final auth = ref.read(authProvider).value;
     if (auth is AuthAuthenticated) {
       context.go('/home');
     } else {

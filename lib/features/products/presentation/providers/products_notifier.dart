@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:mr_app/core/network/mr_http_client.dart';
 import 'package:mr_app/core/storage/secure_storage.dart';
 import 'package:mr_app/features/auth/presentation/providers/auth_notifier.dart';
@@ -42,7 +43,7 @@ class ProductsNotifier extends AsyncNotifier<List<Product>> {
 
   @override
   Future<List<Product>> build() async {
-    final authState = ref.watch(authProvider).valueOrNull;
+    final authState = ref.watch(authProvider).value;
     if (authState is! AuthAuthenticated) return [];
 
     final (result, cached) = await GetProductsUseCase(
@@ -72,7 +73,7 @@ class ProductsNotifier extends AsyncNotifier<List<Product>> {
   }
 
   Future<void> clearCacheAndReload() async {
-    final authState = ref.read(authProvider).valueOrNull;
+    final authState = ref.read(authProvider).value;
     if (authState is! AuthAuthenticated) return;
     await ref.read(productsRepositoryProvider).clearCache(authState.user.docSearch);
     await reload();
@@ -87,18 +88,21 @@ final homeContactProvider = FutureProvider<ContactInfo?>((ref) async {
 
 // ---------- Product detail ----------
 
-final productDetailProvider = AsyncNotifierProviderFamily<
-    ProductDetailNotifier, (Product, ContactInfo?), int>(
+final AsyncNotifierProviderFamily<ProductDetailNotifier, (Product, ContactInfo?), int>
+    productDetailProvider = AsyncNotifierProvider.family<ProductDetailNotifier,
+        (Product, ContactInfo?), int>(
   ProductDetailNotifier.new,
 );
 
-class ProductDetailNotifier
-    extends FamilyAsyncNotifier<(Product, ContactInfo?), int> {
+class ProductDetailNotifier extends AsyncNotifier<(Product, ContactInfo?)> {
+  ProductDetailNotifier(this.arg);
+  final int arg;
+
   @override
-  Future<(Product, ContactInfo?)> build(int arg) async {
+  Future<(Product, ContactInfo?)> build() async {
     // Intentar obtener el producto del caché de la lista primero
     final listState = ref.read(productsProvider);
-    final cached = listState.valueOrNull?.where((p) => p.idRen == arg).firstOrNull;
+    final cached = listState.value?.where((p) => p.idRen == arg).firstOrNull;
 
     if (cached != null) {
       // Carga la info de contacto en paralelo sin bloquear la UI con el producto ya cacheado

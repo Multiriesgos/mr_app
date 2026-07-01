@@ -163,9 +163,9 @@ class _HomeContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs            = Theme.of(context).colorScheme;
     final productsAsync = ref.watch(productsProvider);
-    final renewingSoon  = _renewingSoon(productsAsync.valueOrNull);
-    final products      = productsAsync.valueOrNull;
-    final contact       = ref.watch(homeContactProvider).valueOrNull;
+    final renewingSoon  = _renewingSoon(productsAsync.value);
+    final products      = productsAsync.value;
+    final contact       = ref.watch(homeContactProvider).value;
 
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),

@@ -25,7 +25,7 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider).valueOrNull;
+    final authState = ref.watch(authProvider).value;
     final user = authState is AuthAuthenticated ? authState.user : null;
 
     return Scaffold(
@@ -137,7 +137,7 @@ class _ThemeTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeAsync = ref.watch(themeModeProvider);
-    final mode = themeAsync.valueOrNull ?? ThemeMode.system;
+    final mode = themeAsync.value ?? ThemeMode.system;
 
     return ListTile(
       leading: Icon(mode == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode),
@@ -175,7 +175,7 @@ class _BiometricsTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final biometrics   = ref.watch(biometricsServiceProvider);
     final enabledAsync = ref.watch(biometricsEnabledProvider);
-    final enabled      = enabledAsync.valueOrNull ?? false;
+    final enabled      = enabledAsync.value ?? false;
 
     return FutureBuilder<BiometricAvailability>(
       future: biometrics.checkAvailability(),

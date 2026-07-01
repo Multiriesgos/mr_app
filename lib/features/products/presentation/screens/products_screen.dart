@@ -79,7 +79,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   Widget build(BuildContext context) {
     final state    = ref.watch(productsProvider);
     final notifier = ref.read(productsProvider.notifier);
-    final count    = state.valueOrNull?.length;
+    final count    = state.value?.length;
     final title    = count != null && count > 0 ? 'Mis pólizas ($count)' : 'Mis pólizas';
     final fromCache = state.hasValue && notifier.fromCache;
 
@@ -113,7 +113,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                 controller: _searchController,
                 query: _query,
                 filter: _filter,
-                products: state.valueOrNull ?? const [],
+                products: state.value ?? const [],
                 onQueryChanged: (q) => setState(() => _query = q),
                 onFilterChanged: (f) => setState(() => _filter = f),
               ),

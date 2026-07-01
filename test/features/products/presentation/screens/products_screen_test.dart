@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/core/error/app_exception.dart';
@@ -74,6 +75,7 @@ Widget _buildScreen(List<Override> overrides) {
 
   return ProviderScope(
     overrides: overrides,
+    retry: (_, __) => null,
     child: MaterialApp.router(
       routerConfig: router,
       theme: AppTheme.light,

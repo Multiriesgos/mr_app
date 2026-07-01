@@ -80,7 +80,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final themeMode =
-        ref.watch(themeModeProvider).valueOrNull ?? ThemeMode.system;
+        ref.watch(themeModeProvider).value ?? ThemeMode.system;
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
