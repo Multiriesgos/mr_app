@@ -43,6 +43,20 @@ workflows:
         script: flutter analyze --fatal-warnings
       - name: Unit tests with coverage
         script: flutter test --coverage
+      - name: Coverage threshold gate
+        script: |
+          awk -v threshold=75 '
+            /^LF:/ { found += substr($0, 4) }
+            /^LH:/ { hit   += substr($0, 4) }
+            END {
+              pct = (found > 0) ? (100.0 * hit / found) : 0
+              printf "Cobertura total: %.1f%% (%d/%d líneas), umbral mínimo: %d%%\n", pct, hit, found, threshold
+              if (pct < threshold) {
+                print "ERROR: la cobertura de tests bajó del umbral mínimo."
+                exit 1
+              }
+            }
+          ' coverage/lcov.info
     artifacts:
       - coverage/lcov.info
     publishing:
