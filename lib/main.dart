@@ -61,7 +61,17 @@ void main() async {
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
-  ]).then((_) => runApp(const ProviderScope(child: MyApp())));
+  ]).then(
+    (_) => runApp(
+      ProviderScope(
+        // Los datasources ya manejan sus propios timeouts (30s) y fallback a
+        // caché; el retry automático de Riverpod solo agregaba hasta ~40s de
+        // espera extra antes de mostrar el error de conexión al usuario.
+        retry: (_, __) => null,
+        child: const MyApp(),
+      ),
+    ),
+  );
 }
 
 /// Rechaza tráfico en claro y certificados inválidos en release.
