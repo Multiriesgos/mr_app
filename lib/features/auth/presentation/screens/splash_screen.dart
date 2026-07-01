@@ -78,9 +78,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor:            Colors.transparent,
-        statusBarIconBrightness:   Brightness.light,
-        systemNavigationBarColor:  Color(0xFF060D45),
-        systemNavigationBarIconBrightness: Brightness.light,
+        statusBarIconBrightness:   Brightness.dark,
+        systemNavigationBarColor:  Colors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
       ),
     );
 
@@ -88,7 +88,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       body: Container(
         width:  double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.loginGradient),
+        color: Colors.white,
         child: SafeArea(
           child: AnimatedBuilder(
             animation: _controller,
@@ -116,7 +116,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     child: const Text(
                       'MULTIRIESGOS',
                       style: TextStyle(
-                        color:       Colors.white,
+                        color:       Colors.black87,
                         fontSize:    13,
                         fontWeight:  FontWeight.w700,
                         letterSpacing: 4,
@@ -131,7 +131,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
-                        color:       Colors.white54,
+                        color:       AppColors.sidebarBg,
                         strokeWidth: 2,
                       ),
                     ),
