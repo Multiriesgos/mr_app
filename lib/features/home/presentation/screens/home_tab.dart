@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -68,7 +70,7 @@ class HomeTab extends ConsumerWidget {
             label: 'Ver perfil',
             button: true,
             child: GestureDetector(
-              onTap: () { HapticFeedback.lightImpact(); onTabChange?.call(3); },
+              onTap: () { unawaited(HapticFeedback.lightImpact()); onTabChange?.call(3); },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                 child: AppAvatar(name: name, radius: 18),
@@ -672,7 +674,11 @@ class _QuickActionCardState extends State<_QuickActionCard>
       button: true,
       child: GestureDetector(
         onTapDown:   reduceMotion ? null : (_) => _press.forward(),
-        onTapUp:     (_) { if (!reduceMotion) _press.reverse(); HapticFeedback.lightImpact(); widget.onTap(); },
+        onTapUp:     (_) {
+          if (!reduceMotion) unawaited(_press.reverse());
+          unawaited(HapticFeedback.lightImpact());
+          widget.onTap();
+        },
         onTapCancel: reduceMotion ? null : ()  => _press.reverse(),
         child: ScaleTransition(
           scale: reduceMotion ? const AlwaysStoppedAnimation(1) : _scale,

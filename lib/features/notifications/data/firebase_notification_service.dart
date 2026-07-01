@@ -56,6 +56,10 @@ Future<void> firebaseBackgroundHandler(RemoteMessage message) async {
   }
 }
 
+// Se instancia solo dentro del closure de notificationServiceProvider
+// (notification_providers.dart); el análisis de alcanzabilidad no sigue esa
+// referencia porque el tipo de retorno del provider es la interfaz.
+// ignore: unreachable_from_main
 class FirebaseNotificationService implements NotificationService {
   final _controller = StreamController<NotificationPayload>.broadcast();
   bool _initialized = false;
@@ -83,9 +87,11 @@ class FirebaseNotificationService implements NotificationService {
     // Renovar suscripción al topic cuando el token FCM cambia.
     FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
       appLogger.info('notifications: token FCM renovado (${newToken.length} chars)');
-      FirebaseMessaging.instance.subscribeToTopic('todos').then((_) {
-        appLogger.info('notifications: re-suscrito al topic "todos"');
-      });
+      unawaited(
+        FirebaseMessaging.instance.subscribeToTopic('todos').then((_) {
+          appLogger.info('notifications: re-suscrito al topic "todos"');
+        }),
+      );
     });
 
     appLogger.info('notifications: Firebase Messaging inicializado');

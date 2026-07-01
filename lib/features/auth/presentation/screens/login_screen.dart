@@ -45,14 +45,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     _entryCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
-    )..forward();
+    );
+    unawaited(_entryCtrl.forward());
     _entryFade = CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut);
     _entrySlide = Tween<Offset>(
       begin: const Offset(0, 0.08),
       end:   Offset.zero,
     ).animate(CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOutCubic));
 
-    _loadSavedDoc();
+    unawaited(_loadSavedDoc());
     _docController.addListener(_clearError);
     _birthController.addListener(_clearError);
   }
@@ -190,7 +191,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             birthDate:      _birthController.text.trim(),
             rememberMe:     _rememberMe,
           );
-    } catch (err) {
+    } on Object catch (err) {
       if (!mounted) return;
       final msg = err is AppException
           ? err.message
@@ -221,7 +222,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     ref.listen(authProvider, (prev, next) {
       next.whenOrNull(
         data: (state) {
-          if (state is AuthAuthenticated) HapticFeedback.mediumImpact();
+          if (state is AuthAuthenticated) {
+            unawaited(HapticFeedback.mediumImpact());
+          }
         },
       );
     });

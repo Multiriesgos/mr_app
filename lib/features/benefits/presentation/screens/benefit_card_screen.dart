@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,13 +21,15 @@ class BenefitCardScreen extends ConsumerWidget {
 
   static void _shareCarnet(User user) {
     final url = ExternalLinks.carnetDigital(user.docSearch);
-    SharePlus.instance.share(
-      ShareParams(
-        text: 'Carnet Digital — Multiriesgos\n'
-            'Nombre: ${user.name}\n'
-            'DUI: ${user.documentNumber}\n'
-            '$url',
-        subject: 'Carnet Digital Multiriesgos',
+    unawaited(
+      SharePlus.instance.share(
+        ShareParams(
+          text: 'Carnet Digital — Multiriesgos\n'
+              'Nombre: ${user.name}\n'
+              'DUI: ${user.documentNumber}\n'
+              '$url',
+          subject: 'Carnet Digital Multiriesgos',
+        ),
       ),
     );
   }
@@ -314,47 +318,49 @@ class _QrSection extends StatelessWidget {
   }
 
   void _showFullScreen(BuildContext context, String data) {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => Dialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: AppRadius.lgBR),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.sectionGap, AppSpacing.sectionGap,
-            AppSpacing.sectionGap, AppSpacing.pagePaddingH,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              QrImageView(
-                data:            data,
-                size:            260,
-                backgroundColor: Colors.white,
-                eyeStyle: const QrEyeStyle(
-                  eyeShape: QrEyeShape.square,
-                  color:    AppColors.sidebarBg,
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (ctx) => Dialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.lgBR),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.sectionGap, AppSpacing.sectionGap,
+              AppSpacing.sectionGap, AppSpacing.pagePaddingH,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                QrImageView(
+                  data:            data,
+                  size:            260,
+                  backgroundColor: Colors.white,
+                  eyeStyle: const QrEyeStyle(
+                    eyeShape: QrEyeShape.square,
+                    color:    AppColors.sidebarBg,
+                  ),
+                  dataModuleStyle: const QrDataModuleStyle(
+                    dataModuleShape: QrDataModuleShape.square,
+                    color:           AppColors.sidebarBg,
+                  ),
                 ),
-                dataModuleStyle: const QrDataModuleStyle(
-                  dataModuleShape: QrDataModuleShape.square,
-                  color:           AppColors.sidebarBg,
+                const SizedBox(height: AppSpacing.s04),
+                Text(
+                  'Muestra este código para identificarte',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: AppColors.textMuted),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.s04),
-              Text(
-                'Muestra este código para identificarte',
-                textAlign: TextAlign.center,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: AppColors.textMuted),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Cerrar'),
-              ),
-            ],
+                const SizedBox(height: AppSpacing.xs),
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Cerrar'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

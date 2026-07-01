@@ -153,7 +153,9 @@ class _ThemeTile extends ConsumerWidget {
           DropdownMenuItem(value: ThemeMode.dark,   child: Text('Oscuro')),
         ],
         onChanged: (m) {
-          if (m != null) ref.read(themeModeProvider.notifier).setMode(m);
+          if (m != null) {
+            unawaited(ref.read(themeModeProvider.notifier).setMode(m));
+          }
         },
       ),
     );
@@ -247,9 +249,11 @@ class _FcmTokenTileState extends State<_FcmTokenTile> {
   @override
   void initState() {
     super.initState();
-    FirebaseMessaging.instance.getToken().then((t) {
-      if (mounted) setState(() { _token = t; _loading = false; });
-    });
+    unawaited(
+      FirebaseMessaging.instance.getToken().then((t) {
+        if (mounted) setState(() { _token = t; _loading = false; });
+      }),
+    );
   }
 
   Future<void> _copy() async {

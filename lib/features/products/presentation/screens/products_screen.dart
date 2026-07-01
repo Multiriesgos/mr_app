@@ -338,12 +338,13 @@ class _LastUpdatedBar extends StatefulWidget {
 }
 
 class _LastUpdatedBarState extends State<_LastUpdatedBar> {
-  late final _timer = Stream<void>.periodic(const Duration(seconds: 30))
-      .listen((_) { if (mounted) setState(() {}); });
+  late final StreamSubscription<void> _timer =
+      Stream<void>.periodic(const Duration(seconds: 30))
+          .listen((_) { if (mounted) setState(() {}); });
 
   @override
   void dispose() {
-    _timer.cancel();
+    unawaited(_timer.cancel());
     super.dispose();
   }
 
@@ -432,9 +433,11 @@ class _AnimatedPolicyCardState extends State<_AnimatedPolicyCard>
   @override
   void initState() {
     super.initState();
-    Future.delayed(
-      Duration(milliseconds: widget.index * AppMotion.fast01.inMilliseconds),
-      () { if (mounted) _ctrl.forward(); },
+    unawaited(
+      Future.delayed(
+        Duration(milliseconds: widget.index * AppMotion.fast01.inMilliseconds),
+        () { if (mounted) unawaited(_ctrl.forward()); },
+      ),
     );
   }
 

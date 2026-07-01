@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,10 +42,12 @@ class ProductDetailScreen extends ConsumerWidget {
       'Aseguradora: ${p.aseguradora}',
       if (p.ejecutivo != null && p.ejecutivo!.isNotEmpty) 'Ejecutivo: ${p.ejecutivo}',
     ];
-    SharePlus.instance.share(
-      ShareParams(
-        text: lines.join('\n'),
-        subject: 'Detalle de póliza — ${p.ramo}',
+    unawaited(
+      SharePlus.instance.share(
+        ShareParams(
+          text: lines.join('\n'),
+          subject: 'Detalle de póliza — ${p.ramo}',
+        ),
       ),
     );
   }

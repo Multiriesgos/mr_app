@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 /// Caja animada de shimmer para skeleton loaders.
@@ -27,7 +29,8 @@ class _ShimmerBoxState extends State<ShimmerBox>
     _ctrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1100),
-    )..repeat();
+    );
+    unawaited(_ctrl.repeat());
     _anim = Tween<double>(begin: -2, end: 2).animate(
       CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
     );

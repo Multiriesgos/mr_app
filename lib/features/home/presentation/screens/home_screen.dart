@@ -42,12 +42,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _initNotifications();
+    unawaited(_initNotifications());
   }
 
   @override
   void dispose() {
-    _notifSubscription?.cancel();
+    unawaited(_notifSubscription?.cancel());
     WidgetsBinding.instance.removeObserver(this);
     for (final c in _scrollControllers) {
       c.dispose();
@@ -59,10 +59,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     if (i == _currentIndex) {
       final c = _scrollControllers[i];
       if (c.hasClients) {
-        c.animateTo(
-          0,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
+        unawaited(
+          c.animateTo(
+            0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          ),
         );
       }
     } else {
@@ -101,7 +103,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void _handleNotifNavigation(Map<String, dynamic> data) {
     final route = data['route'] as String?;
     if (route != null && mounted) {
-      context.push(route);
+      unawaited(context.push(route));
     } else if (mounted) {
       setState(() => _currentIndex = 0);
     }
@@ -110,11 +112,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void _showNotifBanner(NotificationPayload payload) {
     if (!mounted) return;
 
-    ref.read(localNotificationServiceProvider).showNow(
-          id: DateTime.now().millisecondsSinceEpoch & 0x7FFFFFFF,
-          title: payload.title,
-          body: payload.body,
-        );
+    unawaited(
+      ref.read(localNotificationServiceProvider).showNow(
+            id: DateTime.now().millisecondsSinceEpoch & 0x7FFFFFFF,
+            title: payload.title,
+            body: payload.body,
+          ),
+    );
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -152,7 +156,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       _backgroundedAt = null;
       if (at != null) {
         final elapsed = DateTime.now().difference(at).inSeconds;
-        if (elapsed >= _kBiometricTimeoutSeconds) _runBiometricCheck();
+        if (elapsed >= _kBiometricTimeoutSeconds) {
+          unawaited(_runBiometricCheck());
+        }
       }
     }
   }
@@ -174,9 +180,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     ref.listen<AsyncValue<List<Product>>>(productsProvider, (_, next) {
       next.whenData((products) {
-        scheduleRenewalReminders(
-          products,
-          ref.read(localNotificationServiceProvider),
+        unawaited(
+          scheduleRenewalReminders(
+            products,
+            ref.read(localNotificationServiceProvider),
+          ),
         );
       });
     });

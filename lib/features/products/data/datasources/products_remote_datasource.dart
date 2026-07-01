@@ -25,7 +25,7 @@ class ProductsRemoteDataSourceImpl implements ProductsRemoteDataSource {
 
   static const _kHost    = 'secure.multiriesgos.com';
   static const _kTimeout = Duration(seconds: 30);
-  static const _kHeaders = {
+  static const Map<String, String> _kHeaders = {
     'Content-Type': 'application/json; charset=UTF-8',
     'MRApiKey': Constants.kMrApiKey,
   };

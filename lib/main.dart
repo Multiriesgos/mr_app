@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -10,7 +11,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:marionette_flutter/marionette_flutter.dart'; // ignore: depend_on_referenced_packages
+// marionette_flutter es dev_dependency, usada solo en kDebugMode y nunca en release.
+// ignore: depend_on_referenced_packages
+import 'package:marionette_flutter/marionette_flutter.dart';
 import 'package:mr_app/core/di/settings_providers.dart';
 import 'package:mr_app/core/logging/app_logger.dart';
 import 'package:mr_app/core/network/mr_http_client.dart';
@@ -41,10 +44,12 @@ void main() async {
         FirebaseCrashlytics.instance.recordFlutterFatalError;
     // Capturar errores asincrónicos → Crashlytics.
     PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(
-        error,
-        stack as StackTrace?,
-        fatal: true,
+      unawaited(
+        FirebaseCrashlytics.instance.recordError(
+          error,
+          stack as StackTrace?,
+          fatal: true,
+        ),
       );
       return true;
     };

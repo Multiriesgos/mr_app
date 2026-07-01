@@ -58,7 +58,7 @@ dev_dependencies:
   mockito: ^5.4.5
   riverpod_generator: ^2.4.3
   url_launcher_web: ^2.3.3
-  very_good_analysis: ^6.0.0
+  very_good_analysis: ^10.2.0
 
 flutter_icons:
   android: true

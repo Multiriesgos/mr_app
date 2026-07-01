@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -23,20 +25,24 @@ class _CrashlyticsObserver extends TalkerObserver {
   @override
   void onError(TalkerError err) {
     if (kDebugMode) return;
-    FirebaseCrashlytics.instance.recordError(
-      err.error,
-      err.stackTrace,
-      reason: err.message,
+    unawaited(
+      FirebaseCrashlytics.instance.recordError(
+        err.error,
+        err.stackTrace,
+        reason: err.message,
+      ),
     );
   }
 
   @override
   void onException(TalkerException err) {
     if (kDebugMode) return;
-    FirebaseCrashlytics.instance.recordError(
-      err.exception,
-      err.stackTrace,
-      reason: err.message,
+    unawaited(
+      FirebaseCrashlytics.instance.recordError(
+        err.exception,
+        err.stackTrace,
+        reason: err.message,
+      ),
     );
   }
 }
