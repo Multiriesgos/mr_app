@@ -13,10 +13,14 @@ class ProductModel {
     this.suma,
     this.primaNeta,
     this.primaTotal,
+    this.primaMes,
     this.descripcionSeguro,
     this.ejecutivo,
     this.formaPago,
     this.periodoPago,
+    this.marca,
+    this.modelo,
+    this.anioVehiculo,
   });
 
   final int idRen;
@@ -30,10 +34,14 @@ class ProductModel {
   final double? suma;
   final double? primaNeta;
   final double? primaTotal;
+  final double? primaMes;
   final String? descripcionSeguro;
   final String? ejecutivo;
   final String? formaPago;
   final String? periodoPago;
+  final String? marca;
+  final String? modelo;
+  final String? anioVehiculo;
 
   factory ProductModel.fromJson(Map<String, dynamic> json) => ProductModel(
         idRen: json['id_ren'] as int,
@@ -49,10 +57,14 @@ class ProductModel {
         suma: (json['suma'] as num?)?.toDouble(),
         primaNeta: (json['prima_neta'] as num?)?.toDouble(),
         primaTotal: (json['prima_total'] as num?)?.toDouble(),
+        primaMes: (json['prima_mes'] as num?)?.toDouble(),
         descripcionSeguro: json['descripcion_seguro'] as String?,
         ejecutivo: json['ejecutivo'] as String?,
         formaPago: json['forma_pago'] as String?,
         periodoPago: json['periodo_pago'] as String?,
+        marca: json['marca'] as String?,
+        modelo: json['modelo'] as String?,
+        anioVehiculo: json['anio_vehiculo']?.toString(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -67,10 +79,14 @@ class ProductModel {
         'suma': suma,
         'prima_neta': primaNeta,
         'prima_total': primaTotal,
+        'prima_mes': primaMes,
         'descripcion_seguro': descripcionSeguro,
         'ejecutivo': ejecutivo,
         'forma_pago': formaPago,
         'periodo_pago': periodoPago,
+        'marca': marca,
+        'modelo': modelo,
+        'anio_vehiculo': anioVehiculo,
       };
 
   Product toEntity() => Product(
@@ -85,10 +101,14 @@ class ProductModel {
         suma: suma,
         primaNeta: primaNeta,
         primaTotal: primaTotal,
+        primaMes: primaMes,
         descripcionSeguro: descripcionSeguro,
         ejecutivo: ejecutivo,
         formaPago: formaPago,
         periodoPago: periodoPago,
+        marca: marca,
+        modelo: modelo,
+        anioVehiculo: anioVehiculo,
       );
 }
 

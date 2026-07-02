@@ -14,10 +14,14 @@ class Product {
     this.suma,
     this.primaNeta,
     this.primaTotal,
+    this.primaMes,
     this.descripcionSeguro,
     this.ejecutivo,
     this.formaPago,
     this.periodoPago,
+    this.marca,
+    this.modelo,
+    this.anioVehiculo,
   });
 
   final int idRen;
@@ -31,10 +35,14 @@ class Product {
   final double? suma;
   final double? primaNeta;
   final double? primaTotal;
+  final double? primaMes;
   final String? descripcionSeguro;
   final String? ejecutivo;
   final String? formaPago;
   final String? periodoPago;
+  final String? marca;
+  final String? modelo;
+  final String? anioVehiculo;
 
   @override
   bool operator ==(Object other) => other is Product && other.idRen == idRen;

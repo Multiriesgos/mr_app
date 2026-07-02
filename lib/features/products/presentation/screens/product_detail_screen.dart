@@ -173,13 +173,12 @@ class _DetailBody extends StatelessWidget {
         : null;
 
     final hasFinancial = product.suma != null ||
-        product.primaNeta != null ||
         product.primaTotal != null ||
-        (product.formaPago != null && product.formaPago!.isNotEmpty) ||
-        (product.periodoPago != null && product.periodoPago!.isNotEmpty);
-    final hasCoverage  = product.descripcionSeguro != null && product.descripcionSeguro!.isNotEmpty;
-    final hasEjecutivo = product.ejecutivo != null && product.ejecutivo!.isNotEmpty;
-    final hasContact   = contact != null && (contact!.hasPhone || contact!.hasWhatsApp);
+        product.primaMes != null;
+    final hasVehiculo = (product.marca?.isNotEmpty ?? false) ||
+        (product.modelo?.isNotEmpty ?? false) ||
+        (product.anioVehiculo?.isNotEmpty ?? false);
+    final hasContact = contact != null && (contact!.hasPhone || contact!.hasWhatsApp);
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -269,20 +268,23 @@ class _DetailBody extends StatelessWidget {
             _InfoCard(rows: [
               _InfoRow('Tipo de seguro', product.tipoSeguro),
               _InfoRow('Asegurado', product.asegurado),
-              if (product.placa.isNotEmpty)
-                _InfoRow('Placa / Identificador', product.placa),
               if (dateStr != null)
-                _InfoRow('Fecha de renovación', dateStr),
-              if (product.adjunto?.isNotEmpty ?? false)
-                _InfoRow('N.° de póliza', product.adjunto!, copyable: true),
+                _InfoRow('Fecha renovación', dateStr),
             ],),
 
-            // Cobertura
-            if (hasCoverage) ...[
+            // Vehículo
+            if (hasVehiculo) ...[
               const SizedBox(height: AppSpacing.md),
-              const _SectionLabel('Cobertura'),
+              const _SectionLabel('Vehículo'),
               const SizedBox(height: AppSpacing.sm),
-              _InfoCard(rows: [_InfoRow('Descripción', product.descripcionSeguro!)],),
+              _InfoCard(rows: [
+                if (product.marca?.isNotEmpty ?? false)
+                  _InfoRow('Marca', product.marca!),
+                if (product.modelo?.isNotEmpty ?? false)
+                  _InfoRow('Modelo', product.modelo!),
+                if (product.anioVehiculo?.isNotEmpty ?? false)
+                  _InfoRow('Año vehículo', product.anioVehiculo!),
+              ],),
             ],
 
             // Financiero
@@ -290,15 +292,14 @@ class _DetailBody extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               const _SectionLabel('Financiero'),
               const SizedBox(height: AppSpacing.sm),
-              _FinancialCard(product: product),
-            ],
-
-            // Asesor
-            if (hasEjecutivo) ...[
-              const SizedBox(height: AppSpacing.md),
-              const _SectionLabel('Asesor'),
-              const SizedBox(height: AppSpacing.sm),
-              _InfoCard(rows: [_InfoRow('Ejecutivo', product.ejecutivo!)],),
+              _InfoCard(rows: [
+                if (product.suma != null)
+                  _AnimatedCurrencyRow('Suma', product.suma!),
+                if (product.primaTotal != null)
+                  _AnimatedCurrencyRow('Prima total', product.primaTotal!),
+                if (product.primaMes != null)
+                  _AnimatedCurrencyRow('Cuota mensual', product.primaMes!),
+              ],),
             ],
 
             // Contacto de cabina
@@ -360,7 +361,7 @@ class _SectionLabel extends StatelessWidget {
 
 class _InfoCard extends StatelessWidget {
   const _InfoCard({required this.rows});
-  final List<_InfoRow> rows;
+  final List<Widget> rows;
 
   @override
   Widget build(BuildContext context) {
@@ -385,52 +386,6 @@ class _InfoCard extends StatelessWidget {
           ],
         ],
       ),
-    );
-  }
-}
-
-class _FinancialCard extends StatelessWidget {
-  const _FinancialCard({required this.product});
-  final Product product;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs   = Theme.of(context).colorScheme;
-    final rows = <Widget>[];
-
-    void addCurrency(String label, double? amount) {
-      if (amount == null) return;
-      if (rows.isNotEmpty) {
-        rows.add(
-          Divider(height: 1, indent: 16, endIndent: 16, color: cs.outlineVariant),
-        );
-      }
-      rows.add(_AnimatedCurrencyRow(label, amount));
-    }
-
-    void addText(String label, String? value) {
-      if (value == null || value.isEmpty) return;
-      if (rows.isNotEmpty) {
-        rows.add(
-          Divider(height: 1, indent: 16, endIndent: 16, color: cs.outlineVariant),
-        );
-      }
-      rows.add(_InfoRow(label, value));
-    }
-
-    addCurrency('Suma asegurada', product.suma);
-    addCurrency('Prima neta', product.primaNeta);
-    addCurrency('Prima total', product.primaTotal);
-    addText('Forma de pago', product.formaPago);
-    addText('Período de pago', product.periodoPago);
-
-    return Container(
-      decoration: BoxDecoration(
-        color:        cs.surface,
-        borderRadius: AppRadius.mdBR,
-        border:       Border.all(color: cs.outlineVariant),
-      ),
-      child: Column(children: rows),
     );
   }
 }
@@ -487,69 +442,44 @@ class _AnimatedCurrencyRow extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow(this.label, this.value, {this.copyable = false});
+  const _InfoRow(this.label, this.value);
   final String label;
   final String value;
-  final bool   copyable;
-
-  Future<void> _copy(BuildContext context) async {
-    await HapticFeedback.selectionClick();
-    await Clipboard.setData(ClipboardData(text: value));
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content:  Text('$label copiado'),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        margin:   const EdgeInsets.all(AppSpacing.s04),
-        shape:    RoundedRectangleBorder(borderRadius: AppRadius.smBR),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     final cs          = Theme.of(context).colorScheme;
     final displayValue = value.isEmpty ? 'No disponible' : value;
-    final canCopy      = copyable && value.isNotEmpty;
 
-    return InkWell(
-      onTap:        canCopy ? () => _copy(context) : null,
-      borderRadius: AppRadius.mdBR,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical:   AppSpacing.s04,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: 140,
-              child: Text(
-                label,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: cs.onSurfaceVariant),
-              ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical:   AppSpacing.s04,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 140,
+            child: Text(
+              label,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: cs.onSurfaceVariant),
             ),
-            Expanded(
-              child: Text(
-                displayValue,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(fontWeight: FontWeight.w500),
-                textAlign: TextAlign.right,
-              ),
+          ),
+          Expanded(
+            child: Text(
+              displayValue,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(fontWeight: FontWeight.w500),
+              textAlign: TextAlign.right,
             ),
-            if (canCopy) ...[
-              const SizedBox(width: AppSpacing.iconTileGap),
-              Icon(Icons.copy_outlined, size: 15, color: cs.onSurfaceVariant),
-            ],
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

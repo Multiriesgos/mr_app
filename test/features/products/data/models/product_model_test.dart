@@ -16,10 +16,14 @@ void main() {
         'suma': 8000,
         'prima_neta': 350.5,
         'prima_total': 380,
+        'prima_mes': 32.5,
         'descripcion_seguro': 'Cobertura amplia',
         'ejecutivo': 'María López',
         'forma_pago': 'TALONARIO',
         'periodo_pago': 'MENSUAL',
+        'marca': 'TOYOTA',
+        'modelo': 'COROLLA',
+        'anio_vehiculo': 2022,
       });
 
       expect(model.idRen, 42);
@@ -33,10 +37,14 @@ void main() {
       expect(model.suma, 8000.0);
       expect(model.primaNeta, 350.5);
       expect(model.primaTotal, 380.0);
+      expect(model.primaMes, 32.5);
       expect(model.descripcionSeguro, 'Cobertura amplia');
       expect(model.ejecutivo, 'María López');
       expect(model.formaPago, 'TALONARIO');
       expect(model.periodoPago, 'MENSUAL');
+      expect(model.marca, 'TOYOTA');
+      expect(model.modelo, 'COROLLA');
+      expect(model.anioVehiculo, '2022');
     });
 
     test('usa strings vacíos cuando faltan campos requeridos con fallback', () {
@@ -58,10 +66,14 @@ void main() {
       expect(model.suma, isNull);
       expect(model.primaNeta, isNull);
       expect(model.primaTotal, isNull);
+      expect(model.primaMes, isNull);
       expect(model.descripcionSeguro, isNull);
       expect(model.ejecutivo, isNull);
       expect(model.formaPago, isNull);
       expect(model.periodoPago, isNull);
+      expect(model.marca, isNull);
+      expect(model.modelo, isNull);
+      expect(model.anioVehiculo, isNull);
     });
 
     test('fecha_renovacion inválida cae a null en vez de lanzar', () {
@@ -118,6 +130,7 @@ void main() {
         'placa': '',
         'fecha_renovacion': '2027-02-21T00:00:00.000',
         'suma': 5000.0,
+        'marca': 'NISSAN',
       });
 
       final roundTripped = ProductModel.fromJson(original.toJson());
@@ -126,6 +139,7 @@ void main() {
       expect(roundTripped.ramo, original.ramo);
       expect(roundTripped.fechaRenovacion, original.fechaRenovacion);
       expect(roundTripped.suma, original.suma);
+      expect(roundTripped.marca, original.marca);
     });
   });
 
@@ -141,6 +155,9 @@ void main() {
         'fecha_renovacion': '2026-07-16T00:00:00.000',
         'adjunto': 'POL-2024-001',
         'suma': 8000,
+        'marca': 'TOYOTA',
+        'modelo': 'COROLLA',
+        'anio_vehiculo': 2022,
       });
 
       final entity = model.toEntity();
@@ -154,6 +171,9 @@ void main() {
       expect(entity.fechaRenovacion, model.fechaRenovacion);
       expect(entity.adjunto, model.adjunto);
       expect(entity.suma, model.suma);
+      expect(entity.marca, model.marca);
+      expect(entity.modelo, model.modelo);
+      expect(entity.anioVehiculo, model.anioVehiculo);
     });
   });
 

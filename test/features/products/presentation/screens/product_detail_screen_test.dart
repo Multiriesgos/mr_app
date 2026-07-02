@@ -51,16 +51,21 @@ final _tProductBasic = Product(
   asegurado: 'JUAN PÉREZ',
   placa: 'P123456',
   fechaRenovacion: DateTime.now().add(const Duration(days: 60)),
+  suma: 15000,
+  primaTotal: 245.50,
+  primaMes: 20.46,
+  marca: 'TOYOTA',
+  modelo: 'COROLLA',
+  anioVehiculo: '2022',
 );
 
-final _tProductWithAdjunto = Product(
+final _tProductSinExtras = Product(
   idRen: _kIdRen,
   ramo: 'VIDA',
   tipoSeguro: 'Individual',
   aseguradora: 'SEGUROS SA',
   asegurado: 'MARÍA LÓPEZ',
   placa: '',
-  adjunto: 'POL-2024-001',
   fechaRenovacion: DateTime.now().add(const Duration(days: 60)),
 );
 
@@ -173,34 +178,84 @@ void main() {
       expect(find.text('JUAN PÉREZ'), findsOneWidget);
     });
 
-    testWidgets('oculta fila N.° de póliza cuando adjunto es nulo', (tester) async {
-      await tester.pumpWidget(
-        _buildScreen([
-          productDetailProvider.overrideWith2(
-            (_) => _FakeDetailNotifier(_tProductBasic), // adjunto: null
-          ),
-        ]),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('N.° de póliza'), findsNothing);
-    });
-
-    testWidgets(
-        'muestra N.° de póliza con ícono de copia cuando adjunto está presente',
+    testWidgets('muestra Fecha renovación cuando está presente',
         (tester) async {
       await tester.pumpWidget(
         _buildScreen([
           productDetailProvider.overrideWith2(
-            (_) => _FakeDetailNotifier(_tProductWithAdjunto),
+            (_) => _FakeDetailNotifier(_tProductBasic),
           ),
         ]),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('N.° de póliza'), findsOneWidget);
-      expect(find.text('POL-2024-001'), findsOneWidget);
-      expect(find.byIcon(Icons.copy_outlined), findsOneWidget);
+      expect(find.text('Fecha renovación'), findsOneWidget);
+    });
+  });
+
+  group('ProductDetailScreen — sección Vehículo', () {
+    testWidgets('muestra Marca, Modelo y Año vehículo cuando están presentes',
+        (tester) async {
+      await tester.pumpWidget(
+        _buildScreen([
+          productDetailProvider.overrideWith2(
+            (_) => _FakeDetailNotifier(_tProductBasic),
+          ),
+        ]),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('VEHÍCULO'), findsOneWidget);
+      expect(find.text('TOYOTA'), findsOneWidget);
+      expect(find.text('COROLLA'), findsOneWidget);
+      expect(find.text('2022'), findsOneWidget);
+    });
+
+    testWidgets('oculta sección Vehículo cuando no hay datos de vehículo',
+        (tester) async {
+      await tester.pumpWidget(
+        _buildScreen([
+          productDetailProvider.overrideWith2(
+            (_) => _FakeDetailNotifier(_tProductSinExtras),
+          ),
+        ]),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('VEHÍCULO'), findsNothing);
+    });
+  });
+
+  group('ProductDetailScreen — sección Financiero', () {
+    testWidgets('muestra Suma, Prima total y Cuota mensual cuando están presentes',
+        (tester) async {
+      await tester.pumpWidget(
+        _buildScreen([
+          productDetailProvider.overrideWith2(
+            (_) => _FakeDetailNotifier(_tProductBasic),
+          ),
+        ]),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('FINANCIERO'), findsOneWidget);
+      expect(find.text('Suma'), findsOneWidget);
+      expect(find.text('Prima total'), findsOneWidget);
+      expect(find.text('Cuota mensual'), findsOneWidget);
+    });
+
+    testWidgets('oculta sección Financiero cuando no hay datos financieros',
+        (tester) async {
+      await tester.pumpWidget(
+        _buildScreen([
+          productDetailProvider.overrideWith2(
+            (_) => _FakeDetailNotifier(_tProductSinExtras),
+          ),
+        ]),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('FINANCIERO'), findsNothing);
     });
   });
 
