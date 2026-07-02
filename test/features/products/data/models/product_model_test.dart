@@ -14,13 +14,8 @@ void main() {
         'fecha_renovacion': '2026-07-16T00:00:00.000',
         'adjunto': 'POL-2024-001',
         'suma': 8000,
-        'prima_neta': 350.5,
         'prima_total': 380,
         'prima_mes': 32.5,
-        'descripcion_seguro': 'Cobertura amplia',
-        'ejecutivo': 'María López',
-        'forma_pago': 'TALONARIO',
-        'periodo_pago': 'MENSUAL',
         'marca': 'TOYOTA',
         'modelo': 'COROLLA',
         'anio_vehiculo': 2022,
@@ -35,13 +30,8 @@ void main() {
       expect(model.fechaRenovacion, DateTime.parse('2026-07-16T00:00:00.000'));
       expect(model.adjunto, 'POL-2024-001');
       expect(model.suma, 8000.0);
-      expect(model.primaNeta, 350.5);
       expect(model.primaTotal, 380.0);
       expect(model.primaMes, 32.5);
-      expect(model.descripcionSeguro, 'Cobertura amplia');
-      expect(model.ejecutivo, 'María López');
-      expect(model.formaPago, 'TALONARIO');
-      expect(model.periodoPago, 'MENSUAL');
       expect(model.marca, 'TOYOTA');
       expect(model.modelo, 'COROLLA');
       expect(model.anioVehiculo, '2022');
@@ -64,13 +54,8 @@ void main() {
       expect(model.fechaRenovacion, isNull);
       expect(model.adjunto, isNull);
       expect(model.suma, isNull);
-      expect(model.primaNeta, isNull);
       expect(model.primaTotal, isNull);
       expect(model.primaMes, isNull);
-      expect(model.descripcionSeguro, isNull);
-      expect(model.ejecutivo, isNull);
-      expect(model.formaPago, isNull);
-      expect(model.periodoPago, isNull);
       expect(model.marca, isNull);
       expect(model.modelo, isNull);
       expect(model.anioVehiculo, isNull);
@@ -89,13 +74,11 @@ void main() {
       final model = ProductModel.fromJson({
         'id_ren': 1,
         'suma': 1000,
-        'prima_neta': 50,
         'prima_total': 55,
       });
 
       expect(model.suma, isA<double>());
       expect(model.suma, 1000.0);
-      expect(model.primaNeta, 50.0);
       expect(model.primaTotal, 55.0);
     });
   });
