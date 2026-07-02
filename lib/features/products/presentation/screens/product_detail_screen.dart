@@ -31,16 +31,23 @@ class ProductDetailScreen extends ConsumerWidget {
     final dateStr = p.fechaRenovacion != null
         ? DateFormat('dd/MM/yyyy').format(p.fechaRenovacion!)
         : 'N/D';
+    final hasVehiculo = (p.marca?.isNotEmpty ?? false) ||
+        (p.modelo?.isNotEmpty ?? false) ||
+        (p.anioVehiculo?.isNotEmpty ?? false);
     final lines = [
       'Póliza — ${p.ramo}',
       'Tipo: ${p.tipoSeguro}',
       'Asegurado: ${p.asegurado}',
-      if (p.placa.isNotEmpty) 'Placa: ${p.placa}',
       'Renovación: $dateStr',
-      if (p.adjunto != null && p.adjunto!.isNotEmpty) 'N.° póliza: ${p.adjunto}',
-      if (p.suma != null) 'Suma asegurada: \$${p.suma!.toStringAsFixed(2)}',
       'Aseguradora: ${p.aseguradora}',
-      if (p.ejecutivo != null && p.ejecutivo!.isNotEmpty) 'Ejecutivo: ${p.ejecutivo}',
+      if (hasVehiculo) ...[
+        if (p.marca?.isNotEmpty ?? false) 'Marca: ${p.marca}',
+        if (p.modelo?.isNotEmpty ?? false) 'Modelo: ${p.modelo}',
+        if (p.anioVehiculo?.isNotEmpty ?? false) 'Año: ${p.anioVehiculo}',
+      ],
+      if (p.suma != null) 'Suma: \$${p.suma!.toStringAsFixed(2)}',
+      if (p.primaTotal != null) 'Prima total: \$${p.primaTotal!.toStringAsFixed(2)}',
+      if (p.primaMes != null) 'Cuota mensual: \$${p.primaMes!.toStringAsFixed(2)}',
     ];
     unawaited(
       SharePlus.instance.share(
